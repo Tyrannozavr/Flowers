@@ -19,7 +19,7 @@ export interface IOrder {
 }
 
 const Order: React.FC = () => {
-    const [currentStep, setCurrentStep] = useState(2);
+    const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<IOrder>({
         fullName: "",
         phoneNumber: "",

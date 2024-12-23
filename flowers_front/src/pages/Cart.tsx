@@ -1,5 +1,6 @@
 import { ToastContainer } from "react-toastify";
 import { useCart } from "../context/CartContext";
+import { Link } from "react-router-dom";
 
 const Cart = () => {
     const {
@@ -98,7 +99,9 @@ const Cart = () => {
                                 Очистить корзину
                             </button>
                             <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-                                Оформить заказ
+                                <Link to="/order" className="w-full h-full">
+                                    Оформить заказ
+                                </Link>
                             </button>
                         </div>
                     </div>
