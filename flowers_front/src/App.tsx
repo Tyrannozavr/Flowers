@@ -1,5 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-import ContactForm from "./components/ContactForm";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Cart from "./pages/Cart";
@@ -16,7 +15,6 @@ const App: React.FC = () => {
                         element={
                             <>
                                 <ProductSection />
-                                <ContactForm />
                             </>
                         }
                     />
