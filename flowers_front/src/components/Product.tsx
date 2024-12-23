@@ -13,7 +13,7 @@ interface ProductProps {
 }
 
 const Product: React.FC<ProductProps> = ({ product, onAddToCart }) => {
-    const { id, name, price, imageUrl } = product;
+    const { name, price, imageUrl } = product;
     const [isAddedToCart, setIsAddedToCart] = useState(false);
     const { cart } = useCart();
 

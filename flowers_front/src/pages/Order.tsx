@@ -101,12 +101,16 @@ const Order: React.FC = () => {
         setCurrentStep(step);
     };
 
-    const handleDeliveryMethodChange = (method: string) => {
-        setFormData({ ...formData, deliveryMethod: method });
-    };
+    // const handleDeliveryMethodChange = (method: string) => {
+    //     setFormData({ ...formData, deliveryMethod: method });
+    // };
 
     const handleDeliveryDateChange = (date: string) => {
         setFormData({ ...formData, deliveryDate: date });
+    };
+
+    const handleDeliveryTimeChange = (time: string) => {
+        setFormData({ ...formData, deliveryTime: time });
     };
 
     return (
@@ -150,7 +154,8 @@ const Order: React.FC = () => {
                         <AddressStep
                             formData={formData}
                             onChange={handleInputChange}
-                            onMethodChange={handleDeliveryMethodChange}
+                            // onMethodChange={handleDeliveryMethodChange}
+                            onTimeChange={handleDeliveryTimeChange}
                             onDateChange={handleDeliveryDateChange}
                             errors={errors}
                         />

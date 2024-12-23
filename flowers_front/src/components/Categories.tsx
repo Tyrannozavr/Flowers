@@ -1,10 +1,10 @@
 import React from "react";
 
-interface Category {
-    id: number;
-    name: string;
-    imageUrl: string;
-}
+// interface Category {
+//     id: number;
+//     name: string;
+//     imageUrl: string;
+// }
 
 interface CategoriesProps {
     selectedCategory: number | null;
