@@ -1,16 +1,11 @@
 import { FC } from "react";
-import { BsCart3, BsTelegram, BsWhatsapp } from "react-icons/bs";
-import { Link } from "react-router-dom";
-import { useCart } from "../context/CartContext";
+import { BsTelegram, BsWhatsapp } from "react-icons/bs";
 
 type Props = {
     isMobile: boolean;
 };
 
 const ContactMenu: FC<Props> = ({ isMobile }) => {
-    const { cart } = useCart();
-    const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-
     return (
         <div
             className={`text-sm ${
@@ -53,24 +48,6 @@ const ContactMenu: FC<Props> = ({ isMobile }) => {
                 >
                     <BsTelegram className="text-2xl" />
                 </a>
-            </div>
-
-            {/* Иконка корзины с бейджем */}
-            <div
-                className={`relative flex items-center ${
-                    isMobile ? "justify-center" : ""
-                }`}
-            >
-                <Link to="/cart" className="relative">
-                    <BsCart3 className="text-3xl" />
-                    {totalItems > 0 && (
-                        <span
-                            className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center border-2 border-white shadow-lg"
-                        >
-                            {totalItems}
-                        </span>
-                    )}
-                </Link>
             </div>
         </div>
     );

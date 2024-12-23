@@ -1,220 +1,30 @@
 import React, { useEffect, useState } from "react";
 import Categories from "../components/Categories";
 import ContactForm from "../components/ContactForm";
+import FloatingCartButton from "../components/FloatingCart";
 import Pagination from "../components/Pagination";
 import Product from "../components/Product";
-import ProductModal from "../components/ProductModal";
 import { CartItem, useCart } from "../context/CartContext";
+import { mockProducts } from "../data/mockProducts";
 
-interface Product {
+export interface IProduct {
     id: number;
     name: string;
     price: number;
     imageUrl: string;
+    description: string;
+    composition: string[];
 }
 
 const ProductSection: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<number | null>(
         null
     );
-    const [products, setProducts] = useState<Product[]>([]);
+    const [products, setProducts] = useState<IProduct[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [modalProduct, setModalProduct] = useState<Product | null>(null);
     const productsPerPage = 40;
     const { addToCart } = useCart();
-
-    const mockProducts: Product[] = [
-        {
-            id: 1,
-            name: "Роза",
-            price: 5000,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/z/975d214655752d3f17f0118321ca5eb17582366e_shop.jpg",
-        },
-        {
-            id: 2,
-            name: "Тюльпан",
-            price: 300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/y/190816fecbeb22ce924a7d14f1304cdf4c513056_shop.jpg",
-        },
-        {
-            id: 3,
-            name: "Розы",
-            price: 2300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/a/add443f12c81a28b63fdd933f48f3cb6d230ec23_shop.jpg",
-        },
-        {
-            id: 4,
-            name: "Роза",
-            price: 5000,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/z/975d214655752d3f17f0118321ca5eb17582366e_shop.jpg",
-        },
-        {
-            id: 5,
-            name: "Тюльпан",
-            price: 300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/y/190816fecbeb22ce924a7d14f1304cdf4c513056_shop.jpg",
-        },
-        {
-            id: 6,
-            name: "Розы",
-            price: 2300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/a/add443f12c81a28b63fdd933f48f3cb6d230ec23_shop.jpg",
-        },
-        {
-            id: 7,
-            name: "Роза",
-            price: 5000,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/z/975d214655752d3f17f0118321ca5eb17582366e_shop.jpg",
-        },
-        {
-            id: 8,
-            name: "Тюльпан",
-            price: 300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/y/190816fecbeb22ce924a7d14f1304cdf4c513056_shop.jpg",
-        },
-        {
-            id: 9,
-            name: "Розы",
-            price: 2300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/a/add443f12c81a28b63fdd933f48f3cb6d230ec23_shop.jpg",
-        },
-        {
-            id: 1,
-            name: "Роза",
-            price: 5000,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/z/975d214655752d3f17f0118321ca5eb17582366e_shop.jpg",
-        },
-        {
-            id: 2,
-            name: "Тюльпан",
-            price: 300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/y/190816fecbeb22ce924a7d14f1304cdf4c513056_shop.jpg",
-        },
-        {
-            id: 3,
-            name: "Розы",
-            price: 2300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/a/add443f12c81a28b63fdd933f48f3cb6d230ec23_shop.jpg",
-        },
-        {
-            id: 4,
-            name: "Роза",
-            price: 5000,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/z/975d214655752d3f17f0118321ca5eb17582366e_shop.jpg",
-        },
-        {
-            id: 5,
-            name: "Тюльпан",
-            price: 300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/y/190816fecbeb22ce924a7d14f1304cdf4c513056_shop.jpg",
-        },
-        {
-            id: 6,
-            name: "Розы",
-            price: 2300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/a/add443f12c81a28b63fdd933f48f3cb6d230ec23_shop.jpg",
-        },
-        {
-            id: 7,
-            name: "Роза",
-            price: 5000,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/z/975d214655752d3f17f0118321ca5eb17582366e_shop.jpg",
-        },
-        {
-            id: 8,
-            name: "Тюльпан",
-            price: 300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/y/190816fecbeb22ce924a7d14f1304cdf4c513056_shop.jpg",
-        },
-        {
-            id: 9,
-            name: "Розы",
-            price: 2300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/a/add443f12c81a28b63fdd933f48f3cb6d230ec23_shop.jpg",
-        },
-        {
-            id: 1,
-            name: "Роза",
-            price: 5000,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/z/975d214655752d3f17f0118321ca5eb17582366e_shop.jpg",
-        },
-        {
-            id: 2,
-            name: "Тюльпан",
-            price: 300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/y/190816fecbeb22ce924a7d14f1304cdf4c513056_shop.jpg",
-        },
-        {
-            id: 3,
-            name: "Розы",
-            price: 2300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/a/add443f12c81a28b63fdd933f48f3cb6d230ec23_shop.jpg",
-        },
-        {
-            id: 4,
-            name: "Роза",
-            price: 5000,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/z/975d214655752d3f17f0118321ca5eb17582366e_shop.jpg",
-        },
-        {
-            id: 5,
-            name: "Тюльпан",
-            price: 300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/y/190816fecbeb22ce924a7d14f1304cdf4c513056_shop.jpg",
-        },
-        {
-            id: 6,
-            name: "Розы",
-            price: 2300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/a/add443f12c81a28b63fdd933f48f3cb6d230ec23_shop.jpg",
-        },
-        {
-            id: 7,
-            name: "Роза",
-            price: 5000,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/z/975d214655752d3f17f0118321ca5eb17582366e_shop.jpg",
-        },
-        {
-            id: 8,
-            name: "Тюльпан",
-            price: 300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/y/190816fecbeb22ce924a7d14f1304cdf4c513056_shop.jpg",
-        },
-        {
-            id: 9,
-            name: "Розы",
-            price: 2300,
-            imageUrl:
-                "https://cdn.posiflora.online/1891/images/a/add443f12c81a28b63fdd933f48f3cb6d230ec23_shop.jpg",
-        },
-    ];
-
+    
     useEffect(() => {
         const fetchProducts = () => {
             const start = (currentPage - 1) * productsPerPage;
@@ -230,12 +40,6 @@ const ProductSection: React.FC = () => {
         }
     };
 
-    const handleOpenModal = (productId: number) => {
-        const product = mockProducts.find((p) => p.id === productId);
-        setModalProduct(product || null);
-    };
-
-    const handleCloseModal = () => setModalProduct(null);
 
     // Уточняем количество колонок с помощью ResizeObserver API
     const [columns, setColumns] = useState(2);
@@ -260,7 +64,6 @@ const ProductSection: React.FC = () => {
                 key={products[i].id}
                 product={products[i]}
                 onAddToCart={handleAddToCart}
-                onOpenModal={handleOpenModal}
             />
         );
 
@@ -292,7 +95,6 @@ const ProductSection: React.FC = () => {
                         <Product
                             product={product}
                             onAddToCart={handleAddToCart}
-                            onOpenModal={handleOpenModal}
                         />
                         {/* Рендерим форму после каждых 3 строк */}
                         {(index + 1) % (columns * 3) === 0 && (
@@ -312,7 +114,7 @@ const ProductSection: React.FC = () => {
                 totalPages={Math.ceil(mockProducts.length / productsPerPage)}
                 onPageChange={setCurrentPage}
             />
-            <ProductModal product={modalProduct} onClose={handleCloseModal} />
+            <FloatingCartButton />
         </section>
     );
 };

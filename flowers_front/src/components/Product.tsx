@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { FaCartPlus, FaCheck } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import { CartItem, useCart } from "../context/CartContext";
-import { useTheme } from "../theme/ThemeProvider";
 
 interface ProductProps {
     product: {
@@ -11,69 +10,71 @@ interface ProductProps {
         imageUrl: string;
     };
     onAddToCart: (item: CartItem) => void;
-    onOpenModal: (productId: number) => void;
 }
 
-const Product: React.FC<ProductProps> = ({
-    product,
-    onAddToCart,
-    onOpenModal,
-}) => {
+const Product: React.FC<ProductProps> = ({ product, onAddToCart }) => {
     const { id, name, price, imageUrl } = product;
-    const { accentColor } = useTheme();
-    const [isAdded, setIsAdded] = useState(false);
+    const [isAddedToCart, setIsAddedToCart] = useState(false);
     const { cart } = useCart();
 
     useEffect(() => {
         const isInCart = cart.some((item) => item.product.id === product.id);
-        setIsAdded(isInCart);
+        setIsAddedToCart(isInCart);
     }, [cart]);
 
     const formatPrice = (value: number) => value.toLocaleString("ru-RU");
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!isAdded) {
+        if (!isAddedToCart) {
             onAddToCart({ product, quantity: 1 });
-            setIsAdded(true);
+            setIsAddedToCart(true);
         }
     };
 
     return (
-        <div
-            className="max-w-72 flex flex-col bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:shadow-lg h-full"
-            onClick={() => onOpenModal(id)}
-        >
+        <div className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:shadow-lg h-full">
             {/* Контейнер изображения */}
-            <div className="aspect-w-3 aspect-h-4 bg-gray-100">
+            <Link
+                to={`/products/${product.id}`}
+                className="aspect-w-3 aspect-h-4 bg-gray-100"
+            >
                 <img
                     src={imageUrl}
                     alt={name}
                     className="object-cover w-full h-full"
                 />
-            </div>
+            </Link>
             {/* Информация */}
-            <div className="p-4 bg-gray-50 flex flex-col justify-between items-start w-full">
+            <div className="p-4 bg-gray-50 flex flex-col justify-between items-start">
                 {/* Название */}
-                <h3 className="text-sm font-bold text-gray-800 text-center truncate mb-2">
+                <h3 className="text-center truncate mb-2 font-bold text-gray-800 text-[clamp(0.9rem, 2vw, 1.2rem)]">
                     {name}
                 </h3>
-                {/* Цена и кнопка */}
-                <div className="flex items-center justify-between mt-2 w-full">
-                    <p className="text-base font-bold text-gray-900">
-                        {formatPrice(price)} ₽
-                    </p>
+                {/* Цена */}
+                <p className="mb-4 font-bold text-gray-900 text-[clamp(1rem, 2.5vw, 1.4rem)]">
+                    {formatPrice(price)} ₽
+                </p>
+                {/* Кнопки */}
+                <div className="grid grid-cols-1 gap-2 w-full">
                     <button
-                        className={`p-2 rounded-full text-white ${
-                            isAdded ? "bg-green-500 cursor-not-allowed" : ""
-                        }`}
-                        style={{
-                            backgroundColor: isAdded ? "#4CAF50" : accentColor,
-                        }}
+                        className={`flex items-center justify-center w-full py-2 rounded-lg font-semibold transition-all ${
+                            isAddedToCart
+                                ? "bg-green-400 text-white cursor-not-allowed"
+                                : "bg-accent text-white hover:bg-opacity-90"
+                        } text-[clamp(0.9rem, 2vw, 1.2rem)]`}
                         onClick={handleAddToCart}
-                        disabled={isAdded}
+                        disabled={isAddedToCart}
                     >
-                        {isAdded ? <FaCheck /> : <FaCartPlus />}
+                        {isAddedToCart ? "В корзине" : "В корзину"}
+                    </button>
+                    <button className="flex items-center justify-center w-full py-2 rounded-lg bg-white text-accent border-2 border-accent hover:bg-slate-100 transition-all text-[clamp(0.9rem, 2vw, 1.2rem)]">
+                        <Link
+                            to="/order"
+                            className="w-full h-full flex items-center justify-center"
+                        >
+                            Купить сейчас
+                        </Link>
                     </button>
                 </div>
             </div>

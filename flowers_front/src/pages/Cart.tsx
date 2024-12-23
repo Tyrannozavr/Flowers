@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import OrderModal from "../components/OrderModal";
+import { ToastContainer } from "react-toastify";
 import { useCart } from "../context/CartContext";
 
 const Cart = () => {
@@ -12,8 +10,6 @@ const Cart = () => {
         decreaseQuantity,
     } = useCart();
 
-    const [isOrderModalOpen, setOrderModalOpen] = useState(false);
-
     const calculateTotal = () => {
         return cart.reduce(
             (total, item) => total + item.product.price * item.quantity,
@@ -23,13 +19,6 @@ const Cart = () => {
 
     const formatPrice = (value: number) => {
         return value.toLocaleString("ru-RU");
-    };
-
-    const handleOrderSubmit = (name: string, phone: string) => {
-        toast.success(
-            `Спасибо за заказ, ${name}! Мы свяжемся с вами по номеру ${phone}.`
-        );
-        clearCart();
     };
 
     return (
@@ -108,10 +97,7 @@ const Cart = () => {
                             >
                                 Очистить корзину
                             </button>
-                            <button
-                                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                                onClick={() => setOrderModalOpen(true)}
-                            >
+                            <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
                                 Оформить заказ
                             </button>
                         </div>
@@ -120,13 +106,6 @@ const Cart = () => {
             ) : (
                 <p className="text-gray-500">Ваша корзина пуста.</p>
             )}
-
-            <OrderModal
-                isOpen={isOrderModalOpen}
-                onClose={() => setOrderModalOpen(false)}
-                totalAmount={calculateTotal()}
-                onSubmitOrder={handleOrderSubmit}
-            />
             <ToastContainer position="bottom-right" autoClose={3000} />
         </div>
     );
