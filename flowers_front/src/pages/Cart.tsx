@@ -1,15 +1,17 @@
-import { ToastContainer } from "react-toastify";
-import { useCart } from "../context/CartContext";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import {
+    clearCart,
+    decreaseQuantity,
+    increaseQuantity,
+    removeFromCart,
+} from "../redux/cart/slice";
+import { RootState } from "../redux/store";
 
 const Cart = () => {
-    const {
-        cart,
-        removeFromCart,
-        clearCart,
-        increaseQuantity,
-        decreaseQuantity,
-    } = useCart();
+    const dispatch = useDispatch();
+    const cart = useSelector((state: RootState) => state.cart.cart);
 
     const calculateTotal = () => {
         return cart.reduce(
@@ -60,7 +62,7 @@ const Cart = () => {
                                         <button
                                             className="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
                                             onClick={() =>
-                                                decreaseQuantity(product.id)
+                                                dispatch(decreaseQuantity(product.id))
                                             }
                                         >
                                             -
@@ -71,7 +73,7 @@ const Cart = () => {
                                         <button
                                             className="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
                                             onClick={() =>
-                                                increaseQuantity(product.id)
+                                                dispatch(increaseQuantity(product.id))
                                             }
                                         >
                                             +
@@ -94,7 +96,7 @@ const Cart = () => {
                         <div className="flex justify-between">
                             <button
                                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                                onClick={clearCart}
+                                onClick={() => dispatch(clearCart())}
                             >
                                 Очистить корзину
                             </button>

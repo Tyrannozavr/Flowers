@@ -4,7 +4,6 @@ import ContactForm from "../components/ContactForm";
 import FloatingCartButton from "../components/FloatingCart";
 import Pagination from "../components/Pagination";
 import Product from "../components/Product";
-import { CartItem, useCart } from "../context/CartContext";
 import { mockProducts } from "../data/mockProducts";
 
 export interface IProduct {
@@ -23,8 +22,7 @@ const ProductSection: React.FC = () => {
     const [products, setProducts] = useState<IProduct[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const productsPerPage = 40;
-    const { addToCart } = useCart();
-    
+
     useEffect(() => {
         const fetchProducts = () => {
             const start = (currentPage - 1) * productsPerPage;
@@ -33,13 +31,6 @@ const ProductSection: React.FC = () => {
         };
         fetchProducts();
     }, [selectedCategory, currentPage]);
-
-    const handleAddToCart = (item: CartItem) => {
-        if (item) {
-            addToCart(item);
-        }
-    };
-
 
     // Уточняем количество колонок с помощью ResizeObserver API
     const [columns, setColumns] = useState(2);
@@ -60,11 +51,7 @@ const ProductSection: React.FC = () => {
     const enhancedProducts = [];
     for (let i = 0; i < products.length; i++) {
         enhancedProducts.push(
-            <Product
-                key={products[i].id}
-                product={products[i]}
-                onAddToCart={handleAddToCart}
-            />
+            <Product key={products[i].id} product={products[i]} />
         );
 
         // Добавляем форму после каждых трех строк
@@ -92,10 +79,7 @@ const ProductSection: React.FC = () => {
             >
                 {products.map((product, index) => (
                     <React.Fragment key={product.id}>
-                        <Product
-                            product={product}
-                            onAddToCart={handleAddToCart}
-                        />
+                        <Product product={product} />
                         {/* Рендерим форму после каждых 3 строк */}
                         {(index + 1) % (columns * 3) === 0 && (
                             <div

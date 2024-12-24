@@ -1,22 +1,55 @@
 import React from "react";
-import { IOrder } from "../../pages/Order";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    IOrder,
+    clearOrderError,
+    setErrors,
+    setFormData,
+    toggleSelfPickup,
+} from "../../redux/order/slice";
 import CustomPhoneInput from "../CustomPhoneInput";
 
-interface ContactStepProps {
-    formData: IOrder;
-    onChange: (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => void;
-    onToggleChange: () => void;
-    errors: { [key: string]: string };
-}
+const ContactStep: React.FC = () => {
+    const dispatch = useDispatch();
+    const formData = useSelector(
+        (state: { order: { formData: IOrder } }) => state.order.formData
+    );
+    const errors = useSelector(
+        (state: { order: { errors: { [key: string]: string } } }) =>
+            state.order.errors
+    );
 
-const ContactStep: React.FC<ContactStepProps> = ({
-    formData,
-    onChange,
-    onToggleChange,
-    errors,
-}) => {
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        const { name, value } = e.target;
+        dispatch(setFormData({ [name]: value }));
+        dispatch(clearOrderError(name));
+
+        if (name === "fullName" && value.trim() === "") {
+            dispatch(
+                setErrors({
+                    field: "fullName",
+                    error: "ФИО не может быть пустым",
+                })
+            );
+        }
+        if (name === "phoneNumber" && value.trim() === "") {
+            dispatch(
+                setErrors({
+                    field: "phoneNumber",
+                    error: "Номер телефона обязателен",
+                })
+            );
+        }
+    };
+
+    const handleToggleChange = () => {
+        dispatch(toggleSelfPickup());
+        dispatch(clearOrderError("recipientName"));
+        dispatch(clearOrderError("recipientPhone"));
+    };
+
     return (
         <div>
             <h2 className="text-lg font-semibold mb-4">Как с вами связаться</h2>
@@ -30,7 +63,7 @@ const ContactStep: React.FC<ContactStepProps> = ({
                         type="text"
                         name="fullName"
                         value={formData.fullName}
-                        onChange={onChange}
+                        onChange={handleInputChange}
                         className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${
                             errors.fullName
                                 ? "border-red-500 focus:ring-red-500"
@@ -52,11 +85,10 @@ const ContactStep: React.FC<ContactStepProps> = ({
                             Номер телефона*
                         </label>
                         <CustomPhoneInput
-                            required={true}
                             value={formData.phoneNumber}
-                            onChange={onChange}
+                            onChange={handleInputChange}
                             name="phoneNumber"
-                            error={errors.phone}
+                            error={errors.phoneNumber}
                         />
                     </div>
                 </div>
@@ -69,7 +101,7 @@ const ContactStep: React.FC<ContactStepProps> = ({
                                 type="checkbox"
                                 id="selfPickupToggle"
                                 checked={formData.isSelfPickup}
-                                onChange={onToggleChange}
+                                onChange={handleToggleChange}
                                 className="sr-only"
                             />
                             <div
@@ -103,8 +135,8 @@ const ContactStep: React.FC<ContactStepProps> = ({
                             <input
                                 type="text"
                                 name="recipientName"
-                                value={formData.recipientName}
-                                onChange={onChange}
+                                value={formData.recipientName || ""}
+                                onChange={handleInputChange}
                                 className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${
                                     errors.recipientName
                                         ? "border-red-500 focus:ring-red-500"
@@ -124,14 +156,8 @@ const ContactStep: React.FC<ContactStepProps> = ({
                                     Номер телефона получателя*
                                 </label>
                                 <CustomPhoneInput
-                                    required={!formData.isSelfPickup}
-                                    value={
-                                        !formData.isSelfPickup &&
-                                        formData.recipientPhone
-                                            ? formData.recipientPhone
-                                            : ""
-                                    }
-                                    onChange={onChange}
+                                    value={formData.recipientPhone || ""}
+                                    onChange={handleInputChange}
                                     name="recipientPhone"
                                     error={errors.recipientPhone}
                                 />

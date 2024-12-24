@@ -1,10 +1,11 @@
 import React from "react";
 import { BsCart3 } from "react-icons/bs";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { useCart } from "../context/CartContext";
+import { RootState } from "../redux/store";
 
 const FloatingCartButton: React.FC = () => {
-    const { cart } = useCart();
+    const cart = useSelector((state: RootState) => state.cart.cart);
     const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
     return (

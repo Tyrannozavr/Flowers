@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { CartItem, useCart } from "../context/CartContext";
-
+import { addToCart } from "../redux/cart/slice";
+import { RootState } from "../redux/store";
 interface ProductProps {
     product: {
         id: number;
@@ -9,13 +10,13 @@ interface ProductProps {
         price: number;
         imageUrl: string;
     };
-    onAddToCart: (item: CartItem) => void;
 }
 
-const Product: React.FC<ProductProps> = ({ product, onAddToCart }) => {
+const Product: React.FC<ProductProps> = ({ product }) => {
     const { name, price, imageUrl } = product;
     const [isAddedToCart, setIsAddedToCart] = useState(false);
-    const { cart } = useCart();
+    const dispatch = useDispatch();
+    const cart = useSelector((state: RootState) => state.cart.cart);
 
     useEffect(() => {
         const isInCart = cart.some((item) => item.product.id === product.id);
@@ -27,7 +28,7 @@ const Product: React.FC<ProductProps> = ({ product, onAddToCart }) => {
     const handleAddToCart = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!isAddedToCart) {
-            onAddToCart({ product, quantity: 1 });
+            dispatch(addToCart({ product, quantity: 1 }));
             setIsAddedToCart(true);
         }
     };

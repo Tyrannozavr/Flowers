@@ -1,15 +1,17 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { mockProducts } from "../data/mockProducts";
-import { useCart } from "../context/CartContext";
+import { addToCart } from "../redux/cart/slice";
+import { RootState } from "../redux/store";
 
 const ProductPage: React.FC = () => {
-    const { id } = useParams<{ id: string }>(); // Получение ID из параметров маршрута
+    const { id } = useParams<{ id: string }>();
     const product = mockProducts.find(
         (item) => id && item.id === parseInt(id, 10)
     );
-
-    const { cart, addToCart } = useCart();
+    const dispatch = useDispatch();
+    const cart = useSelector((state: RootState) => state.cart.cart);
 
     if (!product) {
         return (
@@ -63,8 +65,7 @@ const ProductPage: React.FC = () => {
                         <button
                             className="w-full mt-4 px-6 py-3 text-lg font-semibold text-white bg-accent rounded-lg shadow-md transition-all hover:bg-opacity-90"
                             onClick={() => {
-                                addToCart({ product, quantity: 1 });
-                                alert("Товар добавлен в корзину!"); // Уведомление
+                                dispatch(addToCart({ product, quantity: 1 }));
                             }}
                         >
                             Добавить в корзину

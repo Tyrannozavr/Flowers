@@ -9,15 +9,13 @@ interface PhoneInputProps {
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => void;
     error?: string;
-    required?: boolean; // Добавляем поддержку обязательного поля
 }
 
 const CustomPhoneInput: React.FC<PhoneInputProps> = ({
     value,
     name,
     onChange,
-    error,
-    required = false, // По умолчанию поле не обязательно
+    error
 }) => {
     const handlePhoneChange = (phoneValue: string) => {
         const event = {
@@ -28,8 +26,6 @@ const CustomPhoneInput: React.FC<PhoneInputProps> = ({
         } as React.ChangeEvent<HTMLInputElement>;
         onChange(event);
     };
-
-    console.log(name, value, required, error);
 
     return (
         <div>
@@ -53,11 +49,6 @@ const CustomPhoneInput: React.FC<PhoneInputProps> = ({
                 }}
                 placeholder="Введите номер телефона"
             />
-            {required && !value && (
-                <p className="text-red-500 text-sm mt-1">
-                    Поле обязательно для заполнения
-                </p>
-            )}
             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
     );
