@@ -26,7 +26,7 @@ interface OrderState {
 }
 
 const initialState: OrderState = {
-    currentStep: 4,
+    currentStep: 1,
     formData: {
         fullName: "",
         phoneNumber: "",
