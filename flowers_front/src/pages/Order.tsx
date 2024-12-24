@@ -16,7 +16,10 @@ const Order: React.FC = () => {
     );
 
     const handleStepChange = (step: number) => {
-        if (step > currentStep && !validateStep(step, formData, dispatch)) {
+        if (
+            step > currentStep &&
+            !validateStep(currentStep, formData, dispatch)
+        ) {
             return;
         }
         dispatch(setStep(step));

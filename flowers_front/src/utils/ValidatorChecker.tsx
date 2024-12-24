@@ -1,6 +1,5 @@
 import { IOrder, setErrors } from "../redux/order/slice";
 
-// Валидация для первого шага
 const firstStepValidate = (formData: IOrder) => {
     const errors: { [key: string]: string } = {};
     if (!formData.fullName.trim()) {
@@ -20,7 +19,6 @@ const firstStepValidate = (formData: IOrder) => {
     return errors;
 };
 
-// Валидация для второго шага
 const secondStepValidate = (formData: IOrder) => {
     const errors: { [key: string]: string } = {};
     if (!formData.deliveryMethod || formData.deliveryMethod === "DELIVERY") {
@@ -46,11 +44,10 @@ const secondStepValidate = (formData: IOrder) => {
     return errors;
 };
 
-// Объект с валидацией для каждого шага
 const validationRules: {
     [key: number]: (formData: IOrder) => { [key: string]: string };
 } = {
-    1: (formData) => firstStepValidate(formData),
+    1: (formData) => firstStepValidate(formData), 
     2: (formData) => secondStepValidate(formData),
     3: (formData) => {
         const errors = {
@@ -68,7 +65,6 @@ const validationRules: {
     },
 };
 
-// Основная валидация
 const validateStep = (
     currentStep: number,
     formData: IOrder,
@@ -76,16 +72,11 @@ const validateStep = (
 ) => {
     const newErrors: { [key: string]: string } = {};
 
-    // Проверка всех шагов от 1 до текущего шага
-    for (let step = 1; step <= currentStep; step++) {
-        const stepErrors = validationRules[step](formData);
-        Object.assign(newErrors, stepErrors);
-    }
+    const stepErrors = validationRules[currentStep](formData);
+    Object.assign(newErrors, stepErrors);
 
-    console.log(newErrors);
-
-    dispatch(setErrors(newErrors)); // Отправляем ошибки в store
-    return Object.keys(newErrors).length === 0; // Возвращаем true, если ошибок нет
+    dispatch(setErrors(newErrors));
+    return Object.keys(newErrors).length === 0; 
 };
 
 export default validateStep;
