@@ -21,7 +21,7 @@ const ProductSection: React.FC = () => {
     );
     const [products, setProducts] = useState<IProduct[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const productsPerPage = 40;
+    const productsPerPage = 24;
 
     useEffect(() => {
         const fetchProducts = () => {
@@ -32,7 +32,6 @@ const ProductSection: React.FC = () => {
         fetchProducts();
     }, [selectedCategory, currentPage]);
 
-    // Уточняем количество колонок с помощью ResizeObserver API
     const [columns, setColumns] = useState(2);
 
     useEffect(() => {
@@ -54,7 +53,6 @@ const ProductSection: React.FC = () => {
             <Product key={products[i].id} product={products[i]} />
         );
 
-        // Добавляем форму после каждых трех строк
         if ((i + 1) % (columns * 3) === 0) {
             enhancedProducts.push(
                 <div key={`form-${i}`} className={`w-full`}>
@@ -63,6 +61,10 @@ const ProductSection: React.FC = () => {
             );
         }
     }
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [currentPage]);
 
     return (
         <section className="w-full p-4">
@@ -80,7 +82,6 @@ const ProductSection: React.FC = () => {
                 {products.map((product, index) => (
                     <React.Fragment key={product.id}>
                         <Product product={product} />
-                        {/* Рендерим форму после каждых 3 строк */}
                         {(index + 1) % (columns * 3) === 0 && (
                             <div
                                 key={`form-${index}`}
@@ -91,6 +92,14 @@ const ProductSection: React.FC = () => {
                         )}
                     </React.Fragment>
                 ))}
+                {((products.length < 18 && columns === 6) ||
+                    (products.length < 12 && columns === 4) ||
+                    (products.length < 9 && columns === 3) ||
+                    (products.length < 6 && columns === 2)) && (
+                    <div className="col-span-full -mx-4">
+                        <ContactForm />
+                    </div>
+                )}
             </div>
 
             <Pagination

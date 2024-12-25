@@ -8,6 +8,7 @@ import {
     removeFromCart,
 } from "../redux/cart/slice";
 import { RootState } from "../redux/store";
+import { useEffect } from "react";
 
 const Cart = () => {
     const dispatch = useDispatch();
@@ -23,6 +24,10 @@ const Cart = () => {
     const formatPrice = (value: number) => {
         return value.toLocaleString("ru-RU");
     };
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
 
     return (
         <div className="container mx-auto p-6 bg-white rounded-lg shadow-md w-full h-full m-6">
@@ -62,7 +67,9 @@ const Cart = () => {
                                         <button
                                             className="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
                                             onClick={() =>
-                                                dispatch(decreaseQuantity(product.id))
+                                                dispatch(
+                                                    decreaseQuantity(product.id)
+                                                )
                                             }
                                         >
                                             -
@@ -73,7 +80,9 @@ const Cart = () => {
                                         <button
                                             className="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
                                             onClick={() =>
-                                                dispatch(increaseQuantity(product.id))
+                                                dispatch(
+                                                    increaseQuantity(product.id)
+                                                )
                                             }
                                         >
                                             +

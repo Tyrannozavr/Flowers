@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProgressBar from "../components/ProgressBar";
 import AddressStep from "../components/steps/AddressStep";
@@ -24,6 +24,10 @@ const Order: React.FC = () => {
         }
         dispatch(setStep(step));
     };
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [currentStep]);
 
     return (
         <div className="bg-gray-100 flex flex-col items-center md:my-10">

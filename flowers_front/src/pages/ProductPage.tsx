@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { mockProducts } from "../data/mockProducts";
@@ -27,6 +27,10 @@ const ProductPage: React.FC = () => {
     }
 
     const isInCart = cart.some((item) => item.product.id === product.id); // Проверка, есть ли товар в корзине
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
 
     return (
         <div className="container mx-auto p-6">
