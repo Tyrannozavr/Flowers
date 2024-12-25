@@ -19,21 +19,23 @@ const ProgressBar: React.FC<ProgressBarInterface> = ({ handleStepChange }) => {
     ];
 
     return (
-        <div className="flex justify-between items-center w-full border-b border-gray-300 mb-2">
+        <div className="flex justify-between items-center w-full border-b space-x-2 border-gray-300 mb-2">
             {steps.map((step) => (
                 <div
                     key={step.id}
-                    className={`text-center flex flex-col items-center w-1/4 cursor-pointer ${
+                    className={`text-start flex flex-col items-start w-1/4 cursor-pointer relative ${
                         currentStep === step.id
                             ? "text-accent font-bold"
                             : "text-gray-600"
                     }`}
                     onClick={() => handleStepChange(step.id)}
                 >
+                    {/* Устанавливаем фиксированный размер шрифта */}
                     <span className="text-sm">Шаг {step.id}</span>
-                    <span className="text-base">{step.label}</span>
+                    <span className="text-base mb-2">{step.label}</span>
+                    {/* Линия под шагом */}
                     {currentStep === step.id && (
-                        <div className="h-1 mt-1 w-full bg-accent"></div>
+                        <div className="absolute bottom-0 left-0 w-full h-1 bg-accent"></div>
                     )}
                 </div>
             ))}

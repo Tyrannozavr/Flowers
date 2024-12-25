@@ -26,7 +26,7 @@ const Order: React.FC = () => {
     };
 
     return (
-        <div className="bg-gray-100 flex flex-col items-center my-10">
+        <div className="bg-gray-100 flex flex-col items-center md:my-10">
             <div className="max-w-3xl w-full bg-white shadow-lg rounded-lg p-6 sm:p-8">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
                     Оформление заказа

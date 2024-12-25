@@ -79,8 +79,8 @@ const ContactStep: React.FC = () => {
                 </div>
 
                 {/* Поля для ввода телефона */}
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="col-span-2">
+                <div className="w-full">
+                    <div className="col-span-2 w-full">
                         <label className="block text-gray-700 font-medium mb-2">
                             Номер телефона*
                         </label>
@@ -150,8 +150,8 @@ const ContactStep: React.FC = () => {
                                 </p>
                             )}
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="col-span-2">
+                        <div className="w-full">
+                            <div className="col-span-2 w-full">
                                 <label className="block text-gray-700 font-medium mb-2">
                                     Номер телефона получателя*
                                 </label>
