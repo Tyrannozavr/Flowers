@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -8,7 +9,6 @@ import {
     removeFromCart,
 } from "../redux/cart/slice";
 import { RootState } from "../redux/store";
-import { useEffect } from "react";
 
 const Cart = () => {
     const dispatch = useDispatch();
@@ -104,16 +104,17 @@ const Cart = () => {
                         </p>
                         <div className="flex justify-between">
                             <button
-                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:shadow-lg"
                                 onClick={() => dispatch(clearCart())}
                             >
                                 Очистить корзину
                             </button>
-                            <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-                                <Link to="/order" className="w-full h-full">
-                                    Оформить заказ
-                                </Link>
-                            </button>
+                            <Link
+                                to="/order"
+                                className="px-4 py-2 bg-accent hover:shadow-lg text-white rounded"
+                            >
+                                Оформить заказ
+                            </Link>
                         </div>
                     </div>
                 </>
