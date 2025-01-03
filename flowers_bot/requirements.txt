@@ -1,0 +1,5 @@
+aiogram==3.x
+fastapi
+uvicorn
+python-dotenv
+httpx
