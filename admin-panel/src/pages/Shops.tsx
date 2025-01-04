@@ -15,8 +15,12 @@ import { deleteShop, fetchShops } from "../api/shops";
 const Shops: React.FC = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { data: shops, isLoading, isError } = useQuery("shops", fetchShops, {
-        retry: false, // Отключаем автоматические попытки
+    const {
+        data: shops,
+        isLoading,
+        isError,
+    } = useQuery("shops", fetchShops, {
+        retry: false,
     });
 
     const deleteMutation = useMutation(deleteShop, {
@@ -30,7 +34,7 @@ const Shops: React.FC = () => {
             <Typography variant="h4" mb={3}>
                 Магазины
             </Typography>
-            {isError || !shops?.length ? ( // Проверяем, есть ли магазины
+            {isError || !shops?.length ? (
                 <Typography variant="body1" color="text.secondary" mb={2}>
                     Нет магазинов
                 </Typography>
@@ -45,9 +49,15 @@ const Shops: React.FC = () => {
                             {shop.logo_url && (
                                 <CardMedia
                                     component="img"
-                                    height="140"
                                     image={shop.logo_url}
                                     alt={`${shop.subdomain} logo`}
+                                    sx={{
+                                        backgroundColor: "#f0f0f0",
+                                        objectFit: "contain",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                    }}
                                 />
                             )}
                             <CardContent>
