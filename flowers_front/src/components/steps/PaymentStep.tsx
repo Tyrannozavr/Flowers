@@ -1,19 +1,20 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { IOrder } from "../../redux/order/slice";
+import { createOrder } from "../../api/order";
 
 const PaymentStep: React.FC = () => {
     const formData = useSelector(
         (state: { order: { formData: IOrder } }) => state.order.formData
     );
 
-    const handleSubmit = (type: "apply" | "pay") => {
+    const handleSubmit = async (type: "apply" | "pay") => {
         if (type === "apply") {
-            console.log("Оставить заявку");
+            console.log(formData);
+            await createOrder(formData);
         } else if (type === "pay") {
             console.log("Оплатить по СБП");
         }
-        console.log(formData);
     };
 
     return (

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.core.database import engine, Base
-from app.routes import shop, auth, category, product, consultation
+from app.routes import shop, auth, category, product, consultation, order
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import get_db
 from app.seed.category import seed_categories
@@ -35,6 +35,7 @@ app.include_router(product.router, prefix="/products", tags=["Products"])
 app.include_router(auth.router)
 app.include_router(category.router)
 app.include_router(consultation.router, prefix="/consultations", tags=["Consultations"])
+app.include_router(order.router, prefix="/orders", tags=["orders"])
 
 app.mount("/static/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/static/categories", StaticFiles(directory="categories"), name="categories")

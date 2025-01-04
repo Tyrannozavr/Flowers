@@ -15,6 +15,7 @@ const WishStep: React.FC = () => {
         e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
     ) => {
         const { name, value } = e.target;
+        console.log(name);
         dispatch(setFormData({ [name]: value }));
     };
 
@@ -29,6 +30,7 @@ const WishStep: React.FC = () => {
             <div>
                 <textarea
                     id="wishes"
+                    name="wishes" // Добавляем name
                     rows={4}
                     maxLength={200}
                     value={wishes}
@@ -36,6 +38,7 @@ const WishStep: React.FC = () => {
                     className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent"
                     placeholder="Введите ваши пожелания"
                 />
+
                 <span className="block text-right text-sm text-gray-500">
                     {200 - (wishes?.length || 0)} символов осталось
                 </span>
@@ -69,6 +72,7 @@ const WishStep: React.FC = () => {
                     </label>
                     <textarea
                         id="cardText"
+                        name="cardText" // Добавляем name
                         rows={4}
                         maxLength={200}
                         value={cardText}
@@ -76,6 +80,7 @@ const WishStep: React.FC = () => {
                         className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent"
                         placeholder="Введите текст для открытки"
                     />
+
                     <span className="block text-right text-sm text-gray-500">
                         {200 - (cardText?.length || 0)} символов осталось
                     </span>

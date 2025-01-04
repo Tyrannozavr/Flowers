@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import {
     clearCart,
@@ -8,11 +8,13 @@ import {
     increaseQuantity,
     removeFromCart,
 } from "../redux/cart/slice";
+import { setCartItems } from "../redux/order/slice";
 import { RootState } from "../redux/store";
 
 const Cart = () => {
     const dispatch = useDispatch();
     const cart = useSelector((state: RootState) => state.cart.cart);
+    const navigate = useNavigate();
 
     const calculateTotal = () => {
         return cart.reduce(
@@ -23,6 +25,18 @@ const Cart = () => {
 
     const formatPrice = (value: number) => {
         return value.toLocaleString("ru-RU");
+    };
+
+    const handleOrder = () => {
+        const mappedCartItems = cart.map((item) => ({
+            id: item.product.id,
+            name: item.product.name,
+            price: item.product.price,
+            quantity: item.quantity,
+        }));
+
+        dispatch(setCartItems(mappedCartItems));
+        navigate("/order");
     };
 
     useEffect(() => {
@@ -91,7 +105,9 @@ const Cart = () => {
                                 </div>
                                 <button
                                     className="text-red-500 hover:text-red-700"
-                                    onClick={() => dispatch(removeFromCart(product.id))}
+                                    onClick={() =>
+                                        dispatch(removeFromCart(product.id))
+                                    }
                                 >
                                     Удалить
                                 </button>
@@ -109,12 +125,12 @@ const Cart = () => {
                             >
                                 Очистить корзину
                             </button>
-                            <Link
-                                to="/order"
+                            <button
                                 className="px-4 py-2 bg-accent hover:shadow-lg text-white rounded"
+                                onClick={handleOrder}
                             >
                                 Оформить заказ
-                            </Link>
+                            </button>
                         </div>
                     </div>
                 </>

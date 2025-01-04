@@ -1,7 +1,15 @@
 // src/store/orderSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+interface CartItem {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+}
+
 export interface IOrder {
+    items: CartItem[];
     fullName: string;
     phoneNumber: string;
     isSelfPickup: boolean;
@@ -28,6 +36,7 @@ interface OrderState {
 const initialState: OrderState = {
     currentStep: 1,
     formData: {
+        items: [],
         fullName: "",
         phoneNumber: "",
         isSelfPickup: true,
@@ -51,6 +60,9 @@ const orderSlice = createSlice({
     name: "order",
     initialState,
     reducers: {
+        setCartItems(state, action: PayloadAction<CartItem[]>) {
+            state.formData.items = action.payload;
+        },
         setStep(state, action: PayloadAction<number>) {
             state.currentStep = action.payload;
         },
@@ -87,6 +99,7 @@ export const {
     toggleSelfPickup,
     clearOrderError,
     resetOrder,
+    setCartItems,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;
