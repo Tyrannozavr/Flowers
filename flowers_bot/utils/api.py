@@ -1,18 +1,31 @@
 import httpx
 from typing import List
+from app.config import BACKEND_API_URL
+import logging
 
-API_BASE_URL = "http://127.0.0.1:8000"  # Укажите URL вашего backend
+async def get_orders() -> List[dict]:
+    """Получить список заказов"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{BACKEND_API_URL}/orders/")
+            response.raise_for_status()
+    except Exception as e:
+        logging.error("Ошибка подключения к бэкенду:", e)
 
-async def get_shops() -> List[dict]:
-    """Получить список магазинов с backend."""
-    async with httpx.AsyncClient() as client:
-        response = await client.get(f"{API_BASE_URL}/shops")
-        response.raise_for_status()
-        return response.json()
-
-async def create_shop(subdomain: str) -> dict:
+async def get_orders_by_status(status: str) -> List[dict]:
     """Создать новый магазин через backend."""
     async with httpx.AsyncClient() as client:
-        response = await client.post(f"{API_BASE_URL}/shops", json={"subdomain": subdomain})
+        response = await client.get(f"{BACKEND_API_URL}/orders/status?status={status}")
         response.raise_for_status()
         return response.json()
+
+async def update_order_status(order_id: int, status: str) -> str:
+    """Обновляет статус заказа."""
+    url = f"{BACKEND_API_URL}/orders/{order_id}"
+    params = {"status": status}
+    print(f"Отправляем запрос: {url} с параметрами: {params}")
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.put(url, params=params)
+        response.raise_for_status()
+        return f"Статус заказа {order_id} успешно обновлен на {status}."

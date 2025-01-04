@@ -79,3 +79,29 @@ async def get_orders_by_status(
         return order_responses
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving orders: {str(e)}")
+
+@router.put("/{order_id}")
+async def update_order_status(
+    order_id: int,
+    status: OrderStatus = Query(..., description="Новый статус заказа"),
+    db: Session = Depends(get_db),
+):
+    """
+    Обновляет статус заказа по ID.
+    """
+    try:
+        print(1, order_id, status)
+        # Найти заказ по ID
+        order = db.query(OrderDb).filter(OrderDb.id == order_id).first()
+        if not order:
+            raise HTTPException(status_code=404, detail=f"Order with ID {order_id} not found")
+
+        # Обновить статус заказа
+        order.status = status
+        db.commit()
+        db.refresh(order)
+
+        return {"message": f"Order {order_id} status updated to {status}"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error updating order status: {str(e)}")

@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, HTTPException, status, Header
 from datetime import datetime, timedelta
-from jose import jwt, JWTError
+import jwt
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from app.core.config import settings
 
+print(jwt)
 load_dotenv()
 
 router = APIRouter()
@@ -30,11 +31,17 @@ def decode_token(token: str):
                 detail="Token expired",
             )
         return payload
-    except JWTError:
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired",
+        )
+    except jwt.InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
         )
+
 
 @router.get("/auth/check")
 async def get_current_user(authorization: str = Header(None)):
@@ -46,6 +53,7 @@ async def get_current_user(authorization: str = Header(None)):
     if token_data.get("username") != settings.ADMIN_USERNAME:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     return {"message": "Authenticated"}
+
 
 class LoginSchema(BaseModel):
     username: str
