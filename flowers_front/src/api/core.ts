@@ -6,18 +6,11 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
     async (config) => {
+        const subdomain = window.location.hostname.split(".")[0];
+        config.headers["X-Subdomain"] = subdomain;
         return config;
     },
     async (error) => {
-        return Promise.reject(error);
-    }
-);
-
-instance.interceptors.response.use(
-    (response) => {
-        return response;
-    },
-    (error) => {
         return Promise.reject(error);
     }
 );

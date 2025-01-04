@@ -15,9 +15,9 @@ def get_products_by_subdomain_with_filtering_and_pagination(
     per_page: int = Query(10, ge=1, le=100, description="Количество продуктов на странице"),
     db: Session = Depends(get_db),
 ):
-    host = request.headers.get("host", "")
-    subdomain = host.split(".")[0]
-    print(host, subdomain)
+    subdomain = request.headers.get("X-Subdomain")
+    if not subdomain:
+        raise HTTPException(status_code=400, detail="Subdomain header is required")
     
     # Проверяем, существует ли магазин
     shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
@@ -62,8 +62,9 @@ def get_product_by_id(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    host = request.headers.get("host", "")
-    subdomain = host.split(".")[0]
+    subdomain = request.headers.get("X-Subdomain")
+    if not subdomain:
+        raise HTTPException(status_code=400, detail="Subdomain header is required")
 
     shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
     if not shop:
