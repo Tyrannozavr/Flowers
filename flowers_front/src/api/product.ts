@@ -9,11 +9,28 @@ export interface IProduct {
     photoUrl: string;
 }
 
+export interface IProductBack {
+    id: number;
+    name: string;
+    description: string | null;
+    price: number;
+    ingredients: string;
+    photo_url: string;
+}
+
+
 export interface ProductPageResponse {
     total: number;
     page: number;
     perPage: number;
     products: IProduct[];
+}
+
+export interface IProductPageResponse {
+    total: number;
+    page: number;
+    perPage: number;
+    products: IProductBack[];
 }
 
 export const fetchProducts = async (
@@ -27,12 +44,12 @@ export const fetchProducts = async (
             params.category_id = categoryId;
         }
 
-        const response = await axios.get<ProductPageResponse>("/products/", {
+        const response = await axios.get<IProductPageResponse>("/products/", {
             params,
         });
         return {
             ...response.data,
-            products: response.data.products.map((el: any) => ({
+            products: response.data.products.map((el) => ({
                 ...el,
                 photoUrl: el.photo_url,
             })),
@@ -47,7 +64,7 @@ export const fetchProductById = async (
     productId: number
 ): Promise<IProduct> => {
     try {
-        const response = await axios.get<any>(`/products/${productId}`);
+        const response = await axios.get<IProductBack>(`/products/${productId}`);
         return { ...response.data, photoUrl: response.data.photo_url };
     } catch (error) {
         console.error("Ошибка при загрузке продукта:", error);

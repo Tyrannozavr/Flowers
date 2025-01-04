@@ -5,10 +5,15 @@ export interface ThemeData {
     logoUrl: string;
 }
 
+interface IShop {
+    primary_color: string;
+    logo_url: string;
+}
+
 export const fetchShop = async (): Promise<ThemeData> => {
     try {
         const response = await axios.get(`/shops/subdomain`);
-        const data = response.data;
+        const data: IShop = response.data;
 
         return {
             accentColor: data.primary_color,
