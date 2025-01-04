@@ -51,7 +51,13 @@ async def create_shop(
     db.commit()
     db.refresh(new_shop)
 
-    return new_shop
+    base_url = str(request.base_url)
+    return ShopResponse(
+        id=new_shop.id,
+        subdomain=new_shop.subdomain,
+        primary_color=new_shop.primary_color,
+        logo_url=f"{base_url}static/uploads/{new_shop.logo_url}" if new_shop.logo_url else None
+    )
 
 @router.get("/", response_model=list[ShopResponse])
 def get_shops(

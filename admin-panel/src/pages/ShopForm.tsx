@@ -22,7 +22,6 @@ const ShopForm: React.FC = () => {
         },
     });
 
-    // Мутация для создания нового магазина
     const createMutation = useMutation(
         (formData: FormData) => createShop(formData),
         {
@@ -33,7 +32,6 @@ const ShopForm: React.FC = () => {
         }
     );
 
-    // Мутация для обновления существующего магазина
     const updateMutation = useMutation(
         ({ formData, shopId }: { formData: FormData; shopId: number }) =>
             updateShop(shopId, formData),

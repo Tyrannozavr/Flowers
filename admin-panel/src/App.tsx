@@ -1,6 +1,6 @@
 import React from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import ProductForm from "./pages/ProductForm";
 import ShopDetails from "./pages/ShopDetails";
@@ -74,6 +74,8 @@ const App: React.FC = () => {
                         </ProtectedRoute>
                     }
                 />
+
+                <Route path="*" element={<Navigate to="/shops" replace />} />
             </Routes>
         </QueryClientProvider>
     );
