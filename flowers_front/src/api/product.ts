@@ -32,7 +32,7 @@ export const fetchProducts = async (
         });
         return {
             ...response.data,
-            products: response.data.products.map((el: IProduct) => ({
+            products: response.data.products.map((el: any) => ({
                 ...el,
                 photoUrl: el.photo_url,
             })),
@@ -47,7 +47,7 @@ export const fetchProductById = async (
     productId: number
 ): Promise<IProduct> => {
     try {
-        const response = await axios.get<IProduct>(`/products/${productId}`);
+        const response = await axios.get<any>(`/products/${productId}`);
         return { ...response.data, photoUrl: response.data.photo_url };
     } catch (error) {
         console.error("Ошибка при загрузке продукта:", error);
