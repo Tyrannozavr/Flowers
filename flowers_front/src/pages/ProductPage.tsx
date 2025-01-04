@@ -11,7 +11,6 @@ const ProductPage: React.FC = () => {
     const dispatch = useDispatch();
     const cart = useSelector((state: RootState) => state.cart.cart);
 
-    // Загружаем данные продукта
     useEffect(() => {
         const loadProduct = async () => {
             if (id) {
@@ -22,7 +21,6 @@ const ProductPage: React.FC = () => {
         loadProduct();
     }, [id]);
 
-    // Скроллим вверх при каждом монтировании компонента
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, []);

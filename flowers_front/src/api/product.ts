@@ -32,7 +32,7 @@ export const fetchProducts = async (
         });
         return {
             ...response.data,
-            products: response.data.products.map((el) => ({
+            products: response.data.products.map((el: IProduct) => ({
                 ...el,
                 photoUrl: el.photo_url,
             })),

@@ -5,7 +5,6 @@ import ContactForm from "../components/ContactForm";
 import FloatingCartButton from "../components/FloatingCart";
 import Pagination from "../components/Pagination";
 import Product from "../components/Product";
-import { mockProducts } from "../data/mockProducts";
 
 const ProductSection: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<number | null>(
@@ -13,8 +12,8 @@ const ProductSection: React.FC = () => {
     );
     const [products, setProducts] = useState<IProduct[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [perPage, setPerPage] = useState(30);
     const [columns, setColumns] = useState(2);
+    const perPage = 30;
 
     useEffect(() => {
         const updateColumns = () => {
@@ -109,7 +108,7 @@ const ProductSection: React.FC = () => {
 
             <Pagination
                 currentPage={currentPage}
-                totalPages={Math.ceil(mockProducts.length / perPage)}
+                totalPages={Math.ceil(products.length / perPage)}
                 onPageChange={setCurrentPage}
             />
             <FloatingCartButton />
