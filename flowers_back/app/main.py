@@ -10,7 +10,11 @@ def run_seed():
     db = next(get_db())
     seed_categories(db)
     
-app = FastAPI()
+app = FastAPI(
+    openapi_url=None,
+    docs_url=None,
+    redoc_url=None  
+)
 
 app.add_middleware(
     CORSMiddleware,
