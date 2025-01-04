@@ -3,7 +3,7 @@ import asyncio
 from fastapi import FastAPI, Request
 from aiogram.types import Update
 from app.bot import bot, dp
-from app.config import WEBHOOK_URL, WEBHOOK_PATH
+from app.config import WEBHOOK_URL, TELEGRAM_BOT_TOKEN
 from utils.orders import send_new_orders
 
 logging.basicConfig(level=logging.INFO)
@@ -23,11 +23,12 @@ async def on_shutdown():
     await bot.delete_webhook()
 
 
-@app.post(WEBHOOK_PATH)
+
+@app.post(f"/webhook/{TELEGRAM_BOT_TOKEN}")
 async def webhook(request: Request):
-    """Обрабатывает входящие вебхуки от Telegram."""
     try:
         raw_update = await request.json()
+        logging.info(f"Входящее обновление: {raw_update}")
         update = Update(**raw_update)
         await dp.feed_update(bot, update)
         return {"ok": True}

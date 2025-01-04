@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 from app.core.config import settings
 
-print(jwt)
 load_dotenv()
 
 router = APIRouter()
