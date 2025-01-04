@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../theme/ThemeProvider";
+import { createConsultation } from "../api/consultation";
 
 const lightenColor = (color: string, percent: number): string => {
     const num = parseInt(color.replace("#", ""), 16);
@@ -32,11 +33,13 @@ const ContactForm: React.FC = () => {
         phone: false,
     });
 
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
         setFormBackgroundColor(lightenColor(accentColor, -10));
     }, [accentColor]);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         const hasErrors = {
@@ -47,11 +50,22 @@ const ContactForm: React.FC = () => {
         setErrors(hasErrors);
 
         if (!hasErrors.name && !hasErrors.phone) {
-            // Если ошибок нет, отправляем данные
-            alert("Форма успешно отправлена!");
-            // Очистка полей после успешной отправки
-            setName("");
-            setPhone("");
+            setLoading(true);
+            try {
+                // Отправляем данные на сервер
+                await createConsultation({
+                    full_name: name,
+                    phone_number: phone,
+                });
+
+                alert("Форма успешно отправлена!");
+                setName("");
+                setPhone("");
+            } catch (error) {
+                alert("Ошибка при отправке формы. Попробуйте снова.");
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -61,7 +75,6 @@ const ContactForm: React.FC = () => {
             style={{ backgroundColor: formBackgroundColor }}
         >
             <div className="container mx-auto px-4 text-center">
-                {/* Описание */}
                 <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-white">
                     Не нашли, что искали?
                 </h2>
@@ -102,8 +115,9 @@ const ContactForm: React.FC = () => {
                     <button
                         type="submit"
                         className="p-3 bg-accent text-white rounded-lg font-semibold hover:bg-opacity-90 shadow-md transition-all duration-200"
+                        disabled={loading}
                     >
-                        Получить
+                        {loading ? "Отправка..." : "Получить"}
                     </button>
                 </form>
             </div>
