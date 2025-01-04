@@ -7,7 +7,7 @@ import {
     CardMedia,
     Typography,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
 import { deleteShop, fetchShops } from "../api/shops";

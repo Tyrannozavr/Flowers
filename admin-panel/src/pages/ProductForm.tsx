@@ -5,6 +5,7 @@ import {
     InputLabel,
     MenuItem,
     Select,
+    SelectChangeEvent,
     TextField,
     Typography,
 } from "@mui/material";
@@ -16,11 +17,11 @@ import { createProduct, fetchProduct, updateProduct } from "../api/products";
 
 const ProductForm: React.FC = () => {
     const { id, productId } = useParams();
-    const isEdit = !!productId; // Определяем режим (создание или редактирование)
+    const isEdit = !!productId;
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    if (!id) return null; // Если нет shopId, ничего не делаем
+    if (!id) return null;
 
     const [formData, setFormData] = useState({
         name: "",
@@ -43,12 +44,11 @@ const ProductForm: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Загружаем продукт только в режиме редактирования
     useQuery(
         ["product", id, productId],
         () => fetchProduct(Number(id), Number(productId)),
         {
-            enabled: isEdit, // Запрос активен только в режиме редактирования
+            enabled: isEdit,
             onSuccess: (data) => {
                 setFormData({
                     name: data.name,
@@ -64,7 +64,6 @@ const ProductForm: React.FC = () => {
         }
     );
 
-    // Загружаем категории
     const { data: categories, isLoading: isLoadingCategories } = useQuery(
         "categories",
         fetchCategories
@@ -102,7 +101,7 @@ const ProductForm: React.FC = () => {
     const handleChange = (
         e:
             | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-            | React.ChangeEvent<{ name?: string; value: unknown }>
+            | SelectChangeEvent<string>
     ) => {
         const { name, value, files } = e.target as HTMLInputElement;
         setFormData((prev) => ({
