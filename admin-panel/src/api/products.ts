@@ -26,11 +26,15 @@ export const createProduct = async ({
     return response.data;
 };
 
-export const updateProduct = async (
-    shopId: number,
-    productId: number,
-    formData: FormData
-) => {
+export const updateProduct = async ({
+    shopId,
+    productId,
+    formData,
+}: {
+    shopId: number;
+    productId: number;
+    formData: FormData;
+}) => {
     const response = await axios.put(
         `/shops/${shopId}/products/${productId}`,
         formData,

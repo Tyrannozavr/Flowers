@@ -43,7 +43,7 @@ const Cart = () => {
                                 <div className="w-20 h-20 bg-gray-100 flex-shrink-0 rounded overflow-hidden">
                                     <img
                                         src={
-                                            product.imageUrl ||
+                                            product.photoUrl ||
                                             "/placeholder.jpg"
                                         }
                                         alt={product.name}
@@ -91,7 +91,7 @@ const Cart = () => {
                                 </div>
                                 <button
                                     className="text-red-500 hover:text-red-700"
-                                    onClick={() => removeFromCart(product.id)}
+                                    onClick={() => dispatch(removeFromCart(product.id))}
                                 >
                                     Удалить
                                 </button>

@@ -12,15 +12,15 @@ import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchCategories } from "../api/categories";
-import { fetchProduct, updateProduct } from "../api/products";
+import { createProduct, fetchProduct, updateProduct } from "../api/products";
 
 const ProductForm: React.FC = () => {
     const { id, productId } = useParams();
-    const isEdit = !!productId;
+    const isEdit = !!productId; // Определяем режим (создание или редактирование)
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    if (!id) return;
+    if (!id) return null; // Если нет shopId, ничего не делаем
 
     const [formData, setFormData] = useState({
         name: "",
@@ -43,14 +43,13 @@ const ProductForm: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const { isLoading: isLoadingProduct } = useQuery(
+    // Загружаем продукт только в режиме редактирования
+    useQuery(
         ["product", id, productId],
         () => fetchProduct(Number(id), Number(productId)),
         {
-            enabled:
-                isEdit && !queryClient.getQueryData(["product", id, productId]),
+            enabled: isEdit, // Запрос активен только в режиме редактирования
             onSuccess: (data) => {
-                console.log("Полученные данные продукта:", data);
                 setFormData({
                     name: data.name,
                     description: data.description || "",
@@ -65,28 +64,24 @@ const ProductForm: React.FC = () => {
         }
     );
 
+    // Загружаем категории
     const { data: categories, isLoading: isLoadingCategories } = useQuery(
         "categories",
-        fetchCategories,
+        fetchCategories
+    );
+
+    const createMutation = useMutation(
+        ({ shopId, formData }: { shopId: number; formData: FormData }) =>
+            createProduct({ shopId, formData }),
         {
             onSuccess: () => {
-                if (isEdit && formData.categoryId) {
-                    // Убедимся, что категория существует
-                    const categoryExists = categories.some(
-                        (cat: any) => cat.id.toString() === formData.categoryId
-                    );
-                    if (!categoryExists) {
-                        setFormData((prev) => ({
-                            ...prev,
-                            categoryId: "",
-                        }));
-                    }
-                }
+                queryClient.invalidateQueries(["products", id]);
+                navigate(`/shops/${id}`);
             },
         }
     );
 
-    const mutation = useMutation(
+    const updateMutation = useMutation(
         ({
             shopId,
             productId,
@@ -95,22 +90,11 @@ const ProductForm: React.FC = () => {
             shopId: number;
             productId: number;
             formData: FormData;
-        }) => updateProduct(shopId, productId, formData),
+        }) => updateProduct({ shopId, productId, formData }),
         {
             onSuccess: () => {
                 queryClient.invalidateQueries(["products", id]);
                 navigate(`/shops/${id}`);
-            },
-            onError: (error: any) => {
-                const backendErrors = error.response?.data?.detail || [];
-                const newErrors: { [key: string]: string } = {};
-                backendErrors.forEach((err: any) => {
-                    if (err.loc[1] === "name") newErrors.name = err.msg;
-                    if (err.loc[1] === "price") newErrors.price = err.msg;
-                    if (err.loc[1] === "category_id")
-                        newErrors.categoryId = err.msg;
-                });
-                setErrors(newErrors);
             },
         }
     );
@@ -118,9 +102,9 @@ const ProductForm: React.FC = () => {
     const handleChange = (
         e:
             | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-            | SelectChangeEvent
+            | React.ChangeEvent<{ name?: string; value: unknown }>
     ) => {
-        const { name, value, files } = e.target;
+        const { name, value, files } = e.target as HTMLInputElement;
         setFormData((prev) => ({
             ...prev,
             [name]: files
@@ -134,38 +118,31 @@ const ProductForm: React.FC = () => {
     const handleSubmit = () => {
         if (!validateForm()) return;
 
-        let data: FormData | any;
-
-        console.log(formData);
-
+        const data = new FormData();
+        data.append("name", formData.name);
+        data.append("description", formData.description || "");
+        data.append("price", formData.price.toString());
+        data.append("category_id", formData.categoryId);
+        data.append("ingredients", formData.ingredients || "");
         if (formData.image) {
-            // Используем FormData, если загружено изображение
-            data = new FormData();
-            data.append("name", formData.name);
-            data.append("description", formData.description || "");
-            data.append("price", formData.price.toString()); // Преобразуем в строку для FormData
-            data.append("category_id", formData.categoryId);
-            data.append("ingredients", formData.ingredients || "");
-            data.append("image", formData.image); // Добавляем изображение
-        } else {
-            // Если изображение не загружено, отправляем JSON
-            data = {
-                name: formData.name || "",
-                description: formData.description || "",
-                price: formData.price.toString(),
-                category_id: formData.categoryId,
-                ingredients: formData.ingredients || "",
-            };
+            data.append("image", formData.image);
         }
 
-        mutation.mutate({
-            shopId: Number(id),
-            ...(isEdit && { productId: Number(productId) }),
-            formData: data,
-        });
+        if (isEdit) {
+            updateMutation.mutate({
+                shopId: Number(id),
+                productId: Number(productId),
+                formData: data,
+            });
+        } else {
+            createMutation.mutate({
+                shopId: Number(id),
+                formData: data,
+            });
+        }
     };
 
-    if (isEdit && isLoadingProduct) return <Typography>Загрузка...</Typography>;
+    if (isEdit && !categories) return <Typography>Загрузка...</Typography>;
     if (isLoadingCategories)
         return <Typography>Загрузка категорий...</Typography>;
 
@@ -215,7 +192,6 @@ const ProductForm: React.FC = () => {
                     error={!!errors.price}
                     helperText={errors.price}
                 />
-
                 <TextField
                     label="Состав"
                     name="ingredients"
@@ -229,7 +205,7 @@ const ProductForm: React.FC = () => {
                     <Select
                         labelId="category-label"
                         name="categoryId"
-                        value={formData.categoryId || ""}
+                        value={formData.categoryId}
                         onChange={handleChange}
                         required
                         error={!!errors.categoryId}
@@ -243,7 +219,6 @@ const ProductForm: React.FC = () => {
                             </MenuItem>
                         ))}
                     </Select>
-
                     {errors.categoryId && (
                         <Typography color="error">
                             {errors.categoryId}

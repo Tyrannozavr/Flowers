@@ -3,23 +3,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { addToCart } from "../redux/cart/slice";
 import { RootState } from "../redux/store";
+import { IProduct } from "../api/product";
 interface ProductProps {
-    product: {
-        id: number;
-        name: string;
-        price: number;
-        imageUrl: string;
-    };
+    product: IProduct
 }
 
 const Product: React.FC<ProductProps> = ({ product }) => {
-    const { name, price, imageUrl } = product;
+    const { name, price, photoUrl } = product;
     const [isAddedToCart, setIsAddedToCart] = useState(false);
     const dispatch = useDispatch();
     const cart = useSelector((state: RootState) => state.cart.cart);
-
+    
     useEffect(() => {
-        const isInCart = cart.some((item) => item.product.id === product.id);
+        const isInCart = cart.some((item) => item?.product?.id === product.id);
         setIsAddedToCart(isInCart);
     }, [cart]);
 
@@ -41,7 +37,7 @@ const Product: React.FC<ProductProps> = ({ product }) => {
                 className="aspect-w-3 aspect-h-4 bg-gray-100"
             >
                 <img
-                    src={imageUrl}
+                    src={photoUrl}
                     alt={name}
                     className="object-cover w-full h-full"
                 />

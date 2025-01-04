@@ -44,14 +44,40 @@ def get_products_by_subdomain_with_filtering_and_pagination(
         page=page,
         per_page=per_page,
         products=[
-            ProductResponse(
-                id=product.id,
-                name=product.name,
-                description=product.description,
-                price=product.price,
-                ingredients=product.ingredients,
-                photo_url=f"{request.base_url}static/uploads/{product.photo_url}" if product.photo_url else None,
-            )
-            for product in products
-        ],
+        ProductResponse(
+            id=product.id,
+            name=product.name,
+            description=product.description,
+            price=product.price,
+            ingredients=product.ingredients,
+            photo_url=f"{request.base_url}static/uploads/{product.photo_url}" if product.photo_url else ""
+        )
+        for product in products
+    ],
+    )
+
+@router.get("/{product_id}", response_model=ProductResponse)
+def get_product_by_id(
+    product_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    host = request.headers.get("host", "")
+    subdomain = host.split(".")[0]
+
+    shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
+    if not shop:
+        raise HTTPException(status_code=404, detail="Магазин не найден")
+
+    product = db.query(Product).filter(Product.id == product_id, Product.shop_id == shop.id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Продукт не найден")
+
+    return ProductResponse(
+        id=product.id,
+        name=product.name,
+        description=product.description,
+        price=product.price,
+        ingredients=product.ingredients,
+        photo_url=f"{request.base_url}static/uploads/{product.photo_url}" if product.photo_url else None,
     )

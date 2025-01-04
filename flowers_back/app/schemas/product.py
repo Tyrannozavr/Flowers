@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 
 class ProductResponse(BaseModel):
@@ -7,7 +7,7 @@ class ProductResponse(BaseModel):
     description: Optional[str]
     price: float
     ingredients: Optional[str]
-    photo_url: str
+    photo_url: Optional[str] = "" 
 
     class Config:
         orm_mode = True

@@ -4,7 +4,7 @@ class CategoryResponse(BaseModel):
     id: int
     name: str
     value: str 
-    image_url: HttpUrl  
+    imageUrl: HttpUrl  
     
     class Config:
         orm_mode = True

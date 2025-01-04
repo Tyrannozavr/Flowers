@@ -1,8 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { CategoryResponse, fetchCategories } from "../api/category";
 import { useTheme } from "../theme/ThemeProvider";
 
 const Footer: React.FC = () => {
     const { logoUrl } = useTheme();
+    const [categories, setCategories] = useState<CategoryResponse[]>([]);
+
+    useEffect(() => {
+        (async () => {
+            const data = await fetchCategories();
+            setCategories(data);
+        })();
+    }, []);
 
     return (
         <footer className="w-full bg-accent text-white pt-20">
@@ -20,31 +29,13 @@ const Footer: React.FC = () => {
                 <div>
                     <h2 className="text-lg font-semibold mb-4">Категории</h2>
                     <ul className="space-y-2">
-                        <li>
-                            <a href="#" className="hover:underline">
-                                Популярное
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" className="hover:underline">
-                                Витрина онлайн
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" className="hover:underline">
-                                Авторские букеты
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" className="hover:underline">
-                                Монобукеты
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" className="hover:underline">
-                                Декор
-                            </a>
-                        </li>
+                        {categories.map((category) => (
+                            <li key={category.id}>
+                                <a href="#" className="hover:underline">
+                                    {category.name}
+                                </a>
+                            </li>
+                        ))}
                     </ul>
                 </div>
 

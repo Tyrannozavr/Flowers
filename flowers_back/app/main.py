@@ -30,7 +30,9 @@ app.include_router(shop.router, prefix="/shops", tags=["Shops"])
 app.include_router(product.router, prefix="/products", tags=["Products"])
 app.include_router(auth.router)
 app.include_router(category.router)
+
 app.mount("/static/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/static/categories", StaticFiles(directory="categories"), name="categories")
 
 @app.get("/")
 def read_root():

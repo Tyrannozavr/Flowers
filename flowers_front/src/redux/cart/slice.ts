@@ -6,7 +6,7 @@ export interface CartItem {
         id: number;
         name: string;
         price: number;
-        imageUrl: string;
+        photoUrl: string;
     };
     quantity: number;
 }
@@ -35,6 +35,7 @@ const cartSlice = createSlice({
             localStorage.setItem("cart", JSON.stringify(state.cart));
         },
         removeFromCart(state, action: PayloadAction<number>) {
+            console.log(state.cart, action.payload);
             state.cart = state.cart.filter(
                 (item) => item.product.id !== action.payload
             );

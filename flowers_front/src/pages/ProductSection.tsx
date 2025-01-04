@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { IProduct, fetchProducts } from "../api/product";
 import Categories from "../components/Categories";
 import ContactForm from "../components/ContactForm";
 import FloatingCartButton from "../components/FloatingCart";
@@ -6,32 +7,13 @@ import Pagination from "../components/Pagination";
 import Product from "../components/Product";
 import { mockProducts } from "../data/mockProducts";
 
-export interface IProduct {
-    id: number;
-    name: string;
-    price: number;
-    imageUrl: string;
-    description: string;
-    composition: string[];
-}
-
 const ProductSection: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<number | null>(
         null
     );
     const [products, setProducts] = useState<IProduct[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const productsPerPage = 24;
-
-    useEffect(() => {
-        const fetchProducts = () => {
-            const start = (currentPage - 1) * productsPerPage;
-            const end = start + productsPerPage;
-            setProducts(mockProducts.slice(start, end));
-        };
-        fetchProducts();
-    }, [selectedCategory, currentPage]);
-
+    const [perPage, setPerPage] = useState(30);
     const [columns, setColumns] = useState(2);
 
     useEffect(() => {
@@ -62,6 +44,29 @@ const ProductSection: React.FC = () => {
         }
     }
 
+    const getProducts = async (category: number | null) => {
+        try {
+            const data = await fetchProducts(currentPage, perPage, category);
+
+            setProducts(data.products);
+        } catch (error) {
+            setProducts([]);
+        }
+    };
+
+    const onSelectCategory = (category: number | null) => {
+        setSelectedCategory((prev) => {
+            const newCategory = prev === category ? null : category;
+
+            getProducts(newCategory);
+            return newCategory;
+        });
+    };
+
+    useEffect(() => {
+        getProducts(selectedCategory);
+    }, []);
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [currentPage]);
@@ -70,7 +75,7 @@ const ProductSection: React.FC = () => {
         <section className="w-full p-4">
             <Categories
                 selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
+                onSelectCategory={onSelectCategory}
             />
 
             <div
@@ -104,7 +109,7 @@ const ProductSection: React.FC = () => {
 
             <Pagination
                 currentPage={currentPage}
-                totalPages={Math.ceil(mockProducts.length / productsPerPage)}
+                totalPages={Math.ceil(mockProducts.length / perPage)}
                 onPageChange={setCurrentPage}
             />
             <FloatingCartButton />

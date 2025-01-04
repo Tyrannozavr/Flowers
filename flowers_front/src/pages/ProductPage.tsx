@@ -1,17 +1,31 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { mockProducts } from "../data/mockProducts";
+import { IProduct, fetchProductById } from "../api/product";
 import { addToCart } from "../redux/cart/slice";
 import { RootState } from "../redux/store";
 
 const ProductPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const product = mockProducts.find(
-        (item) => id && item.id === parseInt(id, 10)
-    );
+    const [product, setProduct] = useState<IProduct>();
     const dispatch = useDispatch();
     const cart = useSelector((state: RootState) => state.cart.cart);
+
+    // Загружаем данные продукта
+    useEffect(() => {
+        const loadProduct = async () => {
+            if (id) {
+                const data = await fetchProductById(Number(id));
+                setProduct(data);
+            }
+        };
+        loadProduct();
+    }, [id]);
+
+    // Скроллим вверх при каждом монтировании компонента
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
 
     if (!product) {
         return (
@@ -26,11 +40,7 @@ const ProductPage: React.FC = () => {
         );
     }
 
-    const isInCart = cart.some((item) => item.product.id === product.id); // Проверка, есть ли товар в корзине
-
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    }, []);
+    const isInCart = cart.some((item) => item.product.id === product.id);
 
     return (
         <div className="container mx-auto p-6">
@@ -38,7 +48,7 @@ const ProductPage: React.FC = () => {
                 {/* Изображение букета */}
                 <div className="w-full md:w-1/2">
                     <img
-                        src={product.imageUrl}
+                        src={product.photoUrl}
                         alt={product.name}
                         className="w-full rounded-lg shadow-lg object-contain"
                     />
@@ -59,7 +69,7 @@ const ProductPage: React.FC = () => {
                         Состав:
                     </h3>
                     <ul className="list-disc list-inside text-gray-600 mb-4">
-                        {product.composition.map((item, index) => (
+                        {product.ingredients.split(",").map((item, index) => (
                             <li key={index}>{item}</li>
                         ))}
                     </ul>

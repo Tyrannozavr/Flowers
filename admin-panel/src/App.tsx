@@ -4,6 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import ProductForm from "./pages/ProductForm";
 import ShopDetails from "./pages/ShopDetails";
+import ShopForm from "./pages/ShopForm";
 import Shops from "./pages/Shops";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -32,6 +33,24 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute>
                             <ShopDetails />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/shops/new"
+                    element={
+                        <ProtectedRoute>
+                            <ShopForm />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/shops/:id/edit"
+                    element={
+                        <ProtectedRoute>
+                            <ShopForm />
                         </ProtectedRoute>
                     }
                 />

@@ -38,7 +38,7 @@ async def create_shop(
         with open(save_path, "wb") as f:
             f.write(await logo.read())
 
-        logo_url = f"{request.base_url}static/uploads/{unique_filename}"  # Генерация полного URL
+        logo_url = unique_filename
     else:
         logo_url = None
 
@@ -57,7 +57,6 @@ async def create_shop(
 def get_shops(
     request: Request, user: dict = Depends(get_current_user), db: Session = Depends(get_db)
 ):
-    print("GET /shops accessed")
     shops = db.query(Shop).all()
     if not shops:
         raise HTTPException(status_code=404, detail="Нет магазинов")
@@ -73,9 +72,28 @@ def get_shops(
         for shop in shops
     ]
 
+@router.get("/subdomain", response_model=ShopResponse)
+def get_shop_by_id(
+    request: Request, db: Session = Depends(get_db)
+):
+    host = request.headers.get("host", "")
+    subdomain = host.split(".")[0]
+    
+    shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
+    if not shop:
+        raise HTTPException(status_code=404, detail="Магазин не найден")
+    
+    base_url = str(request.base_url)
+    return ShopResponse(
+        id=shop.id,
+        subdomain=shop.subdomain,
+        primary_color=shop.primary_color,
+        logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None,
+    )
+
 @router.get("/{shop_id}", response_model=ShopResponse)
-def get_shop(
-    shop_id: int, request: Request, user: dict = Depends(get_current_user), db: Session = Depends(get_db)
+def get_shop_by_id(
+    shop_id: int, request: Request, db: Session = Depends(get_db)
 ):
     shop = db.query(Shop).filter(Shop.id == shop_id).first()
     if not shop:
@@ -94,7 +112,7 @@ async def update_shop(
     shop_id: int,
     user: dict = Depends(get_current_user),
     subdomain: str = Form(...),
-    primary_color: str = Form(...),
+    color: str = Form(...),
     logo: Optional[UploadFile] = None,
     db: Session = Depends(get_db),
 ):
@@ -103,7 +121,7 @@ async def update_shop(
         raise HTTPException(status_code=404, detail="Магазин не найден")
 
     shop.subdomain = subdomain
-    shop.primary_color = primary_color
+    shop.primary_color = color
 
     if logo:
         file_extension = logo.filename.split(".")[-1]
@@ -132,6 +150,7 @@ def delete_shop(shop_id: int, user: dict = Depends(get_current_user), db: Sessio
 
 @router.get("/{shop_id}/products", response_model=list[ProductResponse])
 def get_products(
+    request: Request,
     shop_id: int,
     db: Session = Depends(get_db),
     user: dict = Depends(get_current_user)
@@ -140,6 +159,7 @@ def get_products(
     if not products:
         raise HTTPException(status_code=404, detail="Продукты не найдены")
     
+    base_url = str(request.base_url)
     return [
         ProductResponse(
             id=product.id,
@@ -147,7 +167,7 @@ def get_products(
             price=product.price,
             description=product.description,
             ingredients=product.ingredients,
-            photo_url=product.photo_url if product.photo_url else None
+            photo_url=f"{base_url}static/uploads/{product.photo_url}" if product.photo_url else None
         )
         for product in products
     ]
@@ -203,7 +223,7 @@ async def create_product(
             f.write(await image.read())
 
         # Генерация URL для сохраненного файла
-        photo_url = f"/static/uploads/{unique_filename}"
+        photo_url = unique_filename
     else:
         photo_url = None
 
@@ -257,7 +277,7 @@ async def update_product(
         with open(save_path, "wb") as f:
             f.write(await image.read())
 
-        product.photo_url = f"{request.base_url}static/uploads/{unique_filename}"
+        product.photo_url = unique_filename
 
     db.commit()
     db.refresh(product)

@@ -15,7 +15,7 @@ def get_categories(request: Request, db: Session = Depends(get_db)):
             id=category.id,
             name=category.name,
             value=category.value,  # Добавляем поле value
-            image_url=f"{base_url}static/categories/{category.value}"
+            imageUrl=f"{base_url}static/categories/{category.value}"
         )
         for category in categories
     ]

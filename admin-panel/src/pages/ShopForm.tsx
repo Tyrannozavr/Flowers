@@ -2,26 +2,41 @@ import { Box, Button, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchShop, updateShop } from "../api/shops";
+import { createShop, fetchShop, updateShop } from "../api/shops";
 
 const ShopForm: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const isEdit = !!id;
     const [subdomain, setSubdomain] = useState("");
     const [primaryColor, setPrimaryColor] = useState("#FFFFFF");
     const [logo, setLogo] = useState<File | null>(null);
 
-    const { data: shop, isLoading } = useQuery(["shop", id], () => fetchShop(Number(id)), {
-        enabled: !!id,
+    useQuery(["shop", id], () => fetchShop(Number(id)), {
+        retry: false,
+        enabled: isEdit,
         onSuccess: (data) => {
             setSubdomain(data.subdomain);
             setPrimaryColor(data.primary_color || "#FFFFFF");
         },
     });
 
-    const mutation = useMutation(
-        (formData: FormData) => updateShop(Number(id), formData),
+    // Мутация для создания нового магазина
+    const createMutation = useMutation(
+        (formData: FormData) => createShop(formData),
+        {
+            onSuccess: () => {
+                queryClient.invalidateQueries("shops");
+                navigate("/shops");
+            },
+        }
+    );
+
+    // Мутация для обновления существующего магазина
+    const updateMutation = useMutation(
+        ({ formData, shopId }: { formData: FormData; shopId: number }) =>
+            updateShop(shopId, formData),
         {
             onSuccess: () => {
                 queryClient.invalidateQueries("shops");
@@ -33,19 +48,27 @@ const ShopForm: React.FC = () => {
     const handleSave = async () => {
         const formData = new FormData();
         formData.append("subdomain", subdomain);
-        formData.append("primary_color", primaryColor);
+        formData.append("color", primaryColor);
         if (logo) {
             formData.append("logo", logo);
         }
-        mutation.mutate(formData);
-    };
 
-    if (isLoading) return <Typography>Загрузка...</Typography>;
+        // Выводим FormData для отладки
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
+
+        if (isEdit) {
+            updateMutation.mutate({ formData, shopId: Number(id) }); // Обновление магазина
+        } else {
+            createMutation.mutate(formData); // Создание нового магазина
+        }
+    };
 
     return (
         <Box p={3}>
             <Typography variant="h4" mb={3}>
-                Редактировать магазин
+                {isEdit ? "Редактировать магазин" : "Создать магазин"}
             </Typography>
             <Box display="flex" flexDirection="column" gap={2} maxWidth="400px">
                 <TextField
@@ -77,7 +100,7 @@ const ShopForm: React.FC = () => {
                     onClick={handleSave}
                     disabled={!subdomain || !primaryColor}
                 >
-                    Сохранить изменения
+                    {isEdit ? "Сохранить изменения" : "Создать"}
                 </Button>
             </Box>
         </Box>
