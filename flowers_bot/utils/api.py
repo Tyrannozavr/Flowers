@@ -9,6 +9,7 @@ async def get_orders() -> List[dict]:
         async with httpx.AsyncClient() as client:
             response = await client.get(f"{BACKEND_API_URL}/orders/")
             response.raise_for_status()
+            return response.json()
     except Exception as e:
         logging.error("Ошибка подключения к бэкенду:", e)
 
@@ -29,3 +30,11 @@ async def update_order_status(order_id: int, status: str) -> str:
         response = await client.put(url, params=params)
         response.raise_for_status()
         return f"Статус заказа {order_id} успешно обновлен на {status}."
+
+async def get_consultations():
+    """Получает новые консультации с backend."""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{BACKEND_API_URL}/consultations/")
+        response.raise_for_status()
+        return response.json()
+    

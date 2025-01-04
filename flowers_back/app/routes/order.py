@@ -58,11 +58,11 @@ async def get_orders(db: Session = Depends(get_db)):
         for order in orders:
             order.is_sent = True
         db.commit()
-        print(orders)
         
         order_responses = [OrderResponse.from_orm(order) for order in orders]
 
         return order_responses
+    
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=f"Error retrieving orders: {str(e)}")
@@ -90,7 +90,6 @@ async def update_order_status(
     Обновляет статус заказа по ID.
     """
     try:
-        print(1, order_id, status)
         # Найти заказ по ID
         order = db.query(OrderDb).filter(OrderDb.id == order_id).first()
         if not order:

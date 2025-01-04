@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from aiogram.types import Update
 from app.bot import bot, dp
 from app.config import WEBHOOK_URL, TELEGRAM_BOT_TOKEN
-from utils.orders import send_new_orders
+from utils.orders import send_new_orders, send_new_consultations
 
 logging.basicConfig(level=logging.INFO)
 
@@ -16,6 +16,7 @@ async def on_startup():
     await bot.set_webhook(WEBHOOK_URL)
 
     asyncio.create_task(send_new_orders())
+    asyncio.create_task(send_new_consultations())
 
 @app.on_event("shutdown")
 async def on_shutdown():

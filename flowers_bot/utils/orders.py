@@ -1,9 +1,9 @@
 import asyncio
 import logging
-from app.bot import bot
-from utils.api import get_orders
-from app.config import TG_USER_IDS
 from typing import List
+from app.bot import bot
+from utils.api import get_orders, get_consultations
+from app.config import TG_USER_IDS
 
 TELEGRAM_MESSAGE_LIMIT = 4096
 
@@ -30,34 +30,28 @@ async def send_new_orders():
     while True:
         try:
             orders = await get_orders()
-            print(orders)
             if orders:
                 logging.info(f"Получено новых заказов: {len(orders)}")
-
-                user_tg_ids = get_user_tg_ids()
-
                 for order in orders:
-                    for tg_id in user_tg_ids:
+                    for tg_id in TG_USER_IDS:
                         await send_order_message(tg_id, order)
         except Exception as e:
             logging.error(f"Ошибка при обработке новых заказов: {e}")
 
         await asyncio.sleep(60)
-        
+
 async def send_order_message(tg_id: int, order: dict):
     """Отправляет заказ в Telegram, разбивая его на части, если сообщение длинное."""
     message = format_order_message(order)
     parts = split_message(message)
-
     for part in parts:
         await bot.send_message(chat_id=tg_id, text=part)
-        
+
 def format_order_message(order: dict) -> str:
     """Форматирует заказ для отправки в Telegram."""
     items = "\n".join(
         [f"- {item['name']} (x{item['quantity']}): {item['price']} ₽" for item in order["items"]]
     )
-    
     return (
         f"📦 Новый заказ:\n"
         f"🆔 ID: {order['id']}\n"
@@ -76,6 +70,33 @@ def format_order_message(order: dict) -> str:
         f"🟢 Статус: {order['status']}\n"
     )
 
-def get_user_tg_ids() -> list:
-    """Возвращает список Telegram ID пользователей для уведомления."""
-    return TG_USER_IDS
+async def send_new_consultations():
+    """Фоновая задача для получения новых консультаций и отправки их пользователям."""
+    while True:
+        try:
+            consultations = await get_consultations()
+            if consultations:
+                logging.info(f"Получено новых консультаций: {len(consultations)}")
+                for consultation in consultations:
+                    for tg_id in TG_USER_IDS:
+                        await send_consultation_message(tg_id, consultation)
+        except Exception as e:
+            logging.error(f"Ошибка при обработке новых консультаций: {e}")
+
+        await asyncio.sleep(60)
+
+async def send_consultation_message(tg_id: int, consultation: dict):
+    """Отправляет консультацию в Telegram, разбивая её на части, если сообщение длинное."""
+    message = format_consultation_message(consultation)
+    parts = split_message(message)
+    for part in parts:
+        await bot.send_message(chat_id=tg_id, text=part)
+
+def format_consultation_message(consultation: dict) -> str:
+    """Форматирует консультацию для отправки в Telegram."""
+    return (
+        f"📝 Новая консультация:\n"
+        f"🆔 ID: {consultation['id']}\n"
+        f"👤 Имя: {consultation['full_name']}\n"
+        f"📞 Телефон: {consultation['phone_number']}\n"
+    )

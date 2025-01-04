@@ -18,7 +18,7 @@ class ConsultationResponse(BaseModel):
     is_sent: bool
  
     class Config:
-        orm_mode = True
+        from_attributes=True
 
 @router.post("/", response_model=ConsultationResponse)
 def create_consultation(consultation_data: ConsultationCreate, db: Session = Depends(get_db)):
@@ -33,7 +33,7 @@ def create_consultation(consultation_data: ConsultationCreate, db: Session = Dep
 def get_unsent_consultations(db: Session = Depends(get_db)):
     """Получает все консультации с is_sent = False и обновляет их статус."""
     consultations = db.query(Consultation).filter(Consultation.is_sent == False).all()
-    
+
     if not consultations:
         return []
 
@@ -41,4 +41,5 @@ def get_unsent_consultations(db: Session = Depends(get_db)):
         consultation.is_sent = True
     db.commit()
     
-    return consultations
+    order_responses = [ConsultationResponse.from_orm(consultation) for consultation in consultations]
+    return order_responses
