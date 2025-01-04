@@ -1,7 +1,8 @@
 import axios from "axios";
 
+console.log(import.meta.env.VITE_BASE_URL_DEV);
 const instance = axios.create({
-    baseURL: "http://localhost:8000",
+    baseURL: import.meta.env.VITE_BASE_URL_DEV,
     headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
         "Content-Type": "application/json",
