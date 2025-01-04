@@ -12,8 +12,8 @@ interface IShop {
 
 export const fetchShop = async (): Promise<ThemeData> => {
     try {
-        const response = await axios.get(`/shops/subdomain`);
-        const data: IShop = response.data;
+        const response = await axios.get<IShop>(`/shops/subdomain`);
+        const data= response.data;
 
         return {
             accentColor: data.primary_color,
