@@ -1,8 +1,8 @@
-"""Add is_sent field to Consultation
+"""init
 
-Revision ID: e0b9d692bbbb
-Revises: 25537d243566
-Create Date: 2025-01-04 17:16:34.934525
+Revision ID: 85a62336a1c5
+Revises: 
+Create Date: 2025-01-15 16:17:14.274693
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'e0b9d692bbbb'
-down_revision: Union[str, None] = '25537d243566'
+revision: str = '85a62336a1c5'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

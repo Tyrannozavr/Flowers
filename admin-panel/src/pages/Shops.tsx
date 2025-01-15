@@ -31,6 +31,16 @@ const Shops: React.FC = () => {
 
     return (
         <Box p={3}>
+            {/* Back Button */}
+            <Button
+                variant="outlined"
+                color="secondary"
+                sx={{ mb: 3 }}
+                onClick={() => navigate("/")}
+            >
+                Назад
+            </Button>
+
             <Typography variant="h4" mb={3}>
                 Магазины
             </Typography>
@@ -63,6 +73,12 @@ const Shops: React.FC = () => {
                             <CardContent>
                                 <Typography variant="h6">
                                     {shop.subdomain}
+                                </Typography>
+                                <Typography variant="h6">
+                                    <a
+                                        className="text-black"
+                                        href={`https://${shop.subdomain}.flourum.ru`}
+                                    >{`https://${shop.subdomain}.flourum.ru`}</a>
                                 </Typography>
                                 <Typography
                                     variant="body2"

@@ -36,7 +36,6 @@ const ShopDetails: React.FC = () => {
     );
     
     const handleDeleteProduct = (productId: number) => {
-        console.log("Удаляем продукт с ID:", productId);
         deleteMutation.mutate({ shopId: Number(id), productId });
     };
     
@@ -45,7 +44,6 @@ const ShopDetails: React.FC = () => {
     };
 
     const handleEditProduct = (productId: number) => {
-        console.log(productId);
         navigate(`/shops/${id}/products/${productId}`);
     };
 

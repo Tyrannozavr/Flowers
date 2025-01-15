@@ -2,6 +2,7 @@ import { Box, Button, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { createShop, fetchShop, updateShop } from "../api/shops";
 
 const ShopForm: React.FC = () => {
@@ -29,6 +30,9 @@ const ShopForm: React.FC = () => {
                 queryClient.invalidateQueries("shops");
                 navigate("/shops");
             },
+            onError: (error: any) => {
+                toast.error(`Не удалось создать магазин: ${error.response.data.detail}`);
+            },
         }
     );
 
@@ -39,6 +43,9 @@ const ShopForm: React.FC = () => {
             onSuccess: () => {
                 queryClient.invalidateQueries("shops");
                 navigate("/shops");
+            },
+            onError: (error: any) => {
+                toast.error(`Не удалось обновить магазин: ${error.response.data.detail}`);
             },
         }
     );
@@ -51,15 +58,10 @@ const ShopForm: React.FC = () => {
             formData.append("logo", logo);
         }
 
-        // Выводим FormData для отладки
-        for (const [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-        }
-
         if (isEdit) {
-            updateMutation.mutate({ formData, shopId: Number(id) }); // Обновление магазина
+            updateMutation.mutate({ formData, shopId: Number(id) });
         } else {
-            createMutation.mutate(formData); // Создание нового магазина
+            createMutation.mutate(formData);
         }
     };
 

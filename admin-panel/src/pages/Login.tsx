@@ -15,9 +15,8 @@ const Login: React.FC = () => {
                 username,
                 password,
             });
-            console.log("object");
             localStorage.setItem("token", response.data.access_token);
-            navigate("/shops");
+            navigate("/");
         } catch (err) {
             setError("Неверные данные для входа");
         }

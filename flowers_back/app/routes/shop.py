@@ -3,19 +3,19 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.shop import Shop
+from app.models.user import User
 from app.models.product import Product
 from app.schemas.shop import ShopResponse
 from app.schemas.product import ProductResponse
 import os 
 import uuid
-from .auth import get_current_user
+from app.routes.admin import get_current_user
 
-router = APIRouter()  # Перенесено в начало файла
+router = APIRouter() 
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# для админа
 @router.post("/", response_model=ShopResponse)
 async def create_shop(
     request: Request,
@@ -23,8 +23,17 @@ async def create_shop(
     subdomain: str = Form(...),
     color: str = Form(...),
     logo: UploadFile = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    security=[{"BearerAuth": []}]
 ):
+    find_user = db.query(User).filter(User.id == user.id).first()
+    
+    if not find_user: 
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    
+    if find_user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено создавать новые магазины")
+    
     existing_shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
     if existing_shop:
         raise HTTPException(status_code=400, detail="Поддомен уже существует")
@@ -45,7 +54,8 @@ async def create_shop(
     new_shop = Shop(
         subdomain=subdomain,
         primary_color=color,
-        logo_url=logo_url
+        logo_url=logo_url,
+        owner_id=find_user.id
     )
     db.add(new_shop)
     db.commit()
@@ -61,11 +71,15 @@ async def create_shop(
 
 @router.get("/", response_model=list[ShopResponse])
 def get_shops(
-    request: Request, user: dict = Depends(get_current_user), db: Session = Depends(get_db)
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
-    shops = db.query(Shop).all()
+    print(current_user.id, current_user.username)
+    shops = db.query(Shop).filter(Shop.owner_id == current_user.id).all()
+    
     if not shops:
-        raise HTTPException(status_code=404, detail="Нет магазинов")
+        raise HTTPException(status_code=404, detail="Нет магазинов для данного пользователя")
 
     base_url = str(request.base_url)
     return [
@@ -79,7 +93,7 @@ def get_shops(
     ]
 
 @router.get("/subdomain", response_model=ShopResponse)
-def get_shop_by_id(
+def get_shop_by_domain(
     request: Request, db: Session = Depends(get_db)
 ):
     subdomain = request.headers.get("X-Subdomain")
@@ -123,6 +137,14 @@ async def update_shop(
     logo: Optional[UploadFile] = None,
     db: Session = Depends(get_db),
 ):
+    find_user = db.query(User).filter(User.id == user.id).first()
+    
+    if not find_user: 
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    
+    if find_user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено обновлять магазины")
+    
     shop = db.query(Shop).filter(Shop.id == shop_id).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
@@ -145,6 +167,14 @@ async def update_shop(
 
 @router.delete("/{shop_id}")
 def delete_shop(shop_id: int, user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    find_user = db.query(User).filter(User.id == user.id).first()
+    
+    if not find_user: 
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    
+    if find_user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено удалять магазины")
+    
     shop = db.query(Shop).filter(Shop.id == shop_id).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
@@ -211,30 +241,32 @@ async def create_product(
     ingredients: str = Form(""),
     image: UploadFile = None,
     db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
-    # Преобразуем цену в число
+    find_user = db.query(User).filter(User.id == user.id).first()
+    
+    if not find_user: 
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    
+    if find_user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено создавать новые продукты")
+    
     price = int(price, 10)
     
-    # Обработка изображения
     if image:
-        # Проверяем и создаем директорию, если она не существует
         os.makedirs("static/uploads", exist_ok=True)
 
-        # Генерация уникального имени файла
         file_extension = image.filename.split(".")[-1]
         unique_filename = f"{uuid.uuid4()}.{file_extension}"
         save_path = os.path.join(UPLOAD_DIR, unique_filename)
         
-        # Сохранение файла
         with open(save_path, "wb") as f:
             f.write(await image.read())
 
-        # Генерация URL для сохраненного файла
         photo_url = unique_filename
     else:
         photo_url = None
 
-    # Создание нового продукта
     new_product = Product(
         shop_id=shop_id,
         name=name,
@@ -263,6 +295,14 @@ async def update_product(
     db: Session = Depends(get_db),
     user: dict = Depends(get_current_user)
 ):
+    find_user = db.query(User).filter(User.id == user.id).first()
+    
+    if not find_user: 
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    
+    if find_user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено создавать обновлять продукты")
+    
     price = int(price, 10)
     product = db.query(Product).filter(
         Product.shop_id == shop_id, Product.id == product_id
@@ -297,6 +337,14 @@ def delete_product(
     db: Session = Depends(get_db),
     user: dict = Depends(get_current_user)
 ):
+    find_user = db.query(User).filter(User.id == user.id).first()
+    
+    if not find_user: 
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    
+    if find_user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено удалять продукты")
+    
     product = db.query(Product).filter(
         Product.shop_id == shop_id, Product.id == product_id
     ).first()

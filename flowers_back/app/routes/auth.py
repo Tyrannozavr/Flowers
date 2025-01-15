@@ -1,25 +1,25 @@
-from fastapi import APIRouter, HTTPException, status, Header
+from fastapi import APIRouter, HTTPException, status, Depends, Header
 from datetime import datetime, timedelta
 import jwt
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from app.core.config import settings
+from app.models.user import User
+from sqlalchemy.orm import Session 
+from app.core.database import get_db
+from app.core.security import verify_password  
 
 load_dotenv()
 
 router = APIRouter()
-
 class Token(BaseModel):
     access_token: str
-    token_type: str
-
 
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(days=settings.TOKEN_EXPIRY_DAYS)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
-
 
 def decode_token(token: str):
     try:
@@ -41,8 +41,11 @@ def decode_token(token: str):
             detail="Invalid authentication credentials",
         )
 
+class LoginSchema(BaseModel):
+    username: str
+    password: str
 
-@router.get("/auth/check")
+@router.get("/check")
 async def get_current_user(authorization: str = Header(None)):
     if not authorization:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization header missing")
@@ -54,14 +57,16 @@ async def get_current_user(authorization: str = Header(None)):
     return {"message": "Authenticated"}
 
 
-class LoginSchema(BaseModel):
-    username: str
-    password: str
+@router.post("/login", response_model=Token)
+async def login(form_data: LoginSchema, db: Session = Depends(get_db)):
+    find_user = db.query(User).filter(User.username == form_data.username).first()
 
-
-@router.post("/auth/login", response_model=Token)
-async def login(form_data: LoginSchema):
-    if form_data.username != settings.ADMIN_USERNAME or form_data.password != settings.ADMIN_PASSWORD:
+    if not find_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    print(form_data.password, find_user.password)
+    if not verify_password(form_data.password, find_user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    access_token = create_access_token({"username": form_data.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    access_token = create_access_token({"username": form_data.username, "id": find_user.id})
+    return {"access_token": access_token}

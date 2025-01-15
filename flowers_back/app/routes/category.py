@@ -6,7 +6,7 @@ from app.schemas.category import CategoryResponse
 
 router = APIRouter()
 
-@router.get("/categories", response_model=list[CategoryResponse])
+@router.get("/", response_model=list[CategoryResponse])
 def get_categories(request: Request, db: Session = Depends(get_db)):
     base_url = str(request.base_url)
     categories = db.query(Category).all()
@@ -14,7 +14,7 @@ def get_categories(request: Request, db: Session = Depends(get_db)):
         CategoryResponse(
             id=category.id,
             name=category.name,
-            value=category.value,  # Добавляем поле value
+            value=category.value,
             imageUrl=f"{base_url}static/categories/{category.value}"
         )
         for category in categories

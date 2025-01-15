@@ -38,3 +38,9 @@ async def get_consultations():
         response.raise_for_status()
         return response.json()
     
+async def get_admin_by_shop_id(shop_id: int):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{BACKEND_API_URL}/admins/shop/{shop_id}")
+        response.raise_for_status()
+        return response.json()
+    

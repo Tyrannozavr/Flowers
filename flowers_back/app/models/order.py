@@ -30,6 +30,9 @@ class Order(Base):
     status = Column(Enum(OrderStatus), default=OrderStatus.NOT_PAID)  
     is_sent = Column(Boolean, default=False)
     
+    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False) 
+    shop = relationship("Shop", back_populates="orders")
+    
     items = relationship("OrderItem", back_populates="order")
 
 

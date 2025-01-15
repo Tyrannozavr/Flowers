@@ -1,5 +1,6 @@
-from sqlalchemy import Column, String, Integer, Boolean
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
 from app.core.database import Base
+from sqlalchemy.orm import relationship
 
 class Consultation(Base):
     __tablename__ = "consultations"
@@ -8,3 +9,7 @@ class Consultation(Base):
     full_name = Column(String, nullable=False)
     phone_number = Column(String, nullable=False)
     is_sent = Column(Boolean, default=False)
+    
+    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False) 
+    shop = relationship("Shop", back_populates="consultations")
+    

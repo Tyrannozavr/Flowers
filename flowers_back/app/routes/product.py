@@ -19,19 +19,15 @@ def get_products_by_subdomain_with_filtering_and_pagination(
     if not subdomain:
         raise HTTPException(status_code=400, detail="Subdomain header is required")
     
-    # Проверяем, существует ли магазин
     shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
 
-    # Базовый запрос
     query = db.query(Product).filter(Product.shop_id == shop.id)
 
-    # Фильтрация по категории, если указано
     if category_id:
         query = query.filter(Product.category_id == category_id)
 
-    # Пагинация
     total_products = query.count()
     query = query.offset((page - 1) * per_page).limit(per_page)
     products = query.all()

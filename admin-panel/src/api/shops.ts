@@ -11,7 +11,6 @@ export const fetchShop = async (id: number) => {
 };
 
 export const createShop = async (formData: FormData) => {
-    console.log("Sending FormData:", [...formData.entries()]); // Лог для отладки
     const response = await axios.post("/shops", formData, {
         headers: {
             "Content-Type": "multipart/form-data",

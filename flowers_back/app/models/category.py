@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Integer
 from app.core.database import Base
-import uuid
 
 class Category(Base):
     __tablename__ = "categories"

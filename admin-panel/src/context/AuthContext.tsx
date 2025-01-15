@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         try {
-            await axios.get("/auth/check", {
+            await axios.get("/admins/me", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setIsAuthenticated(true);

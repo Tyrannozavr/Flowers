@@ -16,7 +16,7 @@ from alembic import context
 
 # Импортируйте модели и базу
 from app.core.database import Base
-from app.models import product, shop, order, category
+from app.models import product, shop, order, category, user, consultation
 
 
 # Настройка URL подключения к БД

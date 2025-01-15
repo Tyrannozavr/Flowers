@@ -1,17 +1,25 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from app.schemas.order import Order, OrderStatus, OrderResponse
 from app.models.order import Order as OrderDb
+from app.models.shop import Shop 
 from app.models.order import OrderItem as OrderItemDb
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db  
 from typing import List
 
 router = APIRouter()
 
 @router.post("/")
-async def create_order(order: Order, db: Session = Depends(get_db)):
+async def create_order(request: Request, order: Order, db: Session = Depends(get_db)):
     try:
-        # Создание записи заказа
+        subdomain = request.headers.get("X-Subdomain")
+        if not subdomain:
+            raise HTTPException(status_code=400, detail="Subdomain header is required")
+        
+        shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
+        if not shop:
+            raise HTTPException(status_code=404, detail="Магазин не найден")
+        
         db_order = OrderDb(
             full_name=order.fullName,
             phone_number=order.phoneNumber,
@@ -28,6 +36,7 @@ async def create_order(order: Order, db: Session = Depends(get_db)):
             wishes=order.wishes,
             card_text=order.cardText,
             is_self_pickup=order.isSelfPickup,
+            shop_id=shop.id
         )
         db.add(db_order)
         db.commit()
@@ -58,11 +67,10 @@ async def get_orders(db: Session = Depends(get_db)):
         for order in orders:
             order.is_sent = True
         db.commit()
-        
+
         order_responses = [OrderResponse.from_orm(order) for order in orders]
 
         return order_responses
-    
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=f"Error retrieving orders: {str(e)}")
@@ -90,12 +98,10 @@ async def update_order_status(
     Обновляет статус заказа по ID.
     """
     try:
-        # Найти заказ по ID
         order = db.query(OrderDb).filter(OrderDb.id == order_id).first()
         if not order:
             raise HTTPException(status_code=404, detail=f"Order with ID {order_id} not found")
 
-        # Обновить статус заказа
         order.status = status
         db.commit()
         db.refresh(order)
