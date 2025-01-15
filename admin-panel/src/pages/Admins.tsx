@@ -36,7 +36,8 @@ const Admins: React.FC = () => {
         isLoading: isAdminsLoading,
         isError,
     } = useQuery("admins", fetchAdmins, {
-        enabled: currentUser?.is_superadmin, // Only fetch if superadmin
+        enabled: currentUser?.is_superadmin,
+        retry: false,
     });
 
     const deactivateMutation = useMutation(deactivateAdmin, {
