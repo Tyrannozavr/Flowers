@@ -3,9 +3,24 @@ import axios from "axios";
 const instance = axios.create({
     baseURL: import.meta.env.VITE_BASE_URL_DEV,
     headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
         "Content-Type": "application/json",
     },
 });
 
-export default instance;
+instance.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+});
+
+const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    instance.defaults.headers["Authorization"] = "";
+
+    window.location.reload();
+};
+
+export { instance, handleLogout };

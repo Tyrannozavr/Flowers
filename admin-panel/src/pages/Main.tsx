@@ -1,15 +1,10 @@
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { handleLogout } from "../api/axios";
 
 const Main: React.FC = () => {
     const navigate = useNavigate();
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-
-        navigate("/auth");
-    };
 
     return (
         <Box p={3}>

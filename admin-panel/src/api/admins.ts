@@ -1,4 +1,4 @@
-import axios from "./axios";
+import { instance as axios } from "./axios";
 
 export const fetchAdmins = async () => {
     const { data } = await axios.get("/admins/");

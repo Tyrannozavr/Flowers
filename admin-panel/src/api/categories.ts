@@ -1,4 +1,4 @@
-import axios from "./axios";
+import { instance as axios } from "./axios";
 
 export const fetchCategories = async () => {
     const response = await axios.get(`/categories`);

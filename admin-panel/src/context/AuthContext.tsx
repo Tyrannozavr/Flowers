@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../api/axios";
+import { instance as axios } from "../api/axios";
 
 interface AuthContextType {
     isAuthenticated: boolean;

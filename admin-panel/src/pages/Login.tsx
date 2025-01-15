@@ -1,7 +1,7 @@
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../api/axios";
-import { Box, Button, TextField, Typography, Alert } from "@mui/material";
+import { instance as axios } from "../api/axios";
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState("");
