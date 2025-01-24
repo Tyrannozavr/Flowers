@@ -1,8 +1,16 @@
 import { instance as axios } from "./axios";
 
 export const fetchProducts = async (shopId: number) => {
-    const response = await axios.get(`/shops/${shopId}/products`);
-    return response.data;
+    try {
+        const response = await axios.get(`/shops/${shopId}/products`);
+        return response.data;
+    } catch (error: any) {
+        if (error.response && error.response.status === 404) {
+            console.log("Продукты не найдены, возвращаем пустой список.");
+            return [];
+        }
+        throw error;
+    }
 };
 
 export const fetchProduct = async (shopId: number, productId: number) => {

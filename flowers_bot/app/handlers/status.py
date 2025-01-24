@@ -6,7 +6,6 @@ from app.keyboards import get_main_menu, get_status_menu
 
 router = Router()
 
-# Словарь для отслеживания контекста пользователя (какое действие выполняется)
 user_context = {}
 order_id_to_update = {}
 
@@ -28,7 +27,7 @@ async def ask_order_id(message: types.Message):
         reply_markup=ReplyKeyboardRemove()
     )
 
-@router.message(lambda message: message.text.isdigit())
+@router.message(lambda message: user_context.get(message.from_user.id) == "update_status" and message.text.isdigit())
 async def ask_new_status(message: types.Message):
     """Запрашивает новый статус для указанного ID заказа."""
     global order_id_to_update

@@ -11,6 +11,3 @@ BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://127.0.0.1:8000")
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST", "https://example.com")
 WEBHOOK_PATH = f"/webhook/{TELEGRAM_BOT_TOKEN}"
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
-TG_USER_IDS = list(map(int, os.getenv("TG_USER_IDS", "").split(",")))
-if not TG_USER_IDS:
-    raise ValueError("TG_USER_IDS не задан в .env файле")

@@ -17,28 +17,34 @@ const ShopDetails: React.FC = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
-    const {
-        data: products,
-        isLoading: isLoadingProducts,
-    } = useQuery(["products", id], () => fetchProducts(Number(id)), {
-        retry: false,
-        onError: (error) => {
-            console.error("Ошибка при загрузке продуктов:", error);
-        },
-    });
+    const { data: products, isLoading: isLoadingProducts } = useQuery(
+        ["products", id],
+        () => fetchProducts(Number(id)),
+        {
+            retry: false,
+            onError: (error) => {
+                console.error("Ошибка при загрузке продуктов:", error);
+            },
+        }
+    );
 
     const deleteMutation = useMutation(
         ({ shopId, productId }: { shopId: number; productId: number }) =>
             deleteProduct(shopId, productId),
         {
-            onSuccess: () => queryClient.invalidateQueries(["products", id]),
+            onSuccess: () => {
+                console.log("Продукт удален, обновляем список...");
+                queryClient.invalidateQueries(["products", id]);
+                console.log("Кэш обновлен для магазина:", id);
+            },
         }
     );
-    
+
     const handleDeleteProduct = (productId: number) => {
+        console.log("Удаляем продукт с ID:", productId);
         deleteMutation.mutate({ shopId: Number(id), productId });
     };
-    
+
     const handleAddProduct = () => {
         navigate(`/shops/${id}/products/new`);
     };

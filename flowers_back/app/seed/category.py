@@ -5,7 +5,6 @@ def seed_categories(db: Session):
     categories = [
         {"name": "Популярное", "value": "popular.jpeg"},
         {"name": "Витрина онлайн", "value": "online_showcase.jpeg"},
-        {"name": "Новый год", "value": "new_year.jpg"},
         {"name": "Авторские букеты", "value": "authored_bouquets.jpg"},
         {"name": "Монобукеты", "value": "mono_bouquets.jpeg"},
         {"name": "Композиции", "value": "compositions.jpeg"},

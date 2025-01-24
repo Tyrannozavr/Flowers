@@ -27,6 +27,7 @@ async def create_order(request: Request, order: Order, db: Session = Depends(get
             recipient_phone=order.recipientPhone,
             city=order.city,
             street=order.street,
+            status=OrderStatus.NOT_PAID,
             house=order.house,
             building=order.building,
             apartment=order.apartment,

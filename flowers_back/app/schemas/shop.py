@@ -19,3 +19,10 @@ class ShopResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class OwnerShopResponse(BaseModel):
+    id: int
+    subdomain: str
+
+    class Config:
+        orm_mode = True
