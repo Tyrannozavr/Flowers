@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request
 from sqlalchemy.orm import Session
@@ -5,11 +6,12 @@ from app.core.database import get_db
 from app.models.shop import Shop
 from app.models.user import User
 from app.models.product import Product
-from app.schemas.shop import ShopResponse
+from app.schemas.shop import ShopResponse, OwnerShopResponse
 from app.schemas.product import ProductResponse
 import os 
 import uuid
 from app.routes.admin import get_current_user
+from sqlalchemy import text
 
 router = APIRouter() 
 
@@ -92,6 +94,23 @@ def get_shops(
         for shop in shops
     ]
 
+@router.get("/user/{telegram_id}", response_model=list[OwnerShopResponse])
+async def get_by_owner(telegram_id: str, request: Request, db: Session = Depends(get_db)):
+    user_id = get_user_id_by_tg_id(telegram_id, db)
+
+    shops = db.query(Shop).filter(Shop.owner_id == user_id).all()
+
+    if not shops:
+        logging.error("No shops found for this user: " + telegram_id)
+        raise HTTPException(status_code=404, detail="No shops found for this user")
+
+    return [
+        OwnerShopResponse(
+            id=shop.id,
+            subdomain=shop.subdomain
+        ) for shop in shops
+    ]
+
 @router.get("/subdomain", response_model=ShopResponse)
 def get_shop_by_domain(
     request: Request, db: Session = Depends(get_db)
@@ -138,10 +157,10 @@ async def update_shop(
     db: Session = Depends(get_db),
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
-    
-    if not find_user: 
+
+    if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    
+
     if find_user.is_removed:
         raise HTTPException(status_code=403, detail="Пользователю запрещено обновлять магазины")
     
@@ -282,6 +301,69 @@ async def create_product(
 
     return new_product
 
+def get_user_id_by_tg_id(user_tg_id: str, db: Session):
+    user = db.execute(
+        text('''
+                    SELECT * FROM Users u
+                    WHERE u.telegram_ids @> :telegram_id
+                '''),
+        {"telegram_id": f'["{user_tg_id}"]'}
+    ).fetchone()
+    print(user)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден! Видимо вам запрещено создавать продукты")
+
+    if user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено создавать новые продукты")
+
+    return user.id
+
+@router.post("/telegram/{shop_id}/products", response_model=ProductResponse)
+async def create_product_from_telegram(
+        shop_id: int,
+        name: str = Form(...),
+        price: str = Form(...),
+        category_id: int = Form(...),
+        description: str = Form(""),
+        ingredients: str = Form(""),
+        image: UploadFile = None,
+        user_tg_id: str = Form(...),
+        db: Session = Depends(get_db)
+):
+    get_user_id_by_tg_id(user_tg_id, db)
+
+    price = int(price, 10)
+
+    if image:
+        os.makedirs("static/uploads", exist_ok=True)
+
+        file_extension = image.filename.split(".")[-1]
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        save_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        with open(save_path, "wb") as f:
+            f.write(await image.read())
+
+        photo_url = unique_filename
+    else:
+        photo_url = None
+
+    new_product = Product(
+        shop_id=shop_id,
+        name=name,
+        price=price,
+        category_id=category_id,
+        description=description,
+        ingredients=ingredients,
+        photo_url=photo_url,
+    )
+    db.add(new_product)
+    db.commit()
+    db.refresh(new_product)
+
+    return new_product
+
 @router.put("/{shop_id}/products/{product_id}", response_model=ProductResponse)
 async def update_product(
     request: Request,
@@ -330,27 +412,44 @@ async def update_product(
     db.refresh(product)
     return product
 
+
 @router.delete("/{shop_id}/products/{product_id}")
 def delete_product(
-    shop_id: int,
-    product_id: int,
-    db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+        shop_id: int,
+        product_id: int,
+        db: Session = Depends(get_db),
+        user: dict = Depends(get_current_user)
 ):
+    # Проверка пользователя
     find_user = db.query(User).filter(User.id == user.id).first()
-    
-    if not find_user: 
+
+    if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    
+
     if find_user.is_removed:
         raise HTTPException(status_code=403, detail="Пользователю запрещено удалять продукты")
-    
+
+    # Проверка продукта
     product = db.query(Product).filter(
         Product.shop_id == shop_id, Product.id == product_id
     ).first()
     if not product:
         raise HTTPException(status_code=404, detail="Продукт не найден")
 
+    # Удаление файла изображения
+    if product.photo_url:
+        file_path = os.path.join(UPLOAD_DIR, product.photo_url)
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Файл {file_path} успешно удален.")
+            else:
+                print(f"Файл {file_path} не найден, возможно, он уже был удален.")
+        except Exception as e:
+            print(f"Ошибка при удалении файла {file_path}: {e}")
+            raise HTTPException(status_code=500, detail="Ошибка при удалении файла продукта")
+
+    # Удаление продукта из базы данных
     db.delete(product)
     db.commit()
     return {"detail": "Продукт удален"}
