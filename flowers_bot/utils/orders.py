@@ -3,7 +3,6 @@ import logging
 from typing import List
 from app.bot import bot
 from utils.api import get_orders, get_consultations, get_admin_by_shop_id
-from app.config import TG_USER_IDS
 
 TELEGRAM_MESSAGE_LIMIT = 4096
 
