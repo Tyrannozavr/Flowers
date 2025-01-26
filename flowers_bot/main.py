@@ -13,7 +13,8 @@ app = FastAPI()
 @app.on_event("startup")
 async def on_startup():
     logging.info(f"Установка вебхука: {WEBHOOK_URL}")
-    await bot.set_webhook(WEBHOOK_URL)
+    result = await bot.set_webhook(WEBHOOK_URL, allowed_updates=["message", "callback_query"])
+    logging.info(f"Результат установки вебхука: {result}")
 
     asyncio.create_task(send_new_orders())
     asyncio.create_task(send_new_consultations())
