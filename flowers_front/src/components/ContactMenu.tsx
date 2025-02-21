@@ -3,9 +3,10 @@ import { BsTelegram, BsWhatsapp } from "react-icons/bs";
 
 type Props = {
     isMobile: boolean;
+    phone: string;
 };
 
-const ContactMenu: FC<Props> = ({ isMobile }) => {
+const ContactMenu: FC<Props> = ({ isMobile, phone }) => {
     return (
         <div
             className={`text-sm ${
@@ -21,8 +22,8 @@ const ContactMenu: FC<Props> = ({ isMobile }) => {
                 }`}
             >
                 <span className="mr-2">Свяжитесь с нами:</span>
-                <a href="tel:+71234567890" className="font-bold">
-                    +7 (123) 456-78-90
+                <a href={`tel:+${phone}`} className="font-bold">
+                    +{phone}
                 </a>
             </div>
 
@@ -33,7 +34,7 @@ const ContactMenu: FC<Props> = ({ isMobile }) => {
                 }`}
             >
                 <a
-                    href="https://wa.me/71234567890"
+                    href={`https://wa.me/${phone}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:underline flex items-center space-x-2"
@@ -41,7 +42,7 @@ const ContactMenu: FC<Props> = ({ isMobile }) => {
                     <BsWhatsapp className="text-2xl" />
                 </a>
                 <a
-                    href="https://t.me/flowershop"
+                    href="https://t.me/ilyyyyaaa"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:underline flex items-center space-x-2"

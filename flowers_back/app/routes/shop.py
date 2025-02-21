@@ -24,6 +24,8 @@ async def create_shop(
     user: dict = Depends(get_current_user),
     subdomain: str = Form(...),
     color: str = Form(...),
+    inn: str = Form(...),
+    phone: str = Form(...),
     logo: UploadFile = None,
     db: Session = Depends(get_db),
     security=[{"BearerAuth": []}]
@@ -56,6 +58,8 @@ async def create_shop(
     new_shop = Shop(
         subdomain=subdomain,
         primary_color=color,
+        inn=inn,
+        phone=phone,
         logo_url=logo_url,
         owner_id=find_user.id
     )
@@ -68,6 +72,8 @@ async def create_shop(
         id=new_shop.id,
         subdomain=new_shop.subdomain,
         primary_color=new_shop.primary_color,
+        inn=new_shop.inn,
+        phone=new_shop.phone,
         logo_url=f"{base_url}static/uploads/{new_shop.logo_url}" if new_shop.logo_url else None
     )
 
@@ -89,6 +95,8 @@ def get_shops(
             id=shop.id,
             subdomain=shop.subdomain,
             primary_color=shop.primary_color,
+            inn=shop.inn,
+            phone=shop.phone,
             logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None
         )
         for shop in shops
@@ -128,6 +136,8 @@ def get_shop_by_domain(
         id=shop.id,
         subdomain=shop.subdomain,
         primary_color=shop.primary_color,
+        inn=shop.inn,
+        phone=shop.phone,
         logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None,
     )
 
@@ -144,6 +154,8 @@ def get_shop_by_id(
         id=shop.id,
         subdomain=shop.subdomain,
         primary_color=shop.primary_color,
+        inn=shop.inn,
+        phone=shop.phone,
         logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None,
     )
 
@@ -153,6 +165,8 @@ async def update_shop(
     user: dict = Depends(get_current_user),
     subdomain: str = Form(...),
     color: str = Form(...),
+    inn: str = Form(...),
+    phone: str = Form(...),
     logo: Optional[UploadFile] = None,
     db: Session = Depends(get_db),
 ):
@@ -170,6 +184,8 @@ async def update_shop(
 
     shop.subdomain = subdomain
     shop.primary_color = color
+    shop.inn = inn
+    shop.phone = phone
 
     if logo:
         file_extension = logo.filename.split(".")[-1]

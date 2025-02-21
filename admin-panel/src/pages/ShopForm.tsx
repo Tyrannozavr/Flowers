@@ -13,6 +13,8 @@ const ShopForm: React.FC = () => {
     const [subdomain, setSubdomain] = useState("");
     const [primaryColor, setPrimaryColor] = useState("#FFFFFF");
     const [logo, setLogo] = useState<File | null>(null);
+    const [phone, setPhone] = useState("");
+    const [inn, setInn] = useState("");
 
     useQuery(["shop", id], () => fetchShop(Number(id)), {
         retry: false,
@@ -20,6 +22,8 @@ const ShopForm: React.FC = () => {
         onSuccess: (data) => {
             setSubdomain(data.subdomain);
             setPrimaryColor(data.primary_color || "#FFFFFF");
+            setPhone(data.phone || "");
+            setInn(data.inn || "");
         },
     });
 
@@ -31,7 +35,9 @@ const ShopForm: React.FC = () => {
                 navigate("/shops");
             },
             onError: (error: any) => {
-                toast.error(`Не удалось создать магазин: ${error.response.data.detail}`);
+                toast.error(
+                    `Не удалось создать магазин: ${error.response.data.detail}`
+                );
             },
         }
     );
@@ -45,7 +51,9 @@ const ShopForm: React.FC = () => {
                 navigate("/shops");
             },
             onError: (error: any) => {
-                toast.error(`Не удалось обновить магазин: ${error.response.data.detail}`);
+                toast.error(
+                    `Не удалось обновить магазин: ${error.response.data.detail}`
+                );
             },
         }
     );
@@ -54,6 +62,9 @@ const ShopForm: React.FC = () => {
         const formData = new FormData();
         formData.append("subdomain", subdomain);
         formData.append("color", primaryColor);
+        formData.append("inn", inn);
+        formData.append("phone", phone);
+
         if (logo) {
             formData.append("logo", logo);
         }
@@ -85,6 +96,20 @@ const ShopForm: React.FC = () => {
                     value={primaryColor}
                     onChange={(e) => setPrimaryColor(e.target.value)}
                 />
+                <TextField
+                    label="ИНН"
+                    variant="outlined"
+                    fullWidth
+                    value={inn}
+                    onChange={(e) => setInn(e.target.value)}
+                />
+                <TextField
+                    label="Номер телефона для звонка"
+                    variant="outlined"
+                    fullWidth
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                />
                 <Button variant="contained" component="label">
                     Загрузить логотип
                     <input
@@ -98,7 +123,7 @@ const ShopForm: React.FC = () => {
                     variant="contained"
                     color="primary"
                     onClick={handleSave}
-                    disabled={!subdomain || !primaryColor}
+                    disabled={!subdomain || !primaryColor || !inn || !phone}
                 >
                     {isEdit ? "Сохранить изменения" : "Создать"}
                 </Button>

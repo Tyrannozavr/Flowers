@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const isMobile = useMediaQuery({ maxWidth: 768 });
-    const { logoUrl } = useTheme();
+    const { logoUrl, phone } = useTheme();
 
     return (
         <header className="bg-accent text-white p-4 h-20 relative z-10">
@@ -55,7 +55,7 @@ const Header = () => {
                         ></span>
                     </button>
                 )}
-                {!isMobile && <ContactMenu isMobile={false} />}
+                {!isMobile && <ContactMenu phone={phone} isMobile={false} />}
             </div>
 
             {isMobile && (
@@ -69,7 +69,7 @@ const Header = () => {
                         transformOrigin: "top",
                     }}
                 >
-                    <ContactMenu isMobile={true} />
+                    <ContactMenu phone={phone} isMobile={true} />
                 </div>
             )}
         </header>

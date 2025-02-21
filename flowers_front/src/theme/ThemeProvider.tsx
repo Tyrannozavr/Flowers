@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { fetchShop } from "../api/shop";
 
-const ThemeContext = createContext({ accentColor: "#175355", logoUrl: "" });
+const ThemeContext = createContext({ accentColor: "#175355", logoUrl: "", phone: "", inn: "" });
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-    const [theme, setTheme] = useState({ accentColor: "#175355", logoUrl: "" });
+    const [theme, setTheme] = useState({ accentColor: "#175355", logoUrl: "", phone: "", inn: "" });
 
     useEffect(() => {
         (async () => {

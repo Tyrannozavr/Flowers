@@ -3,7 +3,7 @@ import { CategoryResponse, fetchCategories } from "../api/category";
 import { useTheme } from "../theme/ThemeProvider";
 
 const Footer: React.FC = () => {
-    const { logoUrl } = useTheme();
+    const { logoUrl, inn, phone } = useTheme();
     const [categories, setCategories] = useState<CategoryResponse[]>([]);
 
     useEffect(() => {
@@ -45,12 +45,16 @@ const Footer: React.FC = () => {
                         Контакты студий
                     </h2>
                     <p className="text-sm">
-                        <strong>+7 911 908 88 38</strong>
+                        <a href={`tel:+${phone}`} className="font-bold">
+                            +{phone}
+                        </a>
                         <br />
                         Санкт-Петербург, ул. Маяковского 23/6
                     </p>
                     <p className="text-sm mt-4">
-                        <strong>+7 911 708 88 38</strong>
+                        <a href={`tel:+${phone}`} className="font-bold">
+                            +{phone}
+                        </a>
                         <br />
                         Санкт-Петербург, Меридианная 8
                     </p>
@@ -81,7 +85,7 @@ const Footer: React.FC = () => {
 
             <div className="mt-8 border-t border-white/20 pt-4 text-sm text-center flex flex-row justify-between p-4">
                 <p className="text-sm">©2024. All Rights Reserved.</p>
-                <p className="text-sm">ИНН: 753614632336</p>
+                <p className="text-sm">ИНН: {inn}</p>
             </div>
         </footer>
     );
