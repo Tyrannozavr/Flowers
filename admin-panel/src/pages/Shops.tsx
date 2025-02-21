@@ -96,6 +96,22 @@ const Shops: React.FC = () => {
                                         display="inline-block"
                                     />
                                 </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    display="flex"
+                                    alignItems="center"
+                                >
+                                    Телефон для связи: {shop.phone}
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    display="flex"
+                                    alignItems="center"
+                                >
+                                    ИНН: {shop.inn}
+                                </Typography>
                             </CardContent>
                             <CardActions>
                                 <Button

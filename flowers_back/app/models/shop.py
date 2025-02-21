@@ -9,7 +9,9 @@ class Shop(Base):
     subdomain = Column(String, unique=True, nullable=False)
     logo_url = Column(String, nullable=True)
     primary_color = Column(String, nullable=True)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)  
+    inn = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
     owner = relationship("User")
     products = relationship(
