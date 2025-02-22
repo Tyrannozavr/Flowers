@@ -7,8 +7,6 @@ load_dotenv()
 # Добавляем корневую папку проекта в PYTHONPATH
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-print("PYTHONPATH:", sys.path)  # Проверяем, что путь корректно добавлен
-
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool

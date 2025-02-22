@@ -1,10 +1,16 @@
 import axios from "./core";
 
+export interface IAddress {
+    address: string;
+    phone: string;
+}
+
 export interface ThemeData {
     accentColor: string;
     logoUrl: string;
     phone: string;
     inn: string;
+    addresses: IAddress[]
 }
 
 interface IShop {
@@ -12,6 +18,7 @@ interface IShop {
     logo_url: string;
     phone: string;
     inn: string;
+    addresses: IAddress[]
 }
 
 export const fetchShop = async (): Promise<ThemeData> => {
@@ -24,6 +31,7 @@ export const fetchShop = async (): Promise<ThemeData> => {
             logoUrl: data.logo_url,
             phone: data.phone,
             inn: data.inn,
+            addresses: data.addresses,
         };
     } catch (error) {
         console.error("Ошибка при получении темы:", error);
