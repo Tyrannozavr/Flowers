@@ -20,7 +20,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         (async () => {
-            const data = await fetchShop();
+            const data: any = await fetchShop();
             setTheme(data);
         })();
     }, []);
