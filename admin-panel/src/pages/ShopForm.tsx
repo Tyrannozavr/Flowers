@@ -15,6 +15,9 @@ const ShopForm: React.FC = () => {
     const [logo, setLogo] = useState<File | null>(null);
     const [phone, setPhone] = useState("");
     const [inn, setInn] = useState("");
+    const [addresses, setAddresses] = useState<
+        { phone: string; address: string }[]
+    >([]);
 
     useQuery(["shop", id], () => fetchShop(Number(id)), {
         retry: false,
@@ -24,6 +27,7 @@ const ShopForm: React.FC = () => {
             setPrimaryColor(data.primary_color || "#FFFFFF");
             setPhone(data.phone || "");
             setInn(data.inn || "");
+            setAddresses(data.addresses || []);
         },
     });
 
@@ -69,11 +73,31 @@ const ShopForm: React.FC = () => {
             formData.append("logo", logo);
         }
 
+        formData.append("addresses", JSON.stringify(addresses));
+
         if (isEdit) {
             updateMutation.mutate({ formData, shopId: Number(id) });
         } else {
             createMutation.mutate(formData);
         }
+    };
+
+    const handleAddAddress = () => {
+        setAddresses((prev) => [...prev, { phone: "", address: "" }]);
+    };
+
+    const handleRemoveAddress = (index: number) => {
+        setAddresses(addresses.filter((_, i) => i !== index));
+    };
+
+    const handleAddressChange = (
+        index: number,
+        field: "phone" | "address",
+        value: string
+    ) => {
+        const updatedAddresses = [...addresses];
+        updatedAddresses[index][field] = value;
+        setAddresses(updatedAddresses);
     };
 
     return (
@@ -110,6 +134,49 @@ const ShopForm: React.FC = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                 />
+
+                {/* Инпуты для добавления адресов */}
+                {addresses.map((address, index) => (
+                    <Box key={index} display="flex" gap={2}>
+                        <TextField
+                            label="Номер телефона"
+                            variant="outlined"
+                            fullWidth
+                            value={address.phone}
+                            onChange={(e) =>
+                                handleAddressChange(
+                                    index,
+                                    "phone",
+                                    e.target.value
+                                )
+                            }
+                        />
+                        <TextField
+                            label="Адрес"
+                            variant="outlined"
+                            fullWidth
+                            value={address.address}
+                            onChange={(e) =>
+                                handleAddressChange(
+                                    index,
+                                    "address",
+                                    e.target.value
+                                )
+                            }
+                        />
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={() => handleRemoveAddress(index)}
+                        >
+                            Удалить
+                        </Button>
+                    </Box>
+                ))}
+                <Button variant="outlined" onClick={handleAddAddress}>
+                    Добавить адрес
+                </Button>
+
                 <Button variant="contained" component="label">
                     Загрузить логотип
                     <input

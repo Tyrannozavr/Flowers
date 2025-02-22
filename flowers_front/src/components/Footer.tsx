@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { CategoryResponse, fetchCategories } from "../api/category";
 import { useTheme } from "../theme/ThemeProvider";
+import { IAddress } from "../api/shop";
 
 const Footer: React.FC = () => {
-    const { logoUrl, inn, phone } = useTheme();
+    const { logoUrl, inn, addresses } = useTheme();
     const [categories, setCategories] = useState<CategoryResponse[]>([]);
 
     useEffect(() => {
@@ -44,7 +45,19 @@ const Footer: React.FC = () => {
                     <h2 className="text-lg font-semibold mb-4">
                         Контакты студий
                     </h2>
-                    <p className="text-sm">
+                    {addresses.map((item: IAddress) => (
+                        <p className="text-sm">
+                            <a
+                                href={`tel:+${item.phone}`}
+                                className="font-bold"
+                            >
+                                +{item.phone}
+                            </a>
+                            <br />
+                            {item.address}
+                        </p>
+                    ))}
+                    {/* <p className="text-sm">
                         <a href={`tel:+${phone}`} className="font-bold">
                             +{phone}
                         </a>
@@ -57,7 +70,7 @@ const Footer: React.FC = () => {
                         </a>
                         <br />
                         Санкт-Петербург, Меридианная 8
-                    </p>
+                    </p> */}
                     <p className="text-sm mt-4">
                         <a
                             href="mailto:flowers.more@yandex.ru"

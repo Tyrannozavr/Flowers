@@ -8,7 +8,6 @@ def create_superadmin():
     
     superadmin = db.query(User).filter(User.username == settings.ADMIN_USERNAME).first()
     if superadmin:
-        print("Суперадмин уже существует.")
         return
 
     hashed_password = hash_password(settings.ADMIN_PASSWORD)
@@ -22,6 +21,4 @@ def create_superadmin():
     db.add(new_superadmin)
     db.commit()
     db.refresh(new_superadmin)
-
-    print(f"Суперадмин с именем {new_superadmin.username} успешно создан!")
 

@@ -63,8 +63,7 @@ async def login(form_data: LoginSchema, db: Session = Depends(get_db)):
 
     if not find_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    
-    print(form_data.password, find_user.password)
+
     if not verify_password(form_data.password, find_user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     

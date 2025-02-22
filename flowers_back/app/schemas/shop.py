@@ -1,5 +1,10 @@
 from pydantic import BaseModel, HttpUrl, UUID4
 from typing import Optional
+from typing import List, Optional
+
+class Address(BaseModel):
+    phone: str
+    address: str
 
 class ShopCreate(BaseModel):
     subdomain: str
@@ -22,6 +27,7 @@ class ShopResponse(BaseModel):
     primary_color: Optional[str]
     inn: Optional[str]
     phone: Optional[str]
+    addresses: List[Address]
 
     class Config:
         orm_mode = True

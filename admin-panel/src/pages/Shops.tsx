@@ -112,6 +112,53 @@ const Shops: React.FC = () => {
                                 >
                                     ИНН: {shop.inn}
                                 </Typography>
+
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    display="flex"
+                                    alignItems="center"
+                                    sx={{ mt: 1 }}
+                                >
+                                    {shop.addresses === null ||
+                                    shop.addresses.length === 0
+                                        ? "Пока нет адресов у этого магазина"
+                                        : "Адреса:"}
+                                </Typography>
+
+                                {shop.addresses?.map(
+                                    (item: any, index: number) => (
+                                        <Box
+                                            key={index}
+                                            sx={{
+                                                mb: 1,
+                                                border: "1px solid #fff",
+                                                p: 1,
+                                                borderRadius: 1,
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                display="flex"
+                                                alignItems="center"
+                                                sx={{ mb: 1 }}
+                                            >
+                                                <strong>Телефон:</strong>{" "}
+                                                {item.phone}
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                display="flex"
+                                                alignItems="center"
+                                            >
+                                                <strong>Адрес:</strong>{" "}
+                                                {item.address}
+                                            </Typography>
+                                        </Box>
+                                    )
+                                )}
                             </CardContent>
                             <CardActions>
                                 <Button

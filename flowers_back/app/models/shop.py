@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from app.core.database import Base
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import JSON
 
 class Shop(Base):
     __tablename__ = "shops"
@@ -19,4 +20,5 @@ class Shop(Base):
     )
     orders = relationship("Order", back_populates="shop")  
     consultations = relationship("Consultation", back_populates="shop")  
-    
+
+    addresses = Column(JSON,  nullable=True)

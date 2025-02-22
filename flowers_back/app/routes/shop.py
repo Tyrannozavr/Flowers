@@ -12,6 +12,7 @@ import os
 import uuid
 from app.routes.admin import get_current_user
 from sqlalchemy import text
+from typing import List, Dict
 
 router = APIRouter() 
 
@@ -27,6 +28,7 @@ async def create_shop(
     inn: str = Form(...),
     phone: str = Form(...),
     logo: UploadFile = None,
+    addresses: List[dict] = Form(...),
     db: Session = Depends(get_db),
     security=[{"BearerAuth": []}]
 ):
@@ -60,9 +62,18 @@ async def create_shop(
         primary_color=color,
         inn=inn,
         phone=phone,
+        addresses=addresses,
         logo_url=logo_url,
         owner_id=find_user.id
     )
+    if addresses:
+        try:
+            import json
+            addresses_list = json.loads(addresses)
+            new_shop.addresses = addresses_list
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Невалидный формат для адресов: {str(e)}")
+
     db.add(new_shop)
     db.commit()
     db.refresh(new_shop)
@@ -74,6 +85,7 @@ async def create_shop(
         primary_color=new_shop.primary_color,
         inn=new_shop.inn,
         phone=new_shop.phone,
+        addresses=new_shop.addresses,
         logo_url=f"{base_url}static/uploads/{new_shop.logo_url}" if new_shop.logo_url else None
     )
 
@@ -90,17 +102,26 @@ def get_shops(
         raise HTTPException(status_code=404, detail="Нет магазинов для данного пользователя")
 
     base_url = str(request.base_url)
-    return [
-        ShopResponse(
+    list_of_shops = []
+    for shop in shops:
+        addresses = []
+        if shop.addresses:
+            try:
+                addresses = shop.addresses
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Невалидный формат для адресов: {str(e)}")
+
+        list_of_shops.append(ShopResponse(
             id=shop.id,
             subdomain=shop.subdomain,
             primary_color=shop.primary_color,
             inn=shop.inn,
             phone=shop.phone,
+            addresses=addresses,
             logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None
-        )
-        for shop in shops
-    ]
+        ))
+
+    return list_of_shops
 
 @router.get("/user/{telegram_id}", response_model=list[OwnerShopResponse])
 async def get_by_owner(telegram_id: str, request: Request, db: Session = Depends(get_db)):
@@ -130,7 +151,15 @@ def get_shop_by_domain(
     shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
-    
+
+    addresses = []
+    if shop.addresses:
+        try:
+            addresses = shop.addresses
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Невалидный формат для адресов: {str(e)}")
+
+
     base_url = str(request.base_url)
     return ShopResponse(
         id=shop.id,
@@ -138,6 +167,7 @@ def get_shop_by_domain(
         primary_color=shop.primary_color,
         inn=shop.inn,
         phone=shop.phone,
+        addresses=addresses,
         logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None,
     )
 
@@ -149,6 +179,13 @@ def get_shop_by_id(
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
 
+    addresses = []
+    if shop.addresses:
+        try:
+            addresses = shop.addresses
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Невалидный формат для адресов: {str(e)}")
+
     base_url = str(request.base_url)
     return ShopResponse(
         id=shop.id,
@@ -156,6 +193,7 @@ def get_shop_by_id(
         primary_color=shop.primary_color,
         inn=shop.inn,
         phone=shop.phone,
+        addresses=addresses,
         logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None,
     )
 
@@ -168,10 +206,11 @@ async def update_shop(
     inn: str = Form(...),
     phone: str = Form(...),
     logo: Optional[UploadFile] = None,
+    addresses: str = Form(...),
     db: Session = Depends(get_db),
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
-
+    print(addresses)
     if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
@@ -186,6 +225,15 @@ async def update_shop(
     shop.primary_color = color
     shop.inn = inn
     shop.phone = phone
+    shop.address = addresses
+
+    if addresses:
+        try:
+            import json
+            addresses_list = json.loads(addresses)
+            shop.addresses = addresses_list
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Невалидный формат для адресов: {str(e)}")
 
     if logo:
         file_extension = logo.filename.split(".")[-1]
@@ -325,7 +373,6 @@ def get_user_id_by_tg_id(user_tg_id: str, db: Session):
                 '''),
         {"telegram_id": f'["{user_tg_id}"]'}
     ).fetchone()
-    print(user)
 
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден! Видимо вам запрещено создавать продукты")
