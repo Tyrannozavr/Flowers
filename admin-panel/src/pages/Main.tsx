@@ -46,6 +46,17 @@ const Main: React.FC = () => {
                         </Typography>
                     </CardContent>
                 </Card>
+                <Card
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => navigate("/profile")}
+                >
+                    <CardContent>
+                        <Typography variant="h5">Профиль</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Профиль
+                        </Typography>
+                    </CardContent>
+                </Card>
             </Box>
         </Box>
     );

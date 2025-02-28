@@ -9,6 +9,7 @@ import ProductForm from "./pages/ProductForm";
 import ShopDetails from "./pages/ShopDetails";
 import ShopForm from "./pages/ShopForm";
 import Shops from "./pages/Shops";
+import Profile from "./pages/Profile";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,16 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute>
                             <Shops />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Shops route */}
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <Profile />
                         </ProtectedRoute>
                     }
                 />

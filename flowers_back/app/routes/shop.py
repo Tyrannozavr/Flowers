@@ -28,7 +28,7 @@ async def create_shop(
     inn: str = Form(...),
     phone: str = Form(...),
     logo: UploadFile = None,
-    addresses: List[dict] = Form(...),
+    addresses: str = Form(...),
     db: Session = Depends(get_db),
     security=[{"BearerAuth": []}]
 ):

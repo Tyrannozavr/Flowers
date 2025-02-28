@@ -1,0 +1,175 @@
+import hashlib
+import os
+from datetime import datetime, timedelta
+
+import requests
+from fastapi import APIRouter, HTTPException, status, Depends, Header, Request
+from dotenv import load_dotenv
+from app.models.user import User
+from app.models.pay import Pay
+from app.models.shop import Shop
+from app.core.database import get_db
+from sqlalchemy.orm import Session
+from app.core.security import hash_password
+from app.routes.auth import decode_token
+from pydantic import BaseModel
+
+load_dotenv()
+
+router = APIRouter()
+
+
+@router.get('/check')
+async def check(request: Request, db: Session = Depends(get_db)):
+    user_id = request.query_params.get("user_id")
+    find_pay_info = db.query(Pay).filter(User.id == user_id).first()
+    if not find_pay_info:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pay info not found")
+
+    payment_status = find_pay_info.status
+    payment_id = find_pay_info.payment_id
+
+    if payment_status != 'CONFIRMED':
+        terminal_key = os.getenv('T_BANK_TERMINAL_KEY')
+        secret_key = os.getenv('T_BANK_SECRET')
+
+        data = {
+            "TerminalKey": terminal_key,
+            "PaymentId": payment_id,
+        }
+
+        data_for_token = [
+            {"TerminalKey": terminal_key},
+            {"PaymentId": payment_id},
+            {"Password": secret_key},
+        ]
+        hashed_token = generate_token(data_for_token)
+        data['Token'] = hashed_token
+
+        url = "https://securepay.tinkoff.ru/v2/GetState"
+        response = requests.post(url, json=data)
+
+        if response.status_code == 200:
+            response_data = response.json()
+            if response_data.get("Success"):
+                current_status = response_data.get('Status')
+                if current_status != payment_status:
+                    payment_status = current_status
+                    find_pay_info.status = payment_status
+
+                    current_date = datetime.now()
+
+                    find_pay_info.last_pay_date = current_date
+                    find_pay_info.paid_until = current_date + timedelta(days=30)
+                    db.commit()
+                    db.refresh(find_pay_info)
+                    if not find_pay_info.id:
+                        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error refreshing pay info")
+                # все статусы
+                # https://www.tbank.ru/kassa/dev/payments/#tag/Scenarii-oplaty-po-karte/Statusnaya-model-platezha
+            else:
+                print("Ошибка получения статуса:", response_data.get("Message"))
+        else:
+            print("Ошибка запроса:", response.status_code, response.text)
+
+    return {'currentStatus': payment_status}
+
+
+@router.get("/init")
+async def pay_init(request: Request, db: Session = Depends(get_db)):
+    user_id = request.query_params.get("user_id")
+    user_email = request.query_params.get("user_email")
+    find_user = db.query(User).filter(User.id == user_id).first()
+    if not find_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    # не инкрементирует поэтому костыль
+    last_id_pay = db.query(Pay).order_by(Pay.id.desc()).first()
+
+    if last_id_pay:
+        last_id = last_id_pay.id
+    else:
+        last_id = 0
+
+    last_id += 1
+
+    init_pay = Pay(
+        id=last_id,
+        user_id=user_id,
+        status='init',
+    )
+
+    db.add(init_pay)
+    db.commit()
+    db.refresh(init_pay)
+
+    if not init_pay.id:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create payment")
+
+    payment_amount = 90000  # в копейках
+    order_id = init_pay.id
+    description = f"Оплата заказа №{init_pay.id}"
+    success_url = "https://admin.flourum.ru/profile"
+    fail_url = "https://admin.flourum.ru/profile"
+
+    terminal_key = os.getenv('T_BANK_TERMINAL_KEY')
+    secret_key = os.getenv('T_BANK_SECRET')
+
+    if not user_email:
+        user_email = "a@test.com"
+
+    data = {
+        "TerminalKey": terminal_key,
+        "Amount": payment_amount,
+        "OrderId": order_id,
+        "Description": description,
+        "SuccessURL": success_url,
+        "FailURL": fail_url,
+        "DATA": {
+            "Email": user_email
+        },
+    }
+
+    data_for_token = [
+        {'TerminalKey': terminal_key},
+        {'Amount': payment_amount},
+        {'OrderId': order_id},
+        {'Description': description},
+        {'Password': secret_key},
+    ]
+
+    hashed_token = generate_token(d=data_for_token)
+    data['Token'] = hashed_token
+
+    url = "https://securepay.tinkoff.ru/v2/Init"
+    response = requests.post(url, json=data)
+
+    pay_url = ''
+
+    if response.status_code == 200:
+        response_data = response.json()
+        if response_data.get('Success'):
+            pay_url = response_data.get('PaymentURL')
+
+            init_pay.status = response_data.get('Status')
+            init_pay.payment_id = response_data.get('PaymentId')
+
+            db.commit()
+            db.refresh(init_pay)
+
+            if not init_pay.id:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error refreshing pay info")
+        else:
+            print("Ошибка инициализации платежа:", response_data.get("Message"))
+    else:
+        print("Ошибка запроса:", response.status_code, response.text)
+
+    return {'url': pay_url}
+
+
+def generate_token(d):
+    sorted_data = sorted(d, key=lambda item: list(item.keys())[0])
+    concatenated_values = ''.join(str(list(item.values())[0]) for item in sorted_data)
+    hash_object = hashlib.sha256(concatenated_values.encode('utf-8'))
+    hashed_token = hash_object.hexdigest()
+    return hashed_token

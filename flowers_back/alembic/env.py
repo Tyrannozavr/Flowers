@@ -14,15 +14,15 @@ from alembic import context
 
 # Импортируйте модели и базу
 from app.core.database import Base
-from app.models import product, shop, order, category, user, consultation
+from app.models import product, shop, order, category, user, consultation, pay
 
 
 # Настройка URL подключения к БД
 config = context.config
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
 
-# Логирование
-fileConfig(config.config_file_name)
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
 target_metadata = Base.metadata
 
 def run_migrations_offline():

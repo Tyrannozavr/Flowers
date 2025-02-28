@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str
     SECRET_KEY: str
     TOKEN_EXPIRY_DAYS: int
+    T_BANK_TERMINAL_KEY: str
+    T_BANK_SECRET: str
 
     class Config:
         env_file = ".env"
