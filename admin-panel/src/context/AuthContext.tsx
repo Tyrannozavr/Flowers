@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { instance as axios } from "../api/axios";
 
 interface AuthContextType {
     isAuthenticated: boolean;
+    isSuperadmin: boolean;
+    userId: number;
     login: (token: string) => void;
     logout: () => void;
+
     checkAuth: () => void;
 }
 
@@ -15,11 +18,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isSuperadmin, setSuperadmin] = useState<boolean>(false);
+    const [userId, setUserId] = useState<number>(-1);
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         checkAuth();
     }, []);
+
+    useEffect(() => {
+        if (isAuthenticated && location.pathname === "/login") {
+            navigate("/");
+        }
+    }, [isAuthenticated, location.pathname, navigate]);
 
     const checkAuth = async () => {
         const token = localStorage.getItem("token");
@@ -30,10 +42,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         try {
-            await axios.get("/admins/me", {
+            const response = await axios.get("/admins/me", {
                 headers: { Authorization: `Bearer ${token}` },
             });
+
             setIsAuthenticated(true);
+            setSuperadmin(response.data.is_superadmin);
+            setUserId(response.data.id);
+
         } catch {
             setIsAuthenticated(false);
             navigate("/login");
@@ -48,12 +64,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const logout = () => {
         localStorage.removeItem("token");
         setIsAuthenticated(false);
+        setSuperadmin(false);
+        setUserId(-1);
         navigate("/login");
     };
 
     return (
         <AuthContext.Provider
-            value={{ isAuthenticated, login, logout, checkAuth }}
+            value={{ isAuthenticated, isSuperadmin, userId, login, logout, checkAuth }}
         >
             {children}
         </AuthContext.Provider>

@@ -1,0 +1,14 @@
+.profile-page {
+  padding: 0;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 120px); /* Adjust based on your header height */
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .profile-page {
+    padding: 0 1rem;
+  }
+}

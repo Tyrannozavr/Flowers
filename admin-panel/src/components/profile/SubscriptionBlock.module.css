@@ -1,0 +1,444 @@
+.subscriptionBlock {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  text-align: left;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.subscriptionTitle {
+  font-size: 28px;
+  color: #333;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  margin: 0 0 20px 20px; /* Отступ 20px слева */
+  text-align: left; /* Явно выравниваем по левому краю */
+}
+
+.description {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #666;
+  margin: 0 0 10px 20px; /* Выравнивание по левому краю с отступом */
+}
+
+.emailInputContainer {
+  display: flex;
+  flex-direction: column; /* Элементы располагаются вертикально */
+  gap: 10px; /* Отступ между полем, кнопкой и текстом ошибки */
+  margin: 0 0 20px 20px; /* Отступ слева и снизу для выравнивания по левому краю */
+}
+
+.emailInput {
+  width: 300px;
+  padding: 12px;
+  border: 1px solid #D9D9D9;
+  border-radius: 4px;
+  font-size: 16px;
+  margin: 10px 0 10px 0; /* Убраны отступы слева, чтобы управлять через emailInputContainer */
+  transition: all 0.3s ease;
+}
+
+.emailInput:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px #007bff;
+}
+
+/* Активная кнопка (по умолчанию для "Оформить за 990 руб/мес" и других) */
+.subscribeButtonActive {
+  width: 240px;
+  height: 44px;
+  background-color: #30AA6E; /* Зелёный цвет для активной кнопки */
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 20px; /* Убираем стандартные отступы, чтобы управлять через emailInputContainer */
+  display: inline-block;
+  text-align: center;
+  line-height: 28px;
+}
+
+.subscribeButtonActive:hover {
+  background-color: #2C9E64; /* Затемнение при наведении */
+}
+
+/* Неактивная/дизейбленная кнопка для "Оформить за 990 руб/мес" и других */
+.subscribeButtonDisabled {
+  width: 240px;
+  height: 44px;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  font-weight: 500;
+  cursor: not-allowed; /* Курсор "не разрешено" для неактивной кнопки */
+  margin: 20px; /* Убираем стандартные отступы, чтобы управлять через emailInputContainer */
+  display: inline-block;
+  text-align: center;
+  line-height: 28px;
+}
+
+/* Кнопка для отмены подписки (красная) */
+.subscribeButtonCancel {
+  width: 240px;
+  height: 44px;
+  background-color: #E9033A; /* Красный цвет для кнопки отмены */
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 20px; /* Убираем стандартные отступы, чтобы управлять через emailInputContainer */
+  display: inline-block;
+  text-align: center;
+  line-height: 28px;
+}
+
+.subscribeButtonCancel:hover {
+  background-color: #D6002F; /* Затемнение при наведении */
+}
+
+/* Активная кнопка "Перейти к оплате" */
+.paymentButton {
+  width: 240px;
+  height: 44px;
+  background-color: #30AA6E; /* Зелёный цвет для активной кнопки "Перейти к оплате" */
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0; /* Убираем стандартные отступы, чтобы управлять через emailInputContainer */
+  display: inline-block;
+  text-align: center;
+  line-height: 28px;
+}
+
+.paymentButton:hover {
+  background-color: #2C9E64; /* Затемнение при наведении */
+}
+
+/* Неактивная кнопка "Перейти к оплате" */
+.paymentButtonDisabled {
+  width: 240px;
+  height: 44px;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  font-weight: 500;
+  cursor: not-allowed; /* Курсор "не разрешено" для неактивной кнопки */
+  margin: 0; /* Убираем стандартные отступы, чтобы управлять через emailInputContainer */
+  display: inline-block;
+  text-align: center;
+  line-height: 28px;
+}
+
+.errorText {
+  color: #E9033A !important; /* Убедимся, что цвет перекрывает родительские стили */
+  font-size: 14px;
+  margin: 5px 0 0 5px; /* Отступы для выравнивания по левому краю */
+  line-height: 1.5; /* Опционально, для улучшения читаемости */
+}
+
+.agreementPoint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 10px 0 10px 20px;
+  padding: 10px 0;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #D9D9D9;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.checkbox.checked {
+  background-color: #30AA6E;
+  border-color: #30AA6E;
+}
+
+.checkbox.checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.agreementText {
+  font-size: 16px;
+  color: #666;
+  transition: color 0.3s;
+}
+
+.agreementText.uncheckedText {
+  color: #E9033A;
+}
+
+.link {
+  color: #30AA6E;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.link:hover {
+  color: #2C9E64;
+  text-decoration: underline;
+}
+
+.contactLink {
+  color: #30AA6E;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.contactLink:hover {
+  color: #2C9E64;
+  text-decoration: underline;
+}
+
+.additionalText {
+  font-size: 14px;
+  color: #666;
+  margin: 10px 0 10px 20px; /* Выравнивание по левому краю с отступом */
+}
+
+.activeSubscription {
+  color: #30AA6E;
+  font-size: 16px;
+  margin: 20px 0 20px 20px; /* Выравнивание по левому краю с отступом */
+  font-weight: 600;
+}
+
+.inactiveSubscription {
+  color: #666;
+  font-size: 16px;
+  margin: 20px 0 20px 20px; /* Выравнивание по левому краю с отступом */
+}
+
+.inactiveBadge {
+  background-color: #E9033A;
+  color: #ffffff;
+  width: 102px;
+  height: 32px;
+  border-radius: 100px; /* Круглые углы, как указано */
+  padding: 8px 16px; /* Указанные padding-top, padding-right, padding-bottom, padding-left */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Указанный gap */
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0px;
+  margin: 24px 0 32px 20px; /* Выравнивание по левому краю с отступом */
+}
+
+.activeBadge {
+  background-color: #30AA6E; /* Зелёный цвет для активной плашки */
+  color: #ffffff;
+  width: 102px;
+  height: 32px;
+  border-radius: 100px; /* Круглые углы, как указано */
+  padding: 8px 16px; /* Указанные padding-top, padding-right, padding-bottom, padding-left */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Указанный gap */
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0px;
+  margin: 24px 0 32px 20px; /* Выравнивание по левому краю с отступом, как у .inactiveBadge */
+}
+.activeBadge {
+   background-color: #30AA6E; /* Зелёный цвет для активной плашки */
+   color: #ffffff;
+   width: fit-content; /* Обновлено с 102px на 176px */
+   height: 32px; /* Осталось 32px, как указано */
+   border-radius: 100px; /* Круглые углы, как указано */
+   padding: 8px 16px; /* Сохраняем текущие padding для совместимости с шириной */
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: 6px; /* Обновлено с 10px на 6px */
+   font-family: Inter; /* Обновлено с "Inter, sans-serif" на "Inter" */
+   font-weight: 500; /* Осталось 500, как указано */
+   font-size: 13px; /* Осталось 13px, как указано */
+   line-height: 16px; /* Осталось 16px, как указано */
+   letter-spacing: 0px; /* Осталось 0px, как указано */
+   margin: 20px 0 40px 20px; /* Выравнивание по левому краю с отступом, как у .inactiveBadge */
+ }
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0  ;
+  margin: 0 0 10px 0; /* Выравнивание по левому краю с отступом */
+}
+.additionalText {
+  font-size: 14px;
+  color: #666;
+  margin: 10px 0 10px 20px; /* Выравнивание по левому краю с отступом */
+}
+
+.cancelSubscriptionText {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: 0px;
+  color: #666;
+  margin: -10px 0 30px 20px; /* Отступ 10px сверху, 30px снизу, 20px слева */
+}
+
+.additionalTextLight {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: 0px;
+  color: #666;
+  margin: 0 0 10px 20px; /* Отступ только снизу 10px, слева 20px */
+}
+
+.additionalTextBold {
+  font-family: Inter;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 10px;
+  letter-spacing: 0px;
+  color: #30AA6E; /* Зелёный цвет для третьего пункта */
+  margin: 0 0 10px 20px; /* Отступ только снизу 10px, слева 20px */
+}
+
+@media (max-width: 768px) {
+  .additionalText,
+  .cancelSubscriptionText,
+  .additionalTextLight,
+  .additionalTextBold {
+    margin: 5px 0 15px 10px; /* Уменьшенные отступы на мобильных: 5px сверху/снизу, 15px снизу для .cancelSubscriptionText, 10px слева */
+    font-size: 9px; /* Уменьшенный размер шрифта на мобильных */
+  }
+
+  .cancelSubscriptionText {
+    margin: 5px 0 15px 10px; /* Уменьшенные отступы: 5px сверху, 15px снизу, 10px слева */
+  }
+}
+
+@media (max-width: 768px) {
+  .activeBadge {
+    width: 90px;
+    height: 28px;
+    margin: 10px 0 0 10px; /* Уменьшенные отступы на мобильных */
+    font-size: 12px;
+    padding: 6px 12px; /* Уменьшенный padding для мобильных */
+  }
+  .subscriptionBlock {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .subscriptionTitle {
+    font-size: 20px;
+    margin: 0 0 10px 10px; /* Уменьшенные отступы на мобильных */
+  }
+
+  .description {
+    font-size: 14px;
+    margin: 0 0 15px 10px; /* Уменьшенные отступы на мобильных */
+  }
+
+  .emailInputContainer {
+    margin: 0 0 15px 10px; /* Уменьшенные отступы на мобильных */
+    gap: 8px; /* Меньший зазор на мобильных */
+  }
+
+  .emailInput {
+    width: 200px;
+    margin: 0; /* Убираем стандартные отступы, чтобы управлять через emailInputContainer */
+  }
+
+  .subscribeButtonActive,
+  .subscribeButtonDisabled,
+  .subscribeButtonCancel,
+  .paymentButton,
+  .paymentButtonDisabled {
+    width: 180px;
+    height: 36px;
+    padding: 10px 20px; /* Уменьшенные padding на мобильных */
+    margin: 0; /* Убираем стандартные отступы, чтобы управлять через emailInputContainer */
+    font-size: 14px;
+  }
+
+  .agreementPoint {
+    margin: 10px 0 10px 10px; /* Уменьшенные отступы на мобильных */
+  }
+
+  .agreementText {
+    font-size: 14px;
+  }
+
+  .additionalText {
+    font-size: 12px;
+    margin: 10px 0 10px 10px; /* Уменьшенные отступы на мобильных */
+  }
+
+  .activeSubscription,
+  .inactiveSubscription {
+    margin: 15px 0 15px 10px; /* Уменьшенные отступы на мобильных */
+  }
+
+  .inactiveBadge {
+    width: 90px;
+    height: 28px;
+    margin: 10px 0 0 10px; /* Уменьшенные отступы на мобильных */
+    font-size: 12px;
+    padding: 6px 12px; /* Уменьшенный padding для мобильных */
+  }
+
+  .buttonGroup {
+    margin: 15px 0 15px 10px; /* Уменьшенные отступы на мобильных */
+  }
+
+  .errorText {
+    margin: 5px 0 0 10px; /* Уменьшенные отступы на мобильных */
+  }
+}

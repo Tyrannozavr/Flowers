@@ -13,3 +13,4 @@ class Pay(Base):
     last_pay_date = Column(DateTime, nullable=True)
     paid_until = Column(DateTime, nullable=True)
     payment_id = Column(String, nullable=True)
+    email = Column(String, nullable=False)

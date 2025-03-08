@@ -120,14 +120,14 @@ const Admins: React.FC = () => {
 
     return (
         <Box p={3}>
-            <Button
+            {/*<Button
                 variant="outlined"
                 color="secondary"
                 sx={{ mb: 3 }}
                 onClick={() => navigate("/")}
             >
                 Назад
-            </Button>
+            </Button>*/}
 
             <Typography variant="h4" mb={3}>
                 {currentUser?.is_superadmin ? "Администраторы" : "Мой профиль"}

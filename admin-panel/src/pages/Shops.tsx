@@ -32,14 +32,14 @@ const Shops: React.FC = () => {
     return (
         <Box p={3}>
             {/* Back Button */}
-            <Button
+            {/*<Button
                 variant="outlined"
                 color="secondary"
                 sx={{ mb: 3 }}
                 onClick={() => navigate("/")}
             >
                 Назад
-            </Button>
+            </Button>*/}
 
             <Typography variant="h4" mb={3}>
                 Магазины

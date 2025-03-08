@@ -1,0 +1,94 @@
+.admin-header {
+    width: 100%;
+    height: 52px;
+    background-color: #30AA6E;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: Inter;
+}
+
+.admin-header * {
+    font-family: inherit;
+}
+
+.admin-header-content {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-logo {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.admin-logo:hover {
+    opacity: 0.8;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.auth-button {
+    width: 73px;
+    height: 36px;
+    padding: 9px 16px;
+    gap: 8px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.button {
+    width: 240px;
+    height: 44px;
+    border-radius: var(--radius-xl);
+    padding: 12px 24px;
+    gap: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Inter;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 20px;
+    letter-spacing: 0px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .admin-header-content {
+        padding: 0 12px;
+    }
+
+    .logo-text {
+        font-size: 20px;
+    }
+
+    .auth-button {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+}

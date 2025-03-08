@@ -1,0 +1,85 @@
+.policyContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 20px 0 10px;
+}
+
+h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 15px 0 5px;
+}
+
+p {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+/* Стили для ссылки "Вернуться на главную" */
+.backLinkContainer {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.backLink {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #30AA6E; /* Зелёный фон, как у кнопок */
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.backLink:hover {
+    background-color: #2C9E64; /* Чуть темнее при наведении */
+}
+
+@media (max-width: 768px) {
+    .policyContainer {
+        padding: 20px 10px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    h3 {
+        font-size: 14px;
+    }
+
+    p {
+        font-size: 12px;
+    }
+
+    .backLinkContainer {
+        margin-top: 30px;
+    }
+
+    .backLink {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}

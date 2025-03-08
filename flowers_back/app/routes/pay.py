@@ -14,6 +14,8 @@ from app.core.security import hash_password
 from app.routes.auth import decode_token
 from pydantic import BaseModel
 
+from urllib.parse import unquote
+
 load_dotenv()
 
 router = APIRouter()
@@ -22,14 +24,15 @@ router = APIRouter()
 @router.get('/check')
 async def check(request: Request, db: Session = Depends(get_db)):
     user_id = request.query_params.get("user_id")
-    find_pay_info = db.query(Pay).filter(User.id == user_id).first()
+    find_pay_info = db.query(Pay).filter(User.id == user_id).order_by(Pay.id.desc()).first()
     if not find_pay_info:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pay info not found")
 
     payment_status = find_pay_info.status
     payment_id = find_pay_info.payment_id
+    paid_until = find_pay_info.paid_until
 
-    if payment_status != 'CONFIRMED':
+    if payment_status != 'CONFIRMED' and payment_status != 'canceled_by_user':
         terminal_key = os.getenv('T_BANK_TERMINAL_KEY')
         secret_key = os.getenv('T_BANK_SECRET')
 
@@ -65,6 +68,8 @@ async def check(request: Request, db: Session = Depends(get_db)):
                     db.refresh(find_pay_info)
                     if not find_pay_info.id:
                         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error refreshing pay info")
+                    else:
+                        paid_until = find_pay_info.paid_until
                 # все статусы
                 # https://www.tbank.ru/kassa/dev/payments/#tag/Scenarii-oplaty-po-karte/Statusnaya-model-platezha
             else:
@@ -72,13 +77,14 @@ async def check(request: Request, db: Session = Depends(get_db)):
         else:
             print("Ошибка запроса:", response.status_code, response.text)
 
-    return {'currentStatus': payment_status}
+    return {'currentStatus': payment_status, 'until': paid_until}
 
 
 @router.get("/init")
 async def pay_init(request: Request, db: Session = Depends(get_db)):
     user_id = request.query_params.get("user_id")
     user_email = request.query_params.get("user_email")
+    back_url = unquote(request.query_params.get("back_url"))
     find_user = db.query(User).filter(User.id == user_id).first()
     if not find_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -97,6 +103,7 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
         id=last_id,
         user_id=user_id,
         status='init',
+        email=user_email,
     )
 
     db.add(init_pay)
@@ -106,17 +113,14 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
     if not init_pay.id:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create payment")
 
-    payment_amount = 90000  # в копейках
+    payment_amount = 990 * 100  # в копейках
     order_id = init_pay.id
     description = f"Оплата заказа №{init_pay.id}"
-    success_url = "https://admin.flourum.ru/profile"
-    fail_url = "https://admin.flourum.ru/profile"
+    success_url = back_url
+    fail_url = back_url
 
     terminal_key = os.getenv('T_BANK_TERMINAL_KEY')
     secret_key = os.getenv('T_BANK_SECRET')
-
-    if not user_email:
-        user_email = "a@test.com"
 
     data = {
         "TerminalKey": terminal_key,
@@ -165,6 +169,27 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
         print("Ошибка запроса:", response.status_code, response.text)
 
     return {'url': pay_url}
+
+
+@router.get("/cancel")
+async def pay_cancel(request: Request, db: Session = Depends(get_db)):
+    user_id = request.query_params.get("user_id")
+    find_pay_info = db.query(Pay).filter(User.id == user_id).order_by(Pay.id.desc()).first()
+    if not find_pay_info:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pay info not found")
+
+    new_status = 'canceled_by_user'
+
+    find_pay_info.status = new_status
+    db.commit()
+    db.refresh(find_pay_info)
+    if not find_pay_info.id:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error refreshing pay info"
+        )
+
+    return {'currentStatus': find_pay_info.status}
 
 
 def generate_token(d):
