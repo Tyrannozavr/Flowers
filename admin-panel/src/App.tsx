@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import Admins from "./pages/Admins";
-import Login from "./pages/Login";
-import Main from "./pages/Main";
 import ProductForm from "./pages/ProductForm";
 import ShopDetails from "./pages/ShopDetails";
 import ShopForm from "./pages/ShopForm";
@@ -20,7 +18,6 @@ import OfferPage from './components/OfferPage'
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
-    const location = useLocation();
 
 //     const handleAuthAction = () => {
 //         handleLogout();

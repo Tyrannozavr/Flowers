@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
     activateAdmin,
@@ -22,7 +21,6 @@ import {
 } from "../api/admins";
 
 const Admins: React.FC = () => {
-    const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     const { data: currentUser, isLoading: isUserLoading } = useQuery(

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import AdminHeader from '../components/admin/AdminHeader';
 import AdminSubHeader from '../components/admin/AdminSubHeader';
 import { AdminSection } from '../components/admin/AdminSubHeader';
@@ -13,9 +13,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
     onAuthAction,
 }) => {
     const location = useLocation();
-    const initialSection = (location.pathname.substring(1) || 'stores') as AdminSection;
+    const initialSection = (location.pathname.substring(1) || 'shops') as AdminSection;
     const [activeSection, setActiveSection] = useState<AdminSection>(initialSection);
-    const navigate = useNavigate();
 
     const handleLogout = () => {
         onAuthAction?.();

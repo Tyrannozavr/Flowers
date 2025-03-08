@@ -36,10 +36,10 @@ const initialConsentItems: ConsentItem[] = [
 
 export const SubscriptionBlock: React.FC<SubscriptionBlockProps> = ({
                                                                         currentState,
+                                                                        userId,
                                                                         email: propEmail,
                                                                         onStateChange,
                                                                         onEmailSubmit,
-                                                                        userId,
                                                                         backUrl,
                                                                         onCancel,
                                                                         until,
