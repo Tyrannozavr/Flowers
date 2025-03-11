@@ -2,6 +2,11 @@ from sqlalchemy import Column, String, Integer, ForeignKey
 from app.core.database import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSON
+from app.models.product import Product
+from app.models.order import Order
+from app.models.user import User
+from app.models.consultation import Consultation
+
 
 class Shop(Base):
     __tablename__ = "shops"

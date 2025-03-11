@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 from datetime import datetime, timedelta
 
@@ -114,13 +115,27 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create payment")
 
     payment_amount = 990 * 100  # в копейках
-    order_id = init_pay.id
+    order_id = f'{user_id}-{init_pay.id}-temp'
     description = f"Оплата заказа №{init_pay.id}"
     success_url = back_url
     fail_url = back_url
 
     terminal_key = os.getenv('T_BANK_TERMINAL_KEY')
     secret_key = os.getenv('T_BANK_SECRET')
+
+    receipt = {
+        'Items': [
+            {
+                'Name': 'Подписка',
+                'Price': payment_amount,
+                'Quantity': 1,
+                'Amount': payment_amount,
+                'Tax': 'none',
+            }
+        ],
+        'Email': user_email,
+        'Taxation': 'osn',
+    }
 
     data = {
         "TerminalKey": terminal_key,
@@ -129,9 +144,12 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
         "Description": description,
         "SuccessURL": success_url,
         "FailURL": fail_url,
+        "NotificationURL": "https://api.flourum.ru/pay/notification",
         "DATA": {
             "Email": user_email
         },
+        "Receipt": receipt,
+        "Recurrent": 'Y',
     }
 
     data_for_token = [
@@ -140,6 +158,7 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
         {'OrderId': order_id},
         {'Description': description},
         {'Password': secret_key},
+        {'Recurrent': 'Y'}
     ]
 
     hashed_token = generate_token(d=data_for_token)
@@ -192,9 +211,21 @@ async def pay_cancel(request: Request, db: Session = Depends(get_db)):
     return {'currentStatus': find_pay_info.status}
 
 
+@router.post('/notification')
+async def notification(request: Request, db: Session = Depends(get_db)):
+    data = await request.json()
+    with open("notification_data.json", "a") as file:
+        file.write(json.dumps(data, ensure_ascii=False) + "\n")
+    return 'ok'
+
+
 def generate_token(d):
     sorted_data = sorted(d, key=lambda item: list(item.keys())[0])
     concatenated_values = ''.join(str(list(item.values())[0]) for item in sorted_data)
     hash_object = hashlib.sha256(concatenated_values.encode('utf-8'))
     hashed_token = hash_object.hexdigest()
     return hashed_token
+
+
+def get_pays(db: Session = Depends(get_db)):
+    return db.query(Pay).order_by(Pay.id.desc()).all()

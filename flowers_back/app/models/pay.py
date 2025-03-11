@@ -14,3 +14,4 @@ class Pay(Base):
     paid_until = Column(DateTime, nullable=True)
     payment_id = Column(String, nullable=True)
     email = Column(String, nullable=False)
+    rebill_id = Column(String, nullable=True)
