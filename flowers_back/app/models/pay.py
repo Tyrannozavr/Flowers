@@ -15,3 +15,7 @@ class Pay(Base):
     payment_id = Column(String, nullable=True)
     email = Column(String, nullable=False)
     rebill_id = Column(String, nullable=True)
+    pan = Column(String, nullable=True)
+    card_id = Column(String, nullable=True)
+    order_id = Column(String, nullable=True)
+    timestamp = Column(DateTime, nullable=True)

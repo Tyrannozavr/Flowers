@@ -176,6 +176,7 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
 
             init_pay.status = response_data.get('Status')
             init_pay.payment_id = response_data.get('PaymentId')
+            init_pay.order_id = order_id
 
             db.commit()
             db.refresh(init_pay)
@@ -214,6 +215,21 @@ async def pay_cancel(request: Request, db: Session = Depends(get_db)):
 @router.post('/notification')
 async def notification(request: Request, db: Session = Depends(get_db)):
     data = await request.json()
+    if not data.get('Success'):
+        return 'ok'
+
+    orderId = data.get('OrderId')
+    payment = db.query(Pay).filter(Pay.order_id == orderId).first()
+    if not payment.id:
+        return 'ok'
+
+    payment.card_id = data.get('CardId')
+    payment.rebill_id = data.get('RebillId')
+    payment.pan = data.get('Pan')
+
+    db.commit()
+    db.refresh(payment)
+
     with open("notification_data.json", "a") as file:
         file.write(json.dumps(data, ensure_ascii=False) + "\n")
     return 'ok'
