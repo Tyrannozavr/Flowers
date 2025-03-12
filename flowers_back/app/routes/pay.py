@@ -192,6 +192,7 @@ async def notification(request: Request, db: Session = Depends(get_db)):
     payment.card_id = data.get('CardId')
     payment.rebill_id = data.get('RebillId')
     payment.pan = data.get('Pan')
+    payment.status = status
     if status == 'CONFIRMED':
         payment.timestamp = datetime.now()
 
