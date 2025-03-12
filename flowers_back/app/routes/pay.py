@@ -24,61 +24,22 @@ router = APIRouter()
 
 @router.get('/check')
 async def check(request: Request, db: Session = Depends(get_db)):
+    answer = {}
     user_id = request.query_params.get("user_id")
     find_pay_info = db.query(Pay).filter(User.id == user_id).order_by(Pay.id.desc()).first()
     if not find_pay_info:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pay info not found")
 
     payment_status = find_pay_info.status
-    payment_id = find_pay_info.payment_id
-    paid_until = find_pay_info.paid_until
+    answer['currentStatus'] = payment_status
 
-    if payment_status != 'CONFIRMED' and payment_status != 'canceled_by_user':
-        terminal_key = os.getenv('T_BANK_TERMINAL_KEY')
-        secret_key = os.getenv('T_BANK_SECRET')
+    ts = find_pay_info.timestamp
+    if ts:
+        answer['until'] = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S.%f") + timedelta(days=30)
 
-        data = {
-            "TerminalKey": terminal_key,
-            "PaymentId": payment_id,
-        }
+    answer['pan'] = find_pay_info.pan
 
-        data_for_token = [
-            {"TerminalKey": terminal_key},
-            {"PaymentId": payment_id},
-            {"Password": secret_key},
-        ]
-        hashed_token = generate_token(data_for_token)
-        data['Token'] = hashed_token
-
-        url = "https://securepay.tinkoff.ru/v2/GetState"
-        response = requests.post(url, json=data)
-
-        if response.status_code == 200:
-            response_data = response.json()
-            if response_data.get("Success"):
-                current_status = response_data.get('Status')
-                if current_status != payment_status:
-                    payment_status = current_status
-                    find_pay_info.status = payment_status
-
-                    current_date = datetime.now()
-
-                    find_pay_info.last_pay_date = current_date
-                    find_pay_info.paid_until = current_date + timedelta(days=30)
-                    db.commit()
-                    db.refresh(find_pay_info)
-                    if not find_pay_info.id:
-                        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error refreshing pay info")
-                    else:
-                        paid_until = find_pay_info.paid_until
-                # все статусы
-                # https://www.tbank.ru/kassa/dev/payments/#tag/Scenarii-oplaty-po-karte/Statusnaya-model-platezha
-            else:
-                print("Ошибка получения статуса:", response_data.get("Message"))
-        else:
-            print("Ошибка запроса:", response.status_code, response.text)
-
-    return {'currentStatus': payment_status, 'until': paid_until}
+    return answer
 
 
 @router.get("/init")
@@ -215,17 +176,24 @@ async def pay_cancel(request: Request, db: Session = Depends(get_db)):
 @router.post('/notification')
 async def notification(request: Request, db: Session = Depends(get_db)):
     data = await request.json()
-    if not data.get('Success'):
-        return 'ok'
-
     orderId = data.get('OrderId')
     payment = db.query(Pay).filter(Pay.order_id == orderId).first()
+    status = data.get('Status')
+
     if not payment.id:
+        return 'ok'
+
+    if not data.get('Success'):
+        payment.status = status
+        db.commit()
+        db.refresh(payment)
         return 'ok'
 
     payment.card_id = data.get('CardId')
     payment.rebill_id = data.get('RebillId')
     payment.pan = data.get('Pan')
+    if status == 'CONFIRMED':
+        payment.timestamp = datetime.now()
 
     db.commit()
     db.refresh(payment)
