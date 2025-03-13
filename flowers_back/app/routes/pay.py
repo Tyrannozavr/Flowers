@@ -26,18 +26,26 @@ router = APIRouter()
 async def check(request: Request, db: Session = Depends(get_db)):
     answer = {}
     user_id = request.query_params.get("user_id")
-    find_pay_info = db.query(Pay).filter(User.id == user_id).order_by(Pay.id.desc()).first()
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='user_id is reqiured')
+
+    find_pay_info = db.query(Pay).filter(Pay.user_id == user_id).order_by(Pay.id.desc()).first()
     if not find_pay_info:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pay info not found")
 
     payment_status = find_pay_info.status
     answer['currentStatus'] = payment_status
 
-    ts = find_pay_info.timestamp
-    if ts:
-        answer['until'] = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S.%f") + timedelta(days=30)
+    try:
+        ts = find_pay_info.timestamp
+        if ts:
+            answer['until'] = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S.%f") + timedelta(days=30)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid timestamp format")
 
-    answer['pan'] = find_pay_info.pan
+    pan = find_pay_info.pan
+    if pan:
+        answer['pan'] = pan
 
     return answer
 
