@@ -39,7 +39,7 @@ async def check(request: Request, db: Session = Depends(get_db)):
     try:
         ts = find_pay_info.timestamp
         if ts:
-            answer['until'] = ts + timedelta(days=30)
+            answer['until'] = ts + timedelta(minutes=5)
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid timestamp format")
 
