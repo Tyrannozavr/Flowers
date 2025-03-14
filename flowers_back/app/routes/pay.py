@@ -2,6 +2,7 @@ import hashlib
 import json
 import os
 from datetime import datetime, timedelta
+import time
 
 import requests
 from fastapi import APIRouter, HTTPException, status, Depends, Header, Request
@@ -84,7 +85,8 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create payment")
 
     payment_amount = 990 * 100  # в копейках
-    order_id = f'{user_id}-{init_pay.id}-temp'
+
+    order_id = f'{user_id}-{init_pay.id}-{int(time.time())}'
     description = f"Оплата заказа №{init_pay.id}"
     success_url = back_url
     fail_url = back_url
