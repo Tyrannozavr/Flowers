@@ -9,13 +9,8 @@ import requests
 from app.core.config import settings
 
 
-def log(t):
-    with open("subscriptoin_log.txt", "a") as file:
-        file.write(t + "\n")
-
-
 def charge():
-    log(f'{datetime.now()}')
+    print(f'{datetime.now()}')
     db = SessionLocal()
     try:
         res = get_pays(db)
@@ -33,7 +28,7 @@ def charge():
                 back_url = 'https://admin.flourum.ru/profile'
                 find_user = db.query(User).filter(User.id == user_id).first()
                 if not find_user:
-                    log('1 юзер не найден')
+                    print('1 юзер не найден')
                     continue
                 # не инкрементирует поэтому костыль
                 last_id_pay = db.query(Pay).order_by(Pay.id.desc()).first()
@@ -53,7 +48,7 @@ def charge():
                 db.commit()
                 db.refresh(init_pay)
                 if not init_pay.id:
-                    log('2 ошибка создания init_pay')
+                    print('2 ошибка создания init_pay')
                     continue
                 payment_amount = 990 * 100  # в копейках
                 order_id = f'{user_id}-{init_pay.id}-temp'
@@ -120,7 +115,7 @@ def charge():
                         db.refresh(init_pay)
 
                         if not init_pay.id:
-                            log('5 ошибка обновления init pay')
+                            print('5 ошибка обновления init pay')
 
                         data_charge = {
                             'TerminalKey': terminal_key,
@@ -138,18 +133,18 @@ def charge():
                         if res_charge.status_code == 200:
                             response_data_charge = res_charge.json()
                             if response_data_charge.get('Success'):
-                                log(f'8 {json.dumps(response_data_charge)}')
+                                print(f'8 {json.dumps(response_data_charge)}')
                             else:
-                                log(f'7 ошибка charge')
+                                print(f'7 ошибка charge')
                         else:
-                            log(f'6 Ошибка запроса: {res_charge.status_code, res_charge.text}')
+                            print(f'6 Ошибка запроса: {res_charge.status_code, res_charge.text}')
                     else:
-                        log(f'4 Ошибка инициализации платежа: {response_data.get("Message")}')
+                        print(f'4 Ошибка инициализации платежа: {response_data.get("Message")}')
                 else:
-                    log(f'5 Ошибка запроса: {response.status_code, response.text}')
+                    print(f'5 Ошибка запроса: {response.status_code, response.text}')
     finally:
         db.close()
-    log(f' ~~~~~~~~ ')
+    print(f' ~~~~~~~~ ')
 
 
 charge()
