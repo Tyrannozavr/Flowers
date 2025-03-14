@@ -15,7 +15,7 @@ def log(t):
         file.write(t + "\n")
 
 
-def test_get_pays():
+def charge():
     log(f'{datetime.now()}')
     db = SessionLocal()
     try:
@@ -154,4 +154,4 @@ def test_get_pays():
     log(f' ~~~~~~~~ ')
 
 
-test_get_pays()
+charge()
