@@ -7,6 +7,7 @@ from app.models.user import User
 from app.models.pay import Pay
 import requests
 from app.core.config import settings
+import time
 
 
 def charge():
@@ -51,7 +52,7 @@ def charge():
                     print('2 ошибка создания init_pay')
                     continue
                 payment_amount = 990 * 100  # в копейках
-                order_id = f'{user_id}-{init_pay.id}-temp'
+                order_id = f'{user_id}-{init_pay.id}-rebill-{int(time.time())}'
                 description = f"Оплата заказа №{init_pay.id}"
                 success_url = back_url
                 fail_url = back_url
@@ -135,7 +136,7 @@ def charge():
                             if response_data_charge.get('Success'):
                                 print(f'8 {json.dumps(response_data_charge)}')
                             else:
-                                print(f'7 ошибка charge')
+                                print(f'7 ошибка charge {json.dumps(response_data_charge)}')
                         else:
                             print(f'6 Ошибка запроса: {res_charge.status_code, res_charge.text}')
                     else:
