@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     T_BANK_SECRET: str = ''
 
     class Config:
-        env_file = ".env"
+        env_file = "/root/flowers/flowers_back/.env"
         env_file_encoding = "utf-8"
 
 
