@@ -8,13 +8,13 @@ from app.models.user import User
 from app.models.product import Product
 from app.schemas.shop import ShopResponse, OwnerShopResponse
 from app.schemas.product import ProductResponse
-import os 
+import os
 import uuid
 from app.routes.admin import get_current_user
 from sqlalchemy import text
 from typing import List, Dict
 
-router = APIRouter() 
+router = APIRouter()
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -33,13 +33,13 @@ async def create_shop(
     security=[{"BearerAuth": []}]
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
-    
-    if not find_user: 
+
+    if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    
+
     if find_user.is_removed:
         raise HTTPException(status_code=403, detail="Пользователю запрещено создавать новые магазины")
-    
+
     existing_shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
     if existing_shop:
         raise HTTPException(status_code=400, detail="Поддомен уже существует")
@@ -97,7 +97,7 @@ def get_shops(
 ):
     print(current_user.id, current_user.username)
     shops = db.query(Shop).filter(Shop.owner_id == current_user.id).all()
-    
+
     if not shops:
         raise HTTPException(status_code=404, detail="Нет магазинов для данного пользователя")
 
@@ -147,7 +147,7 @@ def get_shop_by_domain(
     subdomain = request.headers.get("X-Subdomain")
     if not subdomain:
         raise HTTPException(status_code=400, detail="Subdomain header is required")
-    
+
     shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
@@ -216,7 +216,7 @@ async def update_shop(
 
     if find_user.is_removed:
         raise HTTPException(status_code=403, detail="Пользователю запрещено обновлять магазины")
-    
+
     shop = db.query(Shop).filter(Shop.id == shop_id).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
@@ -251,13 +251,13 @@ async def update_shop(
 @router.delete("/{shop_id}")
 def delete_shop(shop_id: int, user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     find_user = db.query(User).filter(User.id == user.id).first()
-    
-    if not find_user: 
+
+    if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    
+
     if find_user.is_removed:
         raise HTTPException(status_code=403, detail="Пользователю запрещено удалять магазины")
-    
+
     shop = db.query(Shop).filter(Shop.id == shop_id).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
@@ -278,7 +278,7 @@ def get_products(
     products = db.query(Product).filter(Product.shop_id == shop_id).all()
     if not products:
         raise HTTPException(status_code=404, detail="Продукты не найдены")
-    
+
     base_url = str(request.base_url)
     return [
         ProductResponse(
@@ -311,7 +311,9 @@ def get_product(
         price=product.price,
         description=product.description,
         ingredients=product.ingredients,
+        categoryId=product.category_id,
         photo_url=product.photo_url if product.photo_url else None,
+        availability=product.availability
     )
 
 @router.post("/{shop_id}/products", response_model=ProductResponse)
@@ -320,6 +322,7 @@ async def create_product(
     name: str = Form(...),
     price: str = Form(...),
     category_id: int = Form(...),
+    availability: Optional[str] = Form(None),
     description: str = Form(""),
     ingredients: str = Form(""),
     image: UploadFile = None,
@@ -327,22 +330,22 @@ async def create_product(
     user: dict = Depends(get_current_user)
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
-    
-    if not find_user: 
+
+    if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    
+
     if find_user.is_removed:
         raise HTTPException(status_code=403, detail="Пользователю запрещено создавать новые продукты")
-    
+
     price = int(price, 10)
-    
+
     if image:
         os.makedirs("static/uploads", exist_ok=True)
 
         file_extension = image.filename.split(".")[-1]
         unique_filename = f"{uuid.uuid4()}.{file_extension}"
         save_path = os.path.join(UPLOAD_DIR, unique_filename)
-        
+
         with open(save_path, "wb") as f:
             f.write(await image.read())
 
@@ -358,6 +361,7 @@ async def create_product(
         description=description,
         ingredients=ingredients,
         photo_url=photo_url,
+        availability=availability
     )
     db.add(new_product)
     db.commit()
@@ -434,6 +438,8 @@ async def update_product(
     product_id: int,
     name: str = Form(...),
     description: Optional[str] = Form(None),
+    category_id: Optional[int] = Form(None),
+    availability: Optional[str] = Form(None),
     price: str = Form(...),
     ingredients: Optional[str] = Form(None),
     image: Optional[UploadFile] = None,
@@ -441,13 +447,13 @@ async def update_product(
     user: dict = Depends(get_current_user)
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
-    
-    if not find_user: 
+
+    if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    
+
     if find_user.is_removed:
         raise HTTPException(status_code=403, detail="Пользователю запрещено создавать обновлять продукты")
-    
+
     price = int(price, 10)
     product = db.query(Product).filter(
         Product.shop_id == shop_id, Product.id == product_id
@@ -459,6 +465,8 @@ async def update_product(
     product.description = description
     product.price = price
     product.ingredients = ingredients
+    product.category_id = category_id
+    product.availability = availability
 
     if image:
         os.makedirs("static/uploads", exist_ok=True)

@@ -1,13 +1,18 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
+from app.models.product import ProductAvailabilityVariants
+
+
 class ProductResponse(BaseModel):
     id: int
     name: str
     description: Optional[str]
     price: float
     ingredients: Optional[str]
-    photo_url: Optional[str] = "" 
+    photo_url: Optional[str] = ""
+    categoryId: Optional[int] = None,
+    availability: ProductAvailabilityVariants = ProductAvailabilityVariants.AVAILABLE
 
     class Config:
         orm_mode = True
