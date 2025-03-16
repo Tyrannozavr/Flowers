@@ -1,24 +1,26 @@
 from fastapi import APIRouter, HTTPException, Depends, Request, Query
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
+from app.models.product import Product, ProductAvailabilityVariants, AVAILABILITY_LABELS
 from app.models.shop import Shop
-from app.models.product import Product
 from app.schemas.product import ProductPageResponse, ProductResponse
 
 router = APIRouter()
 
+
 @router.get("/", response_model=ProductPageResponse)
 def get_products_by_subdomain_with_filtering_and_pagination(
-    request: Request,
-    category_id: int = Query(None, description="ID категории для фильтрации"),
-    page: int = Query(1, ge=1, description="Номер страницы"),
-    per_page: int = Query(10, ge=1, le=100, description="Количество продуктов на странице"),
-    db: Session = Depends(get_db),
+        request: Request,
+        category_id: int = Query(None, description="ID категории для фильтрации"),
+        page: int = Query(1, ge=1, description="Номер страницы"),
+        per_page: int = Query(10, ge=1, le=100, description="Количество продуктов на странице"),
+        db: Session = Depends(get_db),
 ):
     subdomain = request.headers.get("X-Subdomain")
     if not subdomain:
         raise HTTPException(status_code=400, detail="Subdomain header is required")
-    
+
     shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
@@ -40,23 +42,33 @@ def get_products_by_subdomain_with_filtering_and_pagination(
         page=page,
         per_page=per_page,
         products=[
-        ProductResponse(
-            id=product.id,
-            name=product.name,
-            description=product.description,
-            price=product.price,
-            ingredients=product.ingredients,
-            photo_url=f"{request.base_url}static/uploads/{product.photo_url}" if product.photo_url else ""
-        )
-        for product in products
-    ],
+            ProductResponse(
+                id=product.id,
+                name=product.name,
+                description=product.description,
+                price=product.price,
+                ingredients=product.ingredients,
+                photo_url=f"{request.base_url}static/uploads/{product.photo_url}" if product.photo_url else ""
+            )
+            for product in products
+        ],
     )
+
+
+@router.get("/availability-options")
+def get_availability_options(db: Session = Depends(get_db)):
+    availability_options = [
+        {"key": option.value, "value": AVAILABILITY_LABELS.get(option.value)}
+        for option in ProductAvailabilityVariants
+    ]
+    return availability_options
+
 
 @router.get("/{product_id}", response_model=ProductResponse)
 def get_product_by_id(
-    product_id: int,
-    request: Request,
-    db: Session = Depends(get_db)
+        product_id: int,
+        request: Request,
+        db: Session = Depends(get_db)
 ):
     subdomain = request.headers.get("X-Subdomain")
     if not subdomain:
