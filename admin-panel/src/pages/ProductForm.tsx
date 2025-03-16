@@ -59,7 +59,7 @@ const ProductForm: React.FC = () => {
                     categoryId: data.categoryId
                         ? data.categoryId.toString()
                         : "",
-                    availability: "",
+                    availability: data.availability,
                     image: null,
                 });
             },
@@ -141,6 +141,7 @@ const ProductForm: React.FC = () => {
         data.append("price", formData.price.toString());
         data.append("category_id", formData.categoryId);
         data.append("ingredients", formData.ingredients || "");
+        data.append("availability", formData.availability || "");
         if (formData.image) {
             data.append("image", formData.image);
         }
