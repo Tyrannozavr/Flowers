@@ -9,7 +9,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchCategories } from "../api/categories";
@@ -29,6 +29,7 @@ const ProductForm: React.FC = () => {
         price: 0,
         ingredients: "",
         categoryId: "",
+        availabilityId: "",
         image: null as File | null,
     });
 
@@ -58,6 +59,7 @@ const ProductForm: React.FC = () => {
                     categoryId: data.categoryId
                         ? data.categoryId.toString()
                         : "",
+                    availabilityId: "",
                     image: null,
                 });
             },
@@ -68,7 +70,33 @@ const ProductForm: React.FC = () => {
         "categories",
         fetchCategories
     );
+    type availabilityVariant = {
+        id: number;
+        name: string;
+    }
 
+    const productAbilityVariants = [
+        {
+            id: 1,
+            name: "Товар в наличии"
+        },
+        {
+            id: 2,
+            name: "Товар под заказ"
+        },
+        {
+            id: 3,
+            name: "Товар скрыт"
+        }
+    ]
+    useEffect(() => {
+        if (productAbilityVariants && productAbilityVariants.length > 0 && !formData.availabilityId) {
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                availabilityId: productAbilityVariants[0].id.toString(),
+            }));
+        }
+    }, [productAbilityVariants, formData.availabilityId]);
     const createMutation = useMutation(
         ({ shopId, formData }: { shopId: number; formData: FormData }) =>
             createProduct({ shopId, formData }),
@@ -223,6 +251,37 @@ const ProductForm: React.FC = () => {
                             {errors.categoryId}
                         </Typography>
                     )}
+                </FormControl>
+                <FormControl fullWidth>
+                    <InputLabel id="availability-label">Товар в наличии</InputLabel>
+                    <Select
+                        labelId="availability-label"
+                        name="availabilityId"
+                        value={formData.availabilityId}
+                        onChange={handleChange}
+                        required
+                        sx={{
+                            // Убираем стрелочку
+                            "& .MuiSelect-icon": {
+                                display: "none", // Скрываем иконку
+                            },
+                            // Заполняем фон цветом primary
+                            backgroundColor: "primary.main", // Используем primary цвет из темы
+                            color: "primary.contrastText", // Цвет текста, чтобы был контрастным
+                            "&:hover": {
+                                backgroundColor: "primary.dark", // Темнее при наведении
+                            },
+                        }}
+                    >
+                        {productAbilityVariants.map((variant: availabilityVariant) => (
+                            <MenuItem
+                                key={variant.id}
+                                value={variant.id.toString()}
+                            >
+                                {variant.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
                 </FormControl>
                 <Button
                     variant="contained"
