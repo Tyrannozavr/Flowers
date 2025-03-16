@@ -13,7 +13,7 @@ import React, {useEffect, useState} from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchCategories } from "../api/categories";
-import { createProduct, fetchProduct, updateProduct } from "../api/products";
+import {createProduct, fetchAvailabilityOptions, fetchProduct, updateProduct} from "../api/products";
 
 const ProductForm: React.FC = () => {
     const { id, productId } = useParams();
@@ -29,7 +29,7 @@ const ProductForm: React.FC = () => {
         price: 0,
         ingredients: "",
         categoryId: "",
-        availabilityId: "",
+        availability: "",
         image: null as File | null,
     });
 
@@ -59,7 +59,7 @@ const ProductForm: React.FC = () => {
                     categoryId: data.categoryId
                         ? data.categoryId.toString()
                         : "",
-                    availabilityId: "",
+                    availability: "",
                     image: null,
                 });
             },
@@ -70,33 +70,23 @@ const ProductForm: React.FC = () => {
         "categories",
         fetchCategories
     );
-    type availabilityVariant = {
-        id: number;
-        name: string;
+    type availabilityOption = {
+        key: string;
+        value: string;
     }
+    const { data: availabilityOptions, isLoading: isLoadingOptions } = useQuery(
+        "availabilityOptions",
+        fetchAvailabilityOptions
+    );
 
-    const productAbilityVariants = [
-        {
-            id: 1,
-            name: "Товар в наличии"
-        },
-        {
-            id: 2,
-            name: "Товар под заказ"
-        },
-        {
-            id: 3,
-            name: "Товар скрыт"
-        }
-    ]
     useEffect(() => {
-        if (productAbilityVariants && productAbilityVariants.length > 0 && !formData.availabilityId) {
+        if (availabilityOptions && availabilityOptions.length > 0 && !formData.availability) {
             setFormData((prevFormData) => ({
                 ...prevFormData,
-                availabilityId: productAbilityVariants[0].id.toString(),
+                availability: availabilityOptions[0].key,
             }));
         }
-    }, [productAbilityVariants, formData.availabilityId]);
+    }, [availabilityOptions, formData.availability]);
     const createMutation = useMutation(
         ({ shopId, formData }: { shopId: number; formData: FormData }) =>
             createProduct({ shopId, formData }),
@@ -172,7 +162,8 @@ const ProductForm: React.FC = () => {
     if (isEdit && !categories) return <Typography>Загрузка...</Typography>;
     if (isLoadingCategories)
         return <Typography>Загрузка категорий...</Typography>;
-
+    if (isLoadingOptions)
+        return <Typography>Загрузка опций...</Typography>;
     return (
         <Box p={3} maxWidth="600px" mx="auto">
             <Button
@@ -256,8 +247,8 @@ const ProductForm: React.FC = () => {
                     <InputLabel id="availability-label">Товар в наличии</InputLabel>
                     <Select
                         labelId="availability-label"
-                        name="availabilityId"
-                        value={formData.availabilityId}
+                        name="availability"
+                        value={formData.availability}
                         onChange={handleChange}
                         required
                         sx={{
@@ -273,12 +264,12 @@ const ProductForm: React.FC = () => {
                             },
                         }}
                     >
-                        {productAbilityVariants.map((variant: availabilityVariant) => (
+                        {availabilityOptions.map((variant: availabilityOption) => (
                             <MenuItem
-                                key={variant.id}
-                                value={variant.id.toString()}
+                                key={variant.key}
+                                value={variant.key}
                             >
-                                {variant.name}
+                                {variant.value}
                             </MenuItem>
                         ))}
                     </Select>

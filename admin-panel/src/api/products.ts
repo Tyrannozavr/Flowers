@@ -61,3 +61,8 @@ export const deleteProduct = async (shopId: number, productId: number) => {
     );
     return response.data;
 };
+
+export const fetchAvailabilityOptions = async () => {
+    const response = await axios.get(`/products/availability-options`);
+    return response.data;
+};
