@@ -33,3 +33,6 @@ alembic revision --autogenerate
 ```bash
 alembic upgrade head
 ```
+```bash
+docker compose exec flowers_back  alembic upgrade head
+```
