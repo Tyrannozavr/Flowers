@@ -116,6 +116,7 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
         "SuccessURL": success_url,
         "FailURL": fail_url,
         "NotificationURL": "https://api.flourum.ru/pay/notification",
+        "CustomerKey": str(user_id),
         "DATA": {
             "Email": user_email
         },
