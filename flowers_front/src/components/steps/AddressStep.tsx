@@ -6,12 +6,23 @@ import { IOrder, clearOrderError, setFormData } from "../../redux/order/slice";
 import AddressFields from "../AddressFields";
 import DeliveryDateSelector from "../DeliveryDateSelector";
 import TimeSlotSelector from "../TimeSlotSelector";
+import { useTheme } from "../../theme/ThemeProvider"
 
 const AddressStep: React.FC = () => {
+    interface Address {
+        address: string;
+    }
+
     const dispatch = useDispatch();
     const formData = useSelector(
         (state: { order: { formData: IOrder } }) => state.order.formData
     );
+
+    const theme = useTheme() as { addresses: Address[] };
+
+    const changeAddress = (value: string) => {
+        dispatch(setFormData({ street: value }));
+    };
 
     // Обработчик изменения выбора метода доставки
     const handleDeliveryMethodChange = (method: "DELIVERY" | "PICKUP") => {
@@ -22,7 +33,7 @@ const AddressStep: React.FC = () => {
             dispatch(
                 setFormData({
                     city: "",
-                    street: "",
+                    // street: "",
                     house: "",
                     apartment: "",
                     building: "",
@@ -30,6 +41,10 @@ const AddressStep: React.FC = () => {
             );
         }
     };
+
+    if (!formData.street && theme.addresses.length > 0) {
+        changeAddress(theme.addresses[0].address);
+    }
 
     return (
         <div>
@@ -61,11 +76,26 @@ const AddressStep: React.FC = () => {
             </div>
 
             {formData.deliveryMethod === "PICKUP" ? (
-                <div className="mb-6">
-                    <label className="block text-gray-700 font-medium mb-2">
-                        г.Санкт-Петербург, ул.Московский проспект, д.73
-                    </label>
-                </div>
+                theme.addresses.length > 0 ? (
+                    <div className="mb-6">
+                        <label className="block text-gray-700 font-medium mb-2">
+                            <div>
+                                <select
+                                    name="street"
+                                    defaultValue={formData.street || theme.addresses[0].address}
+                                    onChange={(e) => changeAddress(e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-accent focus:outline-none border-gray-300"
+                                >
+                                    {theme.addresses.map((slot, i) => (
+                                        <option key={i} value={slot.address}>
+                                            {slot.address}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </label>
+                    </div>
+                ) : null
             ) : (
                 <AddressFields />
             )}
