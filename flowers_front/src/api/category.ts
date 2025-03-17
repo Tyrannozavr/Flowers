@@ -8,7 +8,7 @@ export interface CategoryResponse {
 
 export const fetchCategories = async (): Promise<CategoryResponse[]> => {
   try {
-    const response = await axios.get<CategoryResponse[]>("/categories");
+    const response = await axios.get<CategoryResponse[]>("/categories/");
     return response.data;
   } catch (error) {
     console.error("Ошибка при получении категорий:", error);
