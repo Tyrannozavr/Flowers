@@ -1,7 +1,7 @@
 import { instance as axios } from "./axios";
 
 export const fetchShops = async () => {
-    const response = await axios.get("/shops");
+    const response = await axios.get("/shops/");
     return response.data;
 };
 
@@ -11,7 +11,7 @@ export const fetchShop = async (id: number) => {
 };
 
 export const createShop = async (formData: FormData) => {
-    const response = await axios.post("/shops", formData, {
+    const response = await axios.post("/shops/", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
         },

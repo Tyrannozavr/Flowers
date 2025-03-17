@@ -23,7 +23,9 @@ services:
       dockerfile: Dockerfile
     expose:
       - "8000"
-
+    volumes:
+      - ./flowers_back/uploads:/usr/src/app/uploads
+      - ./flowers_back/static:/usr/src/app/static
 
   # Aiogram bot service
   flowers_bot:
@@ -45,3 +47,5 @@ services:
       - flowers_bot
     volumes:
       - ./logs/nginx:/var/log/nginx
+      - ./flowers_back/uploads:/uploads
+      - ./flowers_back/static:/static
