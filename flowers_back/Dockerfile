@@ -3,22 +3,28 @@ FROM python:3.9-slim
 # Set working directory
 WORKDIR /app
 
+# Установка необходимых пакетов
 RUN apt-get update && \
-    apt-get install -y libpq-dev gcc
-
-# Copy requirements file
-COPY requirements.txt .
-RUN pip install --upgrade pip
-# Install dependencies and run migrations
-
-RUN pip install --no-cache-dir -r requirements.txt
-
-RUN apt-get update && \
-    apt-get install -y libpq-dev && \
+    apt-get install -y libpq-dev gcc cron && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy application code
+# Установка зависимостей Python
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Копирование кода приложения
 COPY . .
 
-# Run FastAPI app with uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Настройка cron
+COPY crontab /etc/cron.d/mycron
+RUN chmod 0644 /etc/cron.d/mycron && \
+    crontab /etc/cron.d/mycron && \
+    touch /app/cron.log
+
+# Скрипт запуска cron и uvicorn
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Запуск приложения
+CMD ["/entrypoint.sh"]

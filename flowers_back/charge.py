@@ -134,6 +134,9 @@ def charge():
                         if res_charge.status_code == 200:
                             response_data_charge = res_charge.json()
                             if response_data_charge.get('Success'):
+                                init_pay.timestamp = datetime.now()
+                                db.commit()
+                                db.refresh(init_pay)
                                 print(f'8 {json.dumps(response_data_charge)}')
                             else:
                                 print(f'7 ошибка charge {json.dumps(response_data_charge)}')
