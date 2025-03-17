@@ -23,8 +23,6 @@ services:
       dockerfile: Dockerfile
     expose:
       - "8000"
-    depends_on:
-      - flowers_db
 
 
   # Aiogram bot service
@@ -45,6 +43,8 @@ services:
       - admin-panel
       - flowers_back
       - flowers_bot
+    volumes:
+      - ./logs/nginx:/var/log/nginx
 
 
   flowers_db:
