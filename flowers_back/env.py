@@ -8,7 +8,9 @@ config = context.config
 fileConfig(config.config_file_name)
 
 # Получение строки подключения из переменной окружения
+print("database url is very important")
 DATABASE_URL = os.getenv("DATABASE_URL")
+
 if DATABASE_URL:
     config.set_main_option("sqlalchemy.url", DATABASE_URL)
 

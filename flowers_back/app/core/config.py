@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class Settings(BaseSettings):
@@ -14,8 +19,8 @@ class Settings(BaseSettings):
     T_BANK_SECRET: str = ''
 
     class Config:
-        env_file = "/root/flowers/flowers_back/.env"
+        env_file = BASE_DIR / ".env"
         env_file_encoding = "utf-8"
 
-
+print(BASE_DIR / ".env")
 settings = Settings()

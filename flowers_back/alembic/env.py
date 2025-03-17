@@ -3,10 +3,10 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
+print("databse url is not")
 # Добавляем корневую папку проекта в PYTHONPATH
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config
@@ -21,7 +21,7 @@ from app.models import product, shop, order, category, user, consultation, pay
 # Настройка URL подключения к БД
 config = context.config
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
-
+print("Database url is ",  os.getenv("DATABASE_URL"))
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 target_metadata = Base.metadata

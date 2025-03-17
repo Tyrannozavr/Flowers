@@ -1,0 +1,46 @@
+services:
+  flowers_front:
+    build:
+      context: ./flowers_front
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+
+  admin-panel:
+    build:
+      context: ./admin-panel
+      dockerfile: Dockerfile
+    ports:
+      - "5174:5174"
+    environment:
+      - NODE_ENV=development
+
+
+  flowers_back:
+    build:
+      context: ./flowers_back
+      dockerfile: Dockerfile
+    expose:
+      - "8000"
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+
+#
+#  # Aiogram bot service
+#  telegram-bot:
+#    build:
+#      context: ./bot
+#      dockerfile: Dockerfile
+#    environment:
+#      - BOT_TOKEN=${BOT_TOKEN}
+#    volumes:
+#      - ./bot:/app
+#    depends_on:
+#      - fastapi
+
