@@ -24,8 +24,8 @@ services:
     expose:
       - "8000"
     volumes:
-      - ./flowers_back/uploads:/usr/src/app/uploads
-      - ./flowers_back/static:/usr/src/app/static
+      - ./flowers_back/uploads:/app/uploads
+      - ./flowers_back/static:/app/uploads
 
   # Aiogram bot service
   flowers_bot:
