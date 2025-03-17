@@ -71,14 +71,6 @@ const Footer: React.FC = () => {
                         <br />
                         Санкт-Петербург, Меридианная 8
                     </p> */}
-                    <p className="text-sm mt-4">
-                        <a
-                            href="mailto:flowers.more@yandex.ru"
-                            className="hover:underline"
-                        >
-                            flowers.more@yandex.ru
-                        </a>
-                    </p>
                     <div className="flex space-x-4 mt-4">
                         <a href="#" className="text-2xl hover:opacity-80">
                             <i className="fab fa-instagram"></i>
