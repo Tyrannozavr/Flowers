@@ -526,6 +526,20 @@ def add_shop_categories(
         imageUrl=HttpUrl(f"{request.base_url}{category.image_url}"),
     ) for category in categories]
 
+@router.delete("/{shop_id}/categories/{category_id}")
+def delete_category_from_shop(
+        shop_id: int,
+        category_id: int,
+        db: Session = Depends(get_db),
+        user: dict = Depends(get_current_user)
+):
+    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
+    if shop.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
+
+    shop_repository.delete_shop_category(db=db, shop_id=shop_id, category_id=category_id)
+    return {"detail": "Категория удалена"}
+
 
 
 @router.delete("/{shop_id}/products/{product_id}")

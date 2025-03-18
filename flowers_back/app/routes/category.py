@@ -73,3 +73,11 @@ def create_category(
         value=category.value,
         imageUrl=HttpUrl(image_url_response)
     )
+
+@router.delete("/{category_id}")
+def delete_category(
+        category_id: int,
+        db: Session = Depends(get_db)
+):
+    app.repositories.categories.delete_category_by_id(db=db, category_id=category_id)
+    return {"message": "Category deleted successfully"}

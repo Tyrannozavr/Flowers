@@ -58,3 +58,10 @@ def remove_shop_category(db: Session, shop_id: int, category_id: int):
         db.commit()
         return True
     return False
+
+def delete_shop_category(db: Session, category_id: int, shop_id: int):
+    (db.query(ShopCategories)
+     .filter(ShopCategories.category_id == category_id and ShopCategories.shop_id == shop_id)
+     .delete()
+     )
+    db.commit()

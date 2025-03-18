@@ -14,7 +14,6 @@ class Item(BaseModel):
     quantity: int
 
     class Config:
-        orm_mode = True
         from_attributes = True
 
 class Order(BaseModel):
@@ -36,7 +35,6 @@ class Order(BaseModel):
     wishes: str
 
     class Config:
-        orm_mode = True
         from_attributes = True
 
 class OwnerResponse(BaseModel):
@@ -45,7 +43,7 @@ class OwnerResponse(BaseModel):
     telegram_ids: List[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ShopResponse(BaseModel):
     id: int
@@ -53,7 +51,7 @@ class ShopResponse(BaseModel):
     owner: OwnerResponse
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class OrderResponse(BaseModel):
     id: int
@@ -78,5 +76,4 @@ class OrderResponse(BaseModel):
     shop_id: Optional[int] = None
 
     class Config:
-        orm_mode = True
         from_attributes = True

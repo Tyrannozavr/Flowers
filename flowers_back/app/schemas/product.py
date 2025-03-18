@@ -15,7 +15,7 @@ class ProductResponse(BaseModel):
     availability: ProductAvailabilityVariants = ProductAvailabilityVariants.AVAILABLE
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         
 class ProductPageResponse(BaseModel):
     total: int

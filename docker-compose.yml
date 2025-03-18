@@ -25,6 +25,7 @@ services:
       - "8000"
     volumes:
       - ./flowers_back/uploads:/app/uploads
+      - ./flowers_back/categories:/app/categories
       - ./flowers_back/static:/app/static
 
   # Aiogram bot service
@@ -48,4 +49,5 @@ services:
     volumes:
       - ./logs/nginx:/var/log/nginx
       - ./flowers_back/uploads:/uploads
+      - ./flowers_back/categories:/categories
       - ./flowers_back/static:/static
