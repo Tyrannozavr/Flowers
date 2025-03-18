@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
+
+from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR
 from app.models.category import Category
-from app.repositories.shop import get_categories, get_shop_list, get_shop_categories_list, add_shop_category
+from app.repositories.shop import get_shop_list, get_shop_categories_list, add_shop_category
+from app.repositories import categories as categories_repository
 
 
 def seed_categories(db: Session):
@@ -20,11 +23,11 @@ def seed_categories(db: Session):
     for category in categories:
         existing_category = db.query(Category).filter(Category.name == category["name"]).first()
         if not existing_category:
-            new_category = Category(**category)
+            new_category = Category(**category, image_url=f"{CATEGORY_IMAGE_RETRIEVAL_DIR}/{category.get('value')}")
             db.add(new_category)
 
     db.commit()
-    created_categories = get_categories(db=db)
+    created_categories = categories_repository.get_categories(db=db)
     shops = get_shop_categories_list(db=db)
     for shop in shops:
         if not shop.categories:

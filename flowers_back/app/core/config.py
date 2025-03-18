@@ -23,3 +23,5 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
 settings = Settings()
+CATEGORY_IMAGE_UPLOAD_DIR = "categories"
+CATEGORY_IMAGE_RETRIEVAL_DIR = "static/categories"
