@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR
 from app.core.database import get_db
+from app.models.category import Category
 from app.models.shop import Shop
 from app.models.user import User
 from app.models.product import Product
@@ -100,8 +101,6 @@ def get_shops(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    print("Get shops handler")
-    print(current_user.id, current_user.username)
     shops = db.query(Shop).filter(Shop.owner_id == current_user.id).all()
 
     if not shops:
@@ -496,6 +495,8 @@ def get_shop_categories(
         db: Session = Depends(get_db),
 ):
     categories = shop_repository.get_categories_by_shop_id(shop_id=shop_id, db=db)
+    if not categories:
+        categories = db.query(Category).all()[:15]
     return [CategoryResponse(
         id=category.id,
         name=category.name,
