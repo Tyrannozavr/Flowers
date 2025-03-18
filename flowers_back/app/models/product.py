@@ -4,6 +4,8 @@ from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from app.models.category import Category
+from app.models.shop import Shop
+
 
 class ProductAvailabilityVariants(Enum):
     AVAILABLE = "AVAILABLE"

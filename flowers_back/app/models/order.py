@@ -1,13 +1,16 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from app.core.database import Base
+from app.models.shop import Shop
 import enum
+
 
 class OrderStatus(enum.Enum):
     NOT_PAID = "NOT_PAID"
     PAID = "PAID"
     CANCELED = "CANCELED"
-    
+
+
 class Order(Base):
     __tablename__ = "orders"
 
