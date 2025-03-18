@@ -5,9 +5,12 @@ from fastapi import APIRouter, Request, Depends, UploadFile, Form
 from pydantic import HttpUrl
 from sqlalchemy.orm import Session
 
+import app.repositories.categories
 from app.core.config import CATEGORY_IMAGE_UPLOAD_DIR, CATEGORY_IMAGE_RETRIEVAL_DIR
 from app.core.database import get_db
+from app.dependencies.subdomain import ShopDep
 from app.models.category import Category
+from app.models.shop import Shop
 from app.schemas.category import CategoryResponse
 from app.repositories import categories as categories_repository
 
@@ -15,9 +18,21 @@ router = APIRouter()
 
 
 @router.get("/", response_model=list[CategoryResponse])
-def get_categories(request: Request, db: Session = Depends(get_db)):
+def get_categories(
+        request: Request,
+        shop: ShopDep,
+        db: Session = Depends(get_db),
+):
+
     base_url = str(request.base_url)
-    categories = categories_repository.get_categories(db=db)
+    if shop is None:
+        categories = categories_repository.get_categories(db=db)
+    else:
+        categories = app.repositories.categories.get_categories_by_shop_id(db=db, shop_id=shop.id)
+        print("shop id is ", shop.id, categories)
+        if categories is None:
+            categories = app.repositories.categories.get_categories_by_shop_id(db=db, shop_id=shop.id)[:15]
+
     return [
         CategoryResponse(
             id=category.id,

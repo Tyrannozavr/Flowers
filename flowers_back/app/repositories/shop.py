@@ -6,14 +6,14 @@ from app.models.category import Category
 from app.models.shop import Shop, ShopCategories
 
 
-def get_categories_by_shop_id(db: Session, shop_id: int) -> list[Type[Category]]:
-    return db.query(Category).join(Category.shops).filter(Category.shops.any(shop_id=shop_id)).all()
-
 def get_shop_list(db: Session) -> list[Type[Shop]]:
     return db.query(Shop).all()
 
 def get_shop_by_id(db: Session, shop_id: int) -> Type[Shop]:
     return db.query(Shop).filter(Shop.id == shop_id).first()
+
+def get_shop_by_subdomain(db_session, subdomain: str):
+    return db_session.query(Shop).filter(Shop.subdomain == subdomain).first()
 
 def get_shop_categories_list(db: Session) -> list[Type[Shop]]:
     return (

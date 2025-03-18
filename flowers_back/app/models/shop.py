@@ -27,6 +27,8 @@ class Shop(Base):
     addresses = Column(JSON,  nullable=True)
 
 
+
+
 class ShopCategories(Base):
     __tablename__ = "shop_categories"
 

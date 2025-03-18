@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request
 from pydantic import HttpUrl
 from sqlalchemy.orm import Session
 
+import app.repositories.categories
 from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR
 from app.core.database import get_db
 from app.models.category import Category
@@ -494,15 +495,16 @@ def get_shop_categories(
         shop_id: int,
         db: Session = Depends(get_db),
 ):
-    categories = shop_repository.get_categories_by_shop_id(shop_id=shop_id, db=db)
-    if not categories:
-        categories = db.query(Category).all()[:15]
+    categories = app.repositories.categories.get_categories_by_shop_id(shop_id=shop_id, db=db)
     return [CategoryResponse(
         id=category.id,
         name=category.name,
         value=category.value,
         imageUrl=HttpUrl(f"{request.base_url}{category.image_url}"),
     ) for category in categories]
+
+
+
 
 @router.post("/{shop_id}/categories")
 def add_shop_categories(
@@ -516,7 +518,7 @@ def add_shop_categories(
     if shop.owner_id != user.id:
         raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
     shop_repository.add_shop_categories(db=db, categories=category_list, shop_id=shop_id)
-    categories = shop_repository.get_categories_by_shop_id(db=db, shop_id=shop.id)
+    categories = app.repositories.categories.get_categories_by_shop_id(db=db, shop_id=shop.id)
     return [CategoryResponse(
         id=category.id,
         name=category.name,
