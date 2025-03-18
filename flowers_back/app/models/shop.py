@@ -1,12 +1,16 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
-from app.models.product import Product
-from app.models.order import Order
-from app.models.consultation import Consultation
-from app.models.category import Category
+
 from app.core.database import Base
 
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from app.models.product import Product
+    from app.models.order import Order
+    from app.models.consultation import Consultation
+    from app.models.category import Category
 
 class Shop(Base):
     __tablename__ = "shops"

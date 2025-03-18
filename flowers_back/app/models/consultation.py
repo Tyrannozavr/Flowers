@@ -1,7 +1,11 @@
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
 from app.core.database import Base
 from sqlalchemy.orm import relationship
-from app.models.shop import Shop
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.shop import Shop
 
 
 class Consultation(Base):
