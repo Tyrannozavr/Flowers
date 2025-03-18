@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Union
 
 from fastapi import Request, Depends, HTTPException
 from requests import Session
@@ -12,7 +12,7 @@ def get_subdomain(request: Request) -> str:
 
 SubdomainDep = Annotated[str, Depends(get_subdomain)]
 
-def get_shop(subdomain: SubdomainDep, db: Session = Depends(get_db)) -> Shop | None:
+def get_shop(subdomain: SubdomainDep, db: Session = Depends(get_db)) -> Union[Shop, None]:
     shop = shop_repository.get_shop_by_subdomain(subdomain=subdomain, db_session=db)
     return shop
 
