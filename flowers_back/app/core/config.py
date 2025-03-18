@@ -22,5 +22,4 @@ class Settings(BaseSettings):
         env_file = BASE_DIR / ".env"
         env_file_encoding = "utf-8"
 
-print(BASE_DIR / ".env")
 settings = Settings()

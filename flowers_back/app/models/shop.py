@@ -1,11 +1,8 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
-from app.core.database import Base
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSON
-from app.models.product import Product
-from app.models.order import Order
-from app.models.user import User
-from app.models.consultation import Consultation
+from sqlalchemy.orm import relationship
+
+from app.core.database import Base
 
 
 class Shop(Base):
@@ -18,12 +15,24 @@ class Shop(Base):
     inn = Column(String, nullable=True)
     phone = Column(String, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    
+
     owner = relationship("User")
     products = relationship(
         "Product", back_populates="shop", cascade="all, delete-orphan"
     )
-    orders = relationship("Order", back_populates="shop")  
-    consultations = relationship("Consultation", back_populates="shop")  
+    orders = relationship("Order", back_populates="shop")
+    consultations = relationship("Consultation", back_populates="shop")
+    categories = relationship("ShopCategories", back_populates="shop")
 
     addresses = Column(JSON,  nullable=True)
+
+
+class ShopCategories(Base):
+    __tablename__ = "shop_categories"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+
+    shop = relationship("Shop")
+    category = relationship("Category")
