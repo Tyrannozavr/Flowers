@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from sqlalchemy.dialects.postgresql import JSONB
+from app.models.shop import Shop
+
 
 class User(Base):
     __tablename__ = "users"
