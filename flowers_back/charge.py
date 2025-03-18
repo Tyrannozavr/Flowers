@@ -22,8 +22,10 @@ def charge():
             if not el.timestamp:
                 continue
             users.append(el.user_id)
-            now = datetime.now().date()
-            time_pay_delta = now - el.timestamp.date()
+            # now = datetime.now().date()
+            now = datetime.now()
+            # time_pay_delta = now - el.timestamp.date()
+            time_pay_delta = now - el.timestamp
             # if time_pay_delta >= timedelta(days=30) and el.status != 'canceled_by_user':
             if time_pay_delta >= timedelta(minutes=5) and el.status != 'canceled_by_user':
                 user_id = el.user_id
