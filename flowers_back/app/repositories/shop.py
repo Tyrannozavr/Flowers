@@ -18,7 +18,7 @@ def get_shop_list(db: Session) -> list[Type[Shop]]:
 def get_shop_categories_list(db: Session) -> list[Type[Shop]]:
     return (
         db.query(Shop)
-        .join(ShopCategories)
+        .outerjoin(ShopCategories)
         .all()
     )
 
