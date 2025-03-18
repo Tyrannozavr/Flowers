@@ -6,6 +6,8 @@ from app.core.database import get_db
 from app.models.shop import Shop
 from app.models.user import User
 from app.models.product import Product
+from app.repositories.shop import get_categories_by_shop_id
+from app.schemas.category import CategoryResponse
 from app.schemas.shop import ShopResponse, OwnerShopResponse
 from app.schemas.product import ProductResponse
 import os
@@ -110,7 +112,6 @@ def get_shops(
                 addresses = shop.addresses
             except Exception as e:
                 raise HTTPException(status_code=400, detail=f"Невалидный формат для адресов: {str(e)}")
-
         list_of_shops.append(ShopResponse(
             id=shop.id,
             subdomain=shop.subdomain,
@@ -482,6 +483,16 @@ async def update_product(
     db.commit()
     db.refresh(product)
     return product
+
+
+@router.get("/{shop_id}/categories", response_model=list[CategoryResponse])
+def get_shop_categories(
+        shop_id: int,
+        db: Session = Depends(get_db),
+):
+    categories = get_categories_by_shop_id(shop_id=shop_id, db=db)
+    return categories
+
 
 
 @router.delete("/{shop_id}/products/{product_id}")

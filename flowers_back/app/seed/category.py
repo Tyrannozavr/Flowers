@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.category import Category
+from app.repositories.shop import get_categories, get_shop_list, get_shop_categories_list, add_shop_category
+
 
 def seed_categories(db: Session):
     categories = [
@@ -21,5 +23,12 @@ def seed_categories(db: Session):
             new_category = Category(**category)
             db.add(new_category)
 
+    db.commit()
+    created_categories = get_categories(db=db)
+    shops = get_shop_categories_list(db=db)
+    for shop in shops:
+        if not shop.categories:
+            for category in created_categories:
+                add_shop_category(db=db, shop_id=shop.id, category_id=category.id)
     db.commit()
     print("Категории добавлены.")

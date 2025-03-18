@@ -17,7 +17,7 @@ IMAGE_RETRIEVAL_DIR = "static/categories"
 @router.get("/", response_model=list[CategoryResponse])
 def get_categories(request: Request, db: Session = Depends(get_db)):
     base_url = str(request.base_url)
-    categories = db.query(Category).all()
+    categories = get_categories(db=db)
     return [
         CategoryResponse(
             id=category.id,
