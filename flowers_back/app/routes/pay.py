@@ -230,5 +230,5 @@ def generate_token(d):
     return hashed_token
 
 
-def get_pays(db: Session = Depends(get_db)):
+def get_pays(db: Session):
     return db.query(Pay).order_by(Pay.id.desc()).all()
