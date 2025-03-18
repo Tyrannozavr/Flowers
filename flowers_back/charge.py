@@ -1,3 +1,4 @@
+from app.routes import shop, auth, category, product, consultation, order, admin, pay
 import json
 from datetime import datetime, timedelta
 from app.routes.pay import get_pays
@@ -12,8 +13,7 @@ import time
 
 def charge():
     print(f'{datetime.now()}')
-    db = SessionLocal()
-    try:
+    with SessionLocal() as db:
         res = get_pays(db)
         users = []
         for el in res:
@@ -150,8 +150,6 @@ def charge():
                         print(f'4 Ошибка инициализации платежа: {response_data.get("Message")}')
                 else:
                     print(f'5 Ошибка запроса: {response.status_code, response.text}')
-    finally:
-        db.close()
     print(f' ~~~~~~~~ ')
 
 

@@ -208,7 +208,8 @@ async def notification(request: Request, db: Session = Depends(get_db)):
         return 'ok'
 
     payment.card_id = data.get('CardId')
-    payment.rebill_id = data.get('RebillId')
+    if data.get('RebillId'):
+        payment.rebill_id = data.get('RebillId')
     payment.pan = data.get('Pan')
     payment.status = new_status
 
@@ -229,5 +230,5 @@ def generate_token(d):
     return hashed_token
 
 
-def get_pays(db: Session = Depends(get_db)):
+def get_pays(db: Session):
     return db.query(Pay).order_by(Pay.id.desc()).all()
