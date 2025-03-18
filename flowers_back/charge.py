@@ -26,6 +26,7 @@ def charge():
             now = datetime.now()
             # time_pay_delta = now - el.timestamp.date()
             time_pay_delta = now - el.timestamp
+            rebill_id = el.rebill_id
             # if time_pay_delta >= timedelta(days=30) and el.status != 'canceled_by_user':
             if time_pay_delta >= timedelta(minutes=5) and el.status != 'canceled_by_user':
                 user_id = el.user_id
@@ -48,6 +49,7 @@ def charge():
                     user_id=user_id,
                     status='subscription_init',
                     email=user_email,
+                    rebill_id=rebill_id,
                 )
                 db.add(init_pay)
                 db.commit()
@@ -57,7 +59,7 @@ def charge():
                     continue
                 payment_amount = 990 * 100  # в копейках
                 order_id = f'{user_id}-{init_pay.id}-rebill-{int(time.time())}'
-                description = f"Оплата заказа №{init_pay.id}"
+                description = f"Оплата заказа №{init_pay.id}. Продление подписки."
                 success_url = back_url
                 fail_url = back_url
 
@@ -90,7 +92,6 @@ def charge():
                         "Email": user_email
                     },
                     "Receipt": receipt,
-                    "Recurrent": 'Y',
                 }
 
                 data_for_token = [
@@ -99,7 +100,6 @@ def charge():
                     {'OrderId': order_id},
                     {'Description': description},
                     {'Password': secret_key},
-                    {'Recurrent': 'Y'}
                 ]
 
                 hashed_token = generate_token(d=data_for_token)
@@ -125,12 +125,12 @@ def charge():
                         data_charge = {
                             'TerminalKey': terminal_key,
                             'PaymentId': payment_id,
-                            'RebillId': el.rebill_id,
+                            'RebillId': rebill_id,
                         }
                         data_for_token_charge = [
                             {'TerminalKey': terminal_key},
                             {'PaymentId': payment_id},
-                            {'RebillId': el.rebill_id},
+                            {'RebillId': rebill_id},
                             {'Password': secret_key}
                         ]
                         data_charge['Token'] = generate_token(d=data_for_token_charge)
