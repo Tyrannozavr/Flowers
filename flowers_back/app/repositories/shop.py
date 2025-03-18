@@ -65,3 +65,4 @@ def delete_shop_category(db: Session, category_id: int, shop_id: int):
      .delete()
      )
     db.commit()
+
