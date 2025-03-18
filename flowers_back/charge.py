@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.routes.pay import get_pays
 from app.routes.pay import generate_token
 from app.core.database import SessionLocal
@@ -22,8 +22,12 @@ def charge():
             if not el.timestamp:
                 continue
             users.append(el.user_id)
-            now = datetime.now().date()
-            if el.timestamp.date() <= now and el.status != 'canceled_by_user':
+            # now = datetime.now().date()
+            now = datetime.now()
+            # time_pay_delta = now - el.timestamp.date()
+            time_pay_delta = now - el.timestamp
+            # if time_pay_delta >= timedelta(days=30) and el.status != 'canceled_by_user':
+            if time_pay_delta >= timedelta(minutes=5) and el.status != 'canceled_by_user':
                 user_id = el.user_id
                 user_email = el.email
                 back_url = 'https://admin.flourum.ru/profile'
@@ -134,6 +138,9 @@ def charge():
                         if res_charge.status_code == 200:
                             response_data_charge = res_charge.json()
                             if response_data_charge.get('Success'):
+                                init_pay.timestamp = datetime.now()
+                                db.commit()
+                                db.refresh(init_pay)
                                 print(f'8 {json.dumps(response_data_charge)}')
                             else:
                                 print(f'7 ошибка charge {json.dumps(response_data_charge)}')

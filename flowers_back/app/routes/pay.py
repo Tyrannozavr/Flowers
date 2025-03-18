@@ -116,6 +116,7 @@ async def pay_init(request: Request, db: Session = Depends(get_db)):
         "SuccessURL": success_url,
         "FailURL": fail_url,
         "NotificationURL": "https://api.flourum.ru/pay/notification",
+        "CustomerKey": str(user_id),
         "DATA": {
             "Email": user_email
         },
@@ -186,31 +187,37 @@ async def pay_cancel(request: Request, db: Session = Depends(get_db)):
 @router.post('/notification')
 async def notification(request: Request, db: Session = Depends(get_db)):
     data = await request.json()
-    orderId = data.get('OrderId')
-    payment = db.query(Pay).filter(Pay.order_id == orderId).first()
-    status = data.get('Status')
+    with open("notification_data.json", "a") as file:
+        file.write(json.dumps(data, ensure_ascii=False) + "\n")
+
+    order_id = data.get('OrderId')
+    new_status = data.get('Status')
+
+    payment = db.query(Pay).filter(Pay.order_id == order_id).first()
 
     if not payment.id:
         return 'ok'
 
     if not data.get('Success'):
-        payment.status = status
+        payment.status = new_status
         db.commit()
         db.refresh(payment)
+        return 'ok'
+
+    if payment.status == 'CONFIRMED':
         return 'ok'
 
     payment.card_id = data.get('CardId')
     payment.rebill_id = data.get('RebillId')
     payment.pan = data.get('Pan')
-    payment.status = status
-    if status == 'CONFIRMED':
+    payment.status = new_status
+
+    if new_status == 'CONFIRMED':
         payment.timestamp = datetime.now()
 
     db.commit()
     db.refresh(payment)
 
-    with open("notification_data.json", "a") as file:
-        file.write(json.dumps(data, ensure_ascii=False) + "\n")
     return 'ok'
 
 
