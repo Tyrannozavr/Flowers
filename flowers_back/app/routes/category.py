@@ -29,7 +29,6 @@ def get_categories(
         categories = categories_repository.get_categories(db=db)
     else:
         categories = app.repositories.categories.get_categories_by_shop_id(db=db, shop_id=shop.id)
-        print("shop id is ", shop.id, categories)
         if categories is None:
             categories = app.repositories.categories.get_categories_by_shop_id(db=db, shop_id=shop.id)[:15]
 
