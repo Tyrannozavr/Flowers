@@ -1,8 +1,12 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from app.core.database import Base
-from app.models.shop import Shop
 import enum
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.shop import Shop
 
 
 class OrderStatus(enum.Enum):

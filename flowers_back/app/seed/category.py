@@ -30,6 +30,7 @@ def seed_categories(db: Session):
     created_categories = categories_repository.get_categories(db=db)
     shops = get_shop_categories_list(db=db)
     for shop in shops:
+
         if not shop.categories:
             for category in created_categories:
                 add_shop_category(db=db, shop_id=shop.id, category_id=category.id)
