@@ -10,8 +10,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-from app.models.product import ProductAvailabilityVariants
-
 # revision identifiers, used by Alembic.
 revision: str = 'b8cf6ca8aaf8'
 down_revision: Union[str, None] = 'effedbbebe36'
@@ -26,7 +24,7 @@ def upgrade() -> None:
         sa.Column('availability',
                   sa.String(),
                   nullable=False,
-                  server_default=ProductAvailabilityVariants.AVAILABLE.value  # Значение по умолчанию
+                  server_default="AVAILABLE"  # Значение по умолчанию
                   ), )
     # ### end Alembic commands ###
 

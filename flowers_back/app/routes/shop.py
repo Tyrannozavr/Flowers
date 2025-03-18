@@ -1,11 +1,17 @@
 import logging
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request
+from pydantic import HttpUrl
 from sqlalchemy.orm import Session
+
+from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR
 from app.core.database import get_db
+from app.models.category import Category
 from app.models.shop import Shop
 from app.models.user import User
 from app.models.product import Product
+from app.repositories import shop as shop_repository
+from app.schemas.category import CategoryResponse
 from app.schemas.shop import ShopResponse, OwnerShopResponse
 from app.schemas.product import ProductResponse
 import os
@@ -95,7 +101,6 @@ def get_shops(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    print(current_user.id, current_user.username)
     shops = db.query(Shop).filter(Shop.owner_id == current_user.id).all()
 
     if not shops:
@@ -110,7 +115,6 @@ def get_shops(
                 addresses = shop.addresses
             except Exception as e:
                 raise HTTPException(status_code=400, detail=f"Невалидный формат для адресов: {str(e)}")
-
         list_of_shops.append(ShopResponse(
             id=shop.id,
             subdomain=shop.subdomain,
@@ -482,6 +486,44 @@ async def update_product(
     db.commit()
     db.refresh(product)
     return product
+
+
+@router.get("/{shop_id}/categories", response_model=list[CategoryResponse])
+def get_shop_categories(
+        request: Request,
+        shop_id: int,
+        db: Session = Depends(get_db),
+):
+    categories = shop_repository.get_categories_by_shop_id(shop_id=shop_id, db=db)
+    if not categories:
+        categories = db.query(Category).all()[:15]
+    return [CategoryResponse(
+        id=category.id,
+        name=category.name,
+        value=category.value,
+        imageUrl=HttpUrl(f"{request.base_url}{category.image_url}"),
+    ) for category in categories]
+
+@router.post("/{shop_id}/categories")
+def add_shop_categories(
+        request: Request,
+        shop_id: int,
+        category_list: list[int],
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user)
+    ):
+    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
+    if shop.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
+    shop_repository.add_shop_categories(db=db, categories=category_list, shop_id=shop_id)
+    categories = shop_repository.get_categories_by_shop_id(db=db, shop_id=shop.id)
+    return [CategoryResponse(
+        id=category.id,
+        name=category.name,
+        value=category.value,
+        imageUrl=HttpUrl(f"{request.base_url}{category.image_url}"),
+    ) for category in categories]
+
 
 
 @router.delete("/{shop_id}/products/{product_id}")

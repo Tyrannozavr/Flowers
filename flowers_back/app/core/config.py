@@ -22,5 +22,6 @@ class Settings(BaseSettings):
         env_file = BASE_DIR / ".env"
         env_file_encoding = "utf-8"
 
-print(BASE_DIR / ".env")
 settings = Settings()
+CATEGORY_IMAGE_UPLOAD_DIR = "categories"
+CATEGORY_IMAGE_RETRIEVAL_DIR = "static/categories"
