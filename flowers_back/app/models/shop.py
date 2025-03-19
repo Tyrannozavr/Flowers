@@ -33,7 +33,7 @@ class Shop(Base):
     consultations = relationship("Consultation", back_populates="shop")
     categories = relationship("ShopCategories", back_populates="shop", cascade="all, delete-orphan")
 
-    addresses = Column(JSON,  nullable=True)
+    addresses = Column(JSON,  nullable=True, comment="contains {phone: int, address: str}")
     delivery_cost = relationship("ShopDeliveryCost", back_populates="shop", uselist=False)
 
 

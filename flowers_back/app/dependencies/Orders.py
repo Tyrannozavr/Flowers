@@ -5,7 +5,7 @@
 from typing import Annotated
 from fastapi import Depends
 
-from app.core.config import Settings
+from app.core.config import settings
 from app.models.order import AddressModel
 from app.services.Geo import DeliveryDistanceService, YandexGeoService, GeoService
 
@@ -19,10 +19,10 @@ class AddressService:
 
 
 def get_address_service(address_data: AddressModel) -> DeliveryDistanceService:
-    return DeliveryDistanceService(address_data, YandexGeoService(api_key=Settings.YANDEX_GEOCODER_API_KEY))
+    return DeliveryDistanceService(address_data, YandexGeoService(api_key=settings.YANDEX_GEOCODER_API_KEY))
 
 
-DeliveryDistanceServiceDep = Annotated[str, Depends(get_address_service)]
+DeliveryDistanceServiceDep = Annotated[DeliveryDistanceService, Depends(get_address_service)]
 
 
 

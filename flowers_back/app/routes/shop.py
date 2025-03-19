@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 import app.repositories.categories
 from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR
 from app.core.database import get_db
+from app.dependencies.Orders import DeliveryDistanceServiceDep
 from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate
 from app.models.category import Category
 from app.models.shop import Shop
@@ -613,6 +614,25 @@ def get_shop_delivery_cost(
         fixed_cost=shop.delivery_cost.fixed_cost,
         radius_cost=shop.delivery_cost.radius_cost
     )
+from app.services import Shop as ShopServices
+@router.post("/{shop_id}/delivery/cost/calculate", tags=["Shops", "Delivery"])
+def calculate_shop_delivery_cost(
+    shop_id: int,
+    delivery_distance_services: DeliveryDistanceServiceDep,
+    db: Session = Depends(get_db),
+):
+    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
+    if not shop.delivery_cost:
+        raise HTTPException(status_code=404, detail="Доставка не найдена")
+    elif shop.delivery_cost.fixed_cost:
+        return shop.delivery_cost.fixed_cost
+    else:
+        smallest_distance = None
+        for shop_address in shop.addresses:
+            distance = delivery_distance_services.calculate_delivery_distance(shop_address.get("address"))
+            if smallest_distance is None or smallest_distance > distance:
+                smallest_distance = distance
+        return ShopServices.calculate_delivery_cost(delivery_cost=shop.delivery_cost, distance=smallest_distance)
 
 @router.post("/{shop_id}/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
 def create_shop_delivery_cost(
