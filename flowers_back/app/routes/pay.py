@@ -198,13 +198,16 @@ async def notification(request: Request, db: Session = Depends(get_db)):
     if not payment.id:
         return 'ok'
 
+    if payment.status == 'canceled_by_user':
+        return 'ok'
+
+    if payment.status == 'CONFIRMED':
+        return 'ok'
+
     if not data.get('Success'):
         payment.status = new_status
         db.commit()
         db.refresh(payment)
-        return 'ok'
-
-    if payment.status == 'CONFIRMED':
         return 'ok'
 
     payment.card_id = data.get('CardId')

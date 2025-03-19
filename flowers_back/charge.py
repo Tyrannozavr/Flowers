@@ -16,11 +16,15 @@ def charge():
     with SessionLocal() as db:
         res = get_pays(db)
         users = []
+        count = 0
         for el in res:
             if el.user_id in users:
+                print(f'user in users[], id={el.user_id}')
                 continue
             if not el.timestamp:
                 continue
+            print(count)
+            print(el.status)
             users.append(el.user_id)
             # now = datetime.now().date()
             now = datetime.now()
@@ -28,7 +32,7 @@ def charge():
             time_pay_delta = now - el.timestamp
             rebill_id = el.rebill_id
             # if time_pay_delta >= timedelta(days=30) and el.status != 'canceled_by_user':
-            if time_pay_delta >= timedelta(minutes=5) and el.status != 'canceled_by_user':
+            if time_pay_delta >= timedelta(minutes=5) and el.status == 'CONFIRMED':
                 user_id = el.user_id
                 user_email = el.email
                 back_url = 'https://admin.flourum.ru/profile'
