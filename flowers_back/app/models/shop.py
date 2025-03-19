@@ -1,3 +1,5 @@
+from enum import Enum
+
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
@@ -29,9 +31,10 @@ class Shop(Base):
     )
     orders = relationship("Order", back_populates="shop")
     consultations = relationship("Consultation", back_populates="shop")
-    categories = relationship("ShopCategories", back_populates="shop")
+    categories = relationship("ShopCategories", back_populates="shop", cascade="all, delete-orphan")
 
     addresses = Column(JSON,  nullable=True)
+    delivery_cost = relationship("ShopDeliveryCost", back_populates="shop", uselist=False)
 
 
 
@@ -43,5 +46,20 @@ class ShopCategories(Base):
     shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
 
-    shop = relationship("Shop")
-    category = relationship("Category")
+    shop = relationship("Shop", back_populates="categories")
+    category = relationship("Category", back_populates="shops")
+
+
+
+
+class ShopDeliveryCost(Base):
+    __tablename__ = "shop_delivery_cost"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False, unique=True)
+    type = Column(String, nullable=False)
+    fixed_cost = Column(Integer, nullable=True, comment="Если стоимость доставки фиксированная")
+    radius_cost = Column(JSON,  nullable=True, comment="{радиус до: цена")
+
+    shop = relationship("Shop", back_populates="delivery_cost", uselist=False)
+

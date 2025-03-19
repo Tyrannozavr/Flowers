@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.category import Category
 from app.models.shop import Shop, ShopCategories
+from app.services import Shop as ShopService
 
 
 def get_shop_list(db: Session) -> list[Type[Shop]]:
@@ -65,4 +66,22 @@ def delete_shop_category(db: Session, category_id: int, shop_id: int):
      .delete()
      )
     db.commit()
+
+def get_shop_delivery_cost(db: Session, shop_id: int):
+    return db.query(Shop).filter(Shop.id == shop_id).first().delivery_cost
+
+def update_shop_delivery_cost(db: Session, shop_id: int, delivery_cost: Shop.delivery_cost):
+    shop = db.query(Shop).filter(Shop.id == shop_id).first()
+    shop.delivery_cost = delivery_cost
+    db.commit()
+    db.refresh(shop)
+    return shop.delivery_cost
+
+def create_shop_delivery_cost(db: Session, shop_id: int, delivery_cost: Shop.delivery_cost):
+    delivery_cost = ShopService.create_shop_delivery_cost(delivery_cost)
+    shop = db.query(Shop).filter(Shop.id == shop_id).first()
+    shop.delivery_cost = delivery_cost
+    db.commit()
+    db.refresh(shop)
+    return shop.delivery_cost
 

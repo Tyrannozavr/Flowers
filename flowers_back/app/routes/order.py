@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Request
+
+from app.dependencies.Orders import DeliveryDistanceServiceDep
 from app.schemas.order import Order, OrderStatus, OrderResponse
 from app.models.order import Order as OrderDb
 from app.models.shop import Shop 
@@ -6,6 +8,7 @@ from app.models.order import OrderItem as OrderItemDb
 from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db  
 from typing import List
+from app.repositories import shop as shop_repository
 
 router = APIRouter()
 
@@ -111,3 +114,15 @@ async def update_order_status(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error updating order status: {str(e)}")
+
+@router.get("/delivery/cost/{shop_id}")
+def get_delivery_cost(
+        shop_id: int,
+        delivery_distance_service: DeliveryDistanceServiceDep,
+        db: Session = Depends(get_db),
+):
+    shop = shop_repository.get_shop_by_id(db, shop_id)
+    if not shop:
+        raise HTTPException(status_code=404, detail="Магазин не найден")
+
+    return {"delivery_cost": shop.delivery_cost}
