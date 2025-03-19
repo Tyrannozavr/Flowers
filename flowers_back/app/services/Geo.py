@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 import requests
 from fastapi.logger import logger
@@ -15,7 +15,7 @@ class GeoService(ABC):
         pass
 
     @abstractmethod
-    def calculate_distance(self, coords1: tuple | str, coords2: tuple | str) -> float:
+    def calculate_distance(self, coords1: Union[tuple, str], coords2: Union[tuple, str]) -> float:
         pass
 
 
@@ -49,7 +49,7 @@ class YandexGeoService(GeoService):
             logger.error(f"Ошибка при геокодировании: {e}")
             return None
 
-    def calculate_distance(self, coords1: tuple | str, coords2: tuple | str) -> float:
+    def calculate_distance(self, coords1: Union[tuple, str], coords2: Union[tuple, str]) -> float:
         if isinstance(coords1, str):
             coords1 = self.get_coordinates(coords1)
         if isinstance(coords2, str):

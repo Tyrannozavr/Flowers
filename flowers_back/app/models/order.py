@@ -1,5 +1,5 @@
 import enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from pydantic import BaseModel, Field
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Enum
@@ -62,8 +62,8 @@ class AddressModel(BaseModel):
     city: str = Field(..., description="Город")
     street: str = Field(..., description="Улица")
     house: str = Field(..., description="Дом")
-    building: str | None = Field(None, description="Корпус")
-    apartment: str | None = Field(None, description="Квартира")
+    building: Union[str, None] = Field(None, description="Корпус")
+    apartment: Union[str, None ]= Field(None, description="Квартира")
 
     def to_address_string(self) -> str:
         # Формируем строку адреса
