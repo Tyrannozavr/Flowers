@@ -30,11 +30,11 @@ class ShopResponse(BaseModel):
     addresses: List[Address]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class OwnerShopResponse(BaseModel):
     id: int
     subdomain: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

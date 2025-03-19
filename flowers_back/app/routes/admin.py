@@ -43,7 +43,14 @@ def get_current_user(authorization: str = Header(None), db: Session = Depends(ge
             detail="User not found"
         )
     
+    if user.is_removed:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User is deactivated"
+        )
+
     return user
+
 
 def check_superadmin(current_user: User = Depends(get_current_user)):
     if not current_user.is_superadmin:

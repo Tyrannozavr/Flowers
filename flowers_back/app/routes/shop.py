@@ -526,7 +526,33 @@ def add_shop_categories(
         imageUrl=HttpUrl(f"{request.base_url}{category.image_url}"),
     ) for category in categories]
 
+@router.delete("/{shop_id}/categories/{category_id}")
+def delete_category_from_shop(
+        shop_id: int,
+        category_id: int,
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user)
+):
+    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
+    if shop.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
 
+    shop_repository.delete_shop_category(db=db, shop_id=shop_id, category_id=category_id)
+    return {"detail": "Категория удалена"}
+
+@router.post("/{shop_id}/categories/{category_id}")
+def add_category_to_shop(
+        shop_id: int,
+        category_id: int,
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user)
+):
+    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
+    if shop.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
+
+    shop_repository.add_shop_category(db=db, shop_id=shop_id, category_id=category_id)
+    return {"detail": "Категория добавлена"}
 
 @router.delete("/{shop_id}/products/{product_id}")
 def delete_product(
@@ -568,3 +594,4 @@ def delete_product(
     db.delete(product)
     db.commit()
     return {"detail": "Продукт удален"}
+

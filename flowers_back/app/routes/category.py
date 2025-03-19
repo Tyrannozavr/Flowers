@@ -29,7 +29,6 @@ def get_categories(
         categories = categories_repository.get_categories(db=db)
     else:
         categories = app.repositories.categories.get_categories_by_shop_id(db=db, shop_id=shop.id)
-        print("shop id is ", shop.id, categories)
         if categories is None:
             categories = app.repositories.categories.get_categories_by_shop_id(db=db, shop_id=shop.id)[:15]
 
@@ -74,3 +73,11 @@ def create_category(
         value=category.value,
         imageUrl=HttpUrl(image_url_response)
     )
+
+@router.delete("/{category_id}")
+def delete_category(
+        category_id: int,
+        db: Session = Depends(get_db)
+):
+    app.repositories.categories.delete_category_by_id(db=db, category_id=category_id)
+    return {"message": "Category deleted successfully"}
