@@ -606,7 +606,7 @@ def get_shop_delivery_cost(
     db: Session = Depends(get_db),
 ):
     shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
-    if not shop.delivery_cost:
+    if not shop or not shop.delivery_cost:
         raise HTTPException(status_code=404, detail="Доставка не найдена")
 
     return ShopDeliveryCostResponse(
@@ -622,7 +622,7 @@ def calculate_shop_delivery_cost(
     db: Session = Depends(get_db),
 ):
     shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
-    if not shop.delivery_cost:
+    if not shop or not shop.delivery_cost:
         raise HTTPException(status_code=404, detail="Доставка не найдена")
     elif shop.delivery_cost.fixed_cost:
         return shop.delivery_cost.fixed_cost
