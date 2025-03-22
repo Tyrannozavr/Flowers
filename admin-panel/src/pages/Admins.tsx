@@ -6,6 +6,13 @@ import {
     CardContent,
     TextField,
     Typography,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
 } from "@mui/material";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -18,6 +25,8 @@ import {
     fetchAdmins,
     fetchCurrentAdmin,
     removeTelegramId,
+    fetchPays,
+    cancelPay,
 } from "../api/admins";
 
 const Admins: React.FC = () => {
@@ -30,6 +39,15 @@ const Admins: React.FC = () => {
     );
 
     const {
+        data: all_pays,
+        isLoading: isAllPaysLoading,
+        isErrorPays
+    } = useQuery("all_pays", fetchPays, {
+        enabled: currentUser?.is_superadmin,
+        retry: false
+    });
+
+    const {
         data: admins,
         isLoading: isAdminsLoading,
         isError,
@@ -37,6 +55,20 @@ const Admins: React.FC = () => {
         enabled: currentUser?.is_superadmin,
         retry: false,
     });
+
+    const cancelPayMutation = useMutation(cancelPay, {
+        onSuccess: () => {
+            queryClient.invalidateQueries("all_pays");
+            toast.success("Платеж успешно отменен.");
+        },
+        onError: () => {
+            toast.error("Ошибка при отмене платежа.");
+        },
+    });
+
+    const handleCancelPay = (id: number) => {
+        cancelPayMutation.mutate(id);
+    };
 
     const deactivateMutation = useMutation(deactivateAdmin, {
         onSuccess: () => {
@@ -113,7 +145,11 @@ const Admins: React.FC = () => {
         removeTelegramIdMutation.mutate(telegramId);
     };
 
-    if (isUserLoading || (currentUser?.is_superadmin && isAdminsLoading))
+    const status_to_refund = ['NEW', 'AUTHORIZED', 'AUTHORIZED', 'CONFIRMED', 'CONFIRMED', 'canceled_by_user'];
+    const excludedKeys = ['last_pay_date', 'rebill_id', 'paid_until'];
+    const filteredKeys = all_pays?.length ? Object.keys(all_pays[0]).filter((key) => !excludedKeys.includes(key)) : [];
+
+    if (isUserLoading || (currentUser?.is_superadmin && (isAdminsLoading || isAllPaysLoading)))
         return <Typography>Загрузка...</Typography>;
 
     return (
@@ -221,6 +257,51 @@ const Admins: React.FC = () => {
                             ))}
                         </Box>
                     )}
+
+                    <Typography variant="h6">Платежи</Typography>
+                    {isError ? (
+                        <Typography variant="body1" color="text.secondary">
+                            Ошибка при загрузке администраторов.
+                        </Typography>
+                    ) : (
+                        <TableContainer component={Paper}>
+                          <Table>
+                            <TableHead>
+                              <TableRow>
+                                {filteredKeys.map((key) => (
+                                    <TableCell key={key}>{key}</TableCell>
+                                ))}
+                                <TableCell>Действия</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {all_pays.map((row, index) => (
+                                <TableRow key={index}>
+                                  {filteredKeys.map((key) => (
+                                    <TableCell key={key}>
+                                      {row[key] !== null ? row[key].toString() : "—"}
+                                    </TableCell>
+                                  ))}
+                                      <TableCell>
+                                        {status_to_refund.includes(row.status) && (
+                                            <Button
+                                                variant="contained"
+                                                color="error"
+                                                size="small"
+                                                onClick={() => handleCancelPay(row.payment_id)}
+                                                disabled={cancelPayMutation.isLoading}
+                                            >
+                                                Отменить
+                                            </Button>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                    )}
+
                 </>
             )}
 

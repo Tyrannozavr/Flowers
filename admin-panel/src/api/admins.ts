@@ -41,3 +41,13 @@ export const removeTelegramId = async (telegramId: string) => {
     });
     return response.data;
 };
+
+export const fetchPays = async () => {
+    const response = await axios.get("/pay/get_all");
+    return response.data;
+}
+
+export const cancelPay = async (payment_id) => {
+    const response = await axios.post("/pay/refund", { payment_id: payment_id });
+    return response.data;
+}
