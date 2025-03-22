@@ -47,7 +47,7 @@ export const fetchPays = async () => {
     return response.data;
 }
 
-export const cancelPay = async (payment_id) => {
+export const cancelPay = async (payment_id: number) => {
     const response = await axios.post("/pay/refund", { payment_id: payment_id });
     return response.data;
 }

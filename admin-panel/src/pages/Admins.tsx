@@ -38,11 +38,15 @@ const Admins: React.FC = () => {
         { retry: false }
     );
 
+    type PayRecord = {
+        [key: string]: any;
+    };
+
     const {
         data: all_pays,
         isLoading: isAllPaysLoading,
-        isErrorPays
-    } = useQuery("all_pays", fetchPays, {
+        isError: isErrorPays,
+    } = useQuery<PayRecord[]>("all_pays", fetchPays, {
         enabled: currentUser?.is_superadmin,
         retry: false
     });
@@ -259,9 +263,9 @@ const Admins: React.FC = () => {
                     )}
 
                     <Typography variant="h6">Платежи</Typography>
-                    {isError ? (
+                    {isErrorPays ? (
                         <Typography variant="body1" color="text.secondary">
-                            Ошибка при загрузке администраторов.
+                            Ошибка при загрузке платежей.
                         </Typography>
                     ) : (
                         <TableContainer component={Paper}>
@@ -275,7 +279,7 @@ const Admins: React.FC = () => {
                               </TableRow>
                             </TableHead>
                             <TableBody>
-                              {all_pays.map((row, index) => (
+                              {all_pays?.map((row, index: number) => (
                                 <TableRow key={index}>
                                   {filteredKeys.map((key) => (
                                     <TableCell key={key}>
