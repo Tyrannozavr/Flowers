@@ -1,0 +1,45 @@
+[
+  {
+    "id": 3,
+    "subdomain": "dmiv",
+    "logo_url": "http://127.0.0.1:8000/static/uploads/311a96e2-2924-4177-8ef8-74c3eae8ff61.jpg",
+    "primary_color": "#a34848",
+    "inn": "123",
+    "phone": "123",
+    "addresses": [
+      {
+        "phone": "1232",
+        "address": "г. Минск ул. Славинского, д. 344"
+      },
+      {
+        "phone": "33434",
+        "address": "г. Минск ул. Славинского д. 332"
+      }
+    ]
+  }
+]
+
+[
+  {
+    "id": 11,
+    "full_name": "Дмитрий Счислёнок",
+    "phone_number": "71111111111",
+    "recipient_name": "",
+    "recipient_phone": "",
+    "city": "Минск",
+    "street": "пр. Джержинского",
+    "house": "71",
+    "building": "4",
+    "apartment": "552",
+    "delivery_method": "DELIVERY",
+    "delivery_date": "2025-03-19",
+    "delivery_time": "16:59",
+    "wishes": "аывва",
+    "card_text": "",
+    "is_self_pickup": true,
+    "status": "NOT_PAID",
+    "is_sent": true,
+    "items": [],
+    "shop_id": 3
+  }
+]

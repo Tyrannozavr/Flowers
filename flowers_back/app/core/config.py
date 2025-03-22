@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     TOKEN_EXPIRY_DAYS: int = 0
     T_BANK_TERMINAL_KEY: str = ''
     T_BANK_SECRET: str = ''
+    YANDEX_GEOCODER_API_KEY: str = ''
 
     class Config:
         env_file = BASE_DIR / ".env"
