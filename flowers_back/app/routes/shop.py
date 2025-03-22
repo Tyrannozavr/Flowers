@@ -1,29 +1,25 @@
 import logging
+import os
+import uuid
 from typing import Optional
+
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request
 from pydantic import HttpUrl
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 import app.repositories.categories
-from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR
 from app.core.database import get_db
 from app.dependencies.Orders import DeliveryDistanceServiceDep
 from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate
-from app.models.category import Category
+from app.models.product import Product
 from app.models.shop import Shop
 from app.models.user import User
-from app.models.product import Product
 from app.repositories import shop as shop_repository
-from app.schemas.category import CategoryResponse
-from app.schemas.shop import ShopResponse, OwnerShopResponse
-from app.schemas.product import ProductResponse
-import os
-import uuid
 from app.routes.admin import get_current_user
-from sqlalchemy import text
-from typing import List, Dict
-
-from app.services.Shop import create_shop_delivery_cost
+from app.schemas.category import CategoryResponse
+from app.schemas.product import ProductResponse
+from app.schemas.shop import ShopResponse, OwnerShopResponse
 
 router = APIRouter()
 

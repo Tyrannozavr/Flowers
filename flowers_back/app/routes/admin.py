@@ -52,6 +52,32 @@ def get_current_user(authorization: str = Header(None), db: Session = Depends(ge
     return user
 
 
+def get_user_by_token(token: str = Header(None), db: Session = Depends(get_db)):
+    try:
+        token_data = decode_token(token)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token"
+        )
+
+    # Ищем пользователя в базе данных
+    user = db.query(User).filter(User.username == token_data.get("username")).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found"
+        )
+
+    if user.is_removed:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User is deactivated"
+        )
+
+    return user
+
+
 def check_superadmin(current_user: User = Depends(get_current_user)):
     if not current_user.is_superadmin:
         raise HTTPException(

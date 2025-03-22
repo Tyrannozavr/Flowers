@@ -36,3 +36,5 @@ alembic upgrade head
 ```bash
 docker compose exec flowers_back  alembic upgrade head
 ```
+
+https://jowilf.github.io/starlette-admin/
