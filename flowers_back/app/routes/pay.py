@@ -235,3 +235,78 @@ def generate_token(d):
 
 def get_pays(db: Session):
     return db.query(Pay).order_by(Pay.id.desc()).all()
+
+
+@router.get('/get_all')
+def get_all(request: Request, db: Session = Depends(get_db)):
+    return get_pays(db)
+
+@router.post('/refund')
+async def refund(request: Request, db: Session = Depends(get_db)):
+    data = await request.json()
+    payment_id = data.get("payment_id")
+    if payment_id:
+        payment = db.query(Pay).filter(Pay.payment_id == payment_id).first()
+        if not payment:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pay info not found")
+        else:
+            payment_amount = 990 * 100
+
+            receipt = {
+                'Items': [
+                    {
+                        'Name': 'Подписка',
+                        'Price': payment_amount,
+                        'Quantity': 1,
+                        'Amount': payment_amount,
+                        'Tax': 'none',
+                    }
+                ],
+                'Taxation': 'osn',
+            }
+            if payment.email:
+                receipt['Email'] = payment.email
+
+            terminal_key = os.getenv('T_BANK_TERMINAL_KEY')
+            secret_key = os.getenv('T_BANK_SECRET')
+
+            data = {
+                "TerminalKey": terminal_key,
+                "PaymentId": payment_id,
+                "Receipt": receipt,
+            }
+
+            data_for_token = [
+                {'TerminalKey': terminal_key},
+                {'PaymentId': payment_id},
+                {'Password': secret_key},
+            ]
+
+            hashed_token = generate_token(d=data_for_token)
+            data['Token'] = hashed_token
+
+            url = "https://securepay.tinkoff.ru/v2/Cancel"
+            response = requests.post(url, json=data)
+
+            if response.status_code == 200:
+                response_data = response.json()
+                if response_data.get('Success'):
+
+                    payment.status = response_data.get("Status")
+
+                    db.commit()
+                    db.refresh(payment)
+
+                    if not payment.id:
+                        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                            detail="Error refreshing pay info")
+                else:
+                    print("Ошибка отмены платежа:", response_data.get("Message"))
+            else:
+                print("Ошибка запроса:", response.status_code, response.text)
+
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pay info not found")
+
+
+    print(f'refund {payment_id}')

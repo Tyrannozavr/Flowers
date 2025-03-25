@@ -23,8 +23,6 @@ def charge():
                 continue
             if not el.timestamp:
                 continue
-            print(count)
-            print(el.status)
             users.append(el.user_id)
             # now = datetime.now().date()
             now = datetime.now()
