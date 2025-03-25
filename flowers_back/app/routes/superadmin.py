@@ -1,14 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Response, Form, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Body
 from fastapi.templating import Jinja2Templates
-from fastapi_admin.responses import redirect
 from sqlalchemy.orm import Session
 
+from app.core.database import get_db
 from app.core.security import verify_password
 from app.models import User
-from app.core.database import get_db
-from app.routes.auth import LoginSchema, create_access_token
-from fastapi.responses import RedirectResponse
-# from app.utils.auth import verify_password, create_access_token
+from app.routes.auth import create_access_token
+
 
 router = APIRouter()
 

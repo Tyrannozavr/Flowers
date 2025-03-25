@@ -37,3 +37,26 @@ class Product(Base):
 
     category = relationship("Category")
     shop = relationship("Shop")
+
+
+class ProductAttribute(Base):
+    """Характеристики товаров (например размер обуви)"""
+    __tablename__ = "product_attributes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)  # Название характеристики (например, "Размер обуви")
+
+    # Связь с вариантами характеристик
+    attribute_values = relationship("ProductAttributeValue", back_populates="attribute")
+    shop_types = relationship("ShopType", secondary="shop_type_attributes", back_populates="attributes")
+
+
+class ProductAttributeValue(Base):
+    __tablename__ = "product_attribute_values"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    value = Column(String, nullable=False)  # Значение характеристики (например, "32")
+    attribute_id = Column(Integer, ForeignKey("product_attributes.id"), nullable=False)  # Связь с характеристикой
+
+    # Связь с характеристикой
+    attribute = relationship("ProductAttribute", back_populates="attribute_values")

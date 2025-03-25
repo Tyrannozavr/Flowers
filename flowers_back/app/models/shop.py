@@ -63,3 +63,30 @@ class ShopDeliveryCost(Base):
 
     shop = relationship("Shop", back_populates="delivery_cost", uselist=False)
 
+
+class ShopType(Base):
+    """Типа магазинов (например обувной)"""
+    __tablename__ = "shop_types"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)  # Название типа магазина (например, "Обувной")
+    icon = Column(String, nullable=True)  # Иконка (необязательное поле)
+
+    # Связь с характеристиками
+    attributes = relationship("ProductAttribute", secondary="shop_type_attributes", back_populates="shop_types")
+
+
+class ShopTypeAttribute(Base):
+    """Характеристики для типа магазина"""
+    __tablename__ = "shop_type_attributes"
+
+    shop_type_id = Column(Integer, ForeignKey("shop_types.id"), primary_key=True)
+    attribute_id = Column(Integer, ForeignKey("product_attributes.id"), primary_key=True)
+
+
+class ShopAttribute(Base):
+    """Характеристики для конкретного магазина"""
+    __tablename__ = "shop_attributes"
+
+    shop_id = Column(Integer, ForeignKey("shops.id"), primary_key=True)
+    attribute_id = Column(Integer, ForeignKey("product_attributes.id"), primary_key=True)
