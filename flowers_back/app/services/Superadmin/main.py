@@ -1,17 +1,16 @@
 from importlib import import_module
 
+from starlette import status
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse, RedirectResponse
 from starlette_admin.contrib.sqla import Admin, ModelView
-
+from fastapi import Request
 from app.core.database import engine, get_db
 from app.routes.admin import get_user_by_token
-from app.services.Superadmin.product import ProductAdmin
+from app.services.Superadmin.product import ProductAdmin, ProductAttributeAdmin, ProductAttributeValueAdmin
+from app.services.Superadmin.shop import ShopAdmin, ShopTypeAdmin, ShopTypeAttributeAdmin
 
 models_module = import_module("app.models")
-
-from fastapi import Request
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi import status
 
 class AdminAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -47,7 +46,7 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
             # Проверка токена или сессии
             token = request.cookies.get("access_token")
             if not token:
-                return RedirectResponse("superadmin/login", status_code=status.HTTP_303_SEE_OTHER)
+                return RedirectResponse("/superadmin/login", status_code=status.HTTP_303_SEE_OTHER)
     
             # Проверка прав пользователя
             try:
@@ -66,15 +65,23 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
 # Настройка Starlette Admin
 admin = Admin(engine, title="Admin Panel")
 
-storage = {
-    "Product": ProductAdmin
+# Define a mapping of model names to their custom admin views
+admin_views = {
+    "Product": ProductAdmin,
+    "ProductAttribute": ProductAttributeAdmin,
+    "ProductAttributeValue": ProductAttributeValueAdmin,
+    "Shop": ShopAdmin,
+    "ShopType": ShopTypeAdmin,
+    "ShopTypeAttribute": ShopTypeAttributeAdmin,
 }
 
 # Регистрируем все модели из списка __all__
 for model_name in models_module.__all__:
-    view = storage.get(model_name, ModelView)
     model = getattr(models_module, model_name)
-    admin.add_view(view(model, icon="fas fa-table"))  # Иконка для всех моделей
+    view_class = admin_views.get(model_name, ModelView)
+
+    # Use the model_name as the identity
+    admin.add_view(view_class(model, identity=model_name.lower(), icon="fas fa-table"))
 
 
 
