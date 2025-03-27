@@ -1,8 +1,7 @@
-from enum import Enum
-
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Table, Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base
+from enum import Enum
 
 from typing import TYPE_CHECKING
 
@@ -22,6 +21,14 @@ AVAILABILITY_LABELS = {
     ProductAvailabilityVariants.HIDDEN.value: "Товар скрыт",
 }
 
+# Association table for the many-to-many relationship between Product and ProductAttributeValue
+product_attribute_value_association = Table(
+    'product_attribute_value_association',
+    Base.metadata,
+    Column('product_id', Integer, ForeignKey('products.id'), primary_key=True),
+    Column('attribute_value_id', Integer, ForeignKey('product_attribute_values.id'), primary_key=True)
+)
+
 class Product(Base):
     __tablename__ = "products"
 
@@ -37,6 +44,13 @@ class Product(Base):
 
     category = relationship("Category")
     shop = relationship("Shop")
+
+    # Many-to-many relationship with ProductAttributeValue
+    attribute_values = relationship(
+        "ProductAttributeValue",
+        secondary=product_attribute_value_association,
+        back_populates="products"
+    )
 
 
 class ProductAttribute(Base):
@@ -60,3 +74,10 @@ class ProductAttributeValue(Base):
 
     # Связь с характеристикой
     attribute = relationship("ProductAttribute", back_populates="attribute_values")
+
+    # Many-to-many relationship with Product
+    products = relationship(
+        "Product",
+        secondary=product_attribute_value_association,
+        back_populates="attribute_values"
+    )

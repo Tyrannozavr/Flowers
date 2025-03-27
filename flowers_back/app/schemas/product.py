@@ -2,6 +2,21 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 
 from app.models.product import ProductAvailabilityVariants
+from pydantic import BaseModel
+from typing import List, Optional
+
+class ProductAttributeValueResponse(BaseModel):
+    attribute_name: str
+    value: str
+
+class ProductWithAttributesResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+    price: float
+    ingredients: Optional[str]
+    photo_url: Optional[str]
+    attributes: List[ProductAttributeValueResponse]
 
 
 class ProductResponse(BaseModel):

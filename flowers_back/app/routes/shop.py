@@ -3,7 +3,7 @@ import os
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request, File
 from pydantic import HttpUrl
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -12,32 +12,34 @@ import app.repositories.categories
 from app.core.database import get_db
 from app.dependencies.Orders import DeliveryDistanceServiceDep
 from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate
-from app.models.product import Product
-from app.models.shop import Shop
+from app.models.product import Product, ProductAttribute
+from app.models.shop import Shop, ShopAttribute, ShopType
 from app.models.user import User
 from app.repositories import shop as shop_repository
 from app.routes.admin import get_current_user
 from app.schemas.category import CategoryResponse
 from app.schemas.product import ProductResponse
 from app.schemas.shop import ShopResponse, OwnerShopResponse
+from app.services.shop_service import apply_attributes_to_shop
 
 router = APIRouter()
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+
 @router.post("/", response_model=ShopResponse)
 async def create_shop(
-    request: Request,
-    user: dict = Depends(get_current_user),
-    subdomain: str = Form(...),
-    color: str = Form(...),
-    inn: str = Form(...),
-    phone: str = Form(...),
-    logo: UploadFile = None,
-    addresses: str = Form(...),
-    db: Session = Depends(get_db),
-    security=[{"BearerAuth": []}]
+        request: Request,
+        user: dict = Depends(get_current_user),
+        subdomain: str = Form(...),
+        color: str = Form(...),
+        inn: str = Form(...),
+        phone: str = Form(...),
+        logo: UploadFile = None,
+        addresses: str = Form(...),
+        db: Session = Depends(get_db),
+        security=[{"BearerAuth": []}]
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
 
@@ -96,11 +98,12 @@ async def create_shop(
         logo_url=f"{base_url}static/uploads/{new_shop.logo_url}" if new_shop.logo_url else None
     )
 
+
 @router.get("/", response_model=list[ShopResponse])
 def get_shops(
-    request: Request,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+        request: Request,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
 ):
     shops = db.query(Shop).filter(Shop.owner_id == current_user.id).all()
 
@@ -128,6 +131,57 @@ def get_shops(
 
     return list_of_shops
 
+
+@router.post("/shop-types", tags=["Shops", "Types"])
+async def create_shop_type(
+        name: str,
+        icon: Optional[UploadFile] = File(None),
+        db: Session = Depends(get_db)
+):
+    # Check if a shop type with the same name already exists
+    existing_shop_type = db.query(ShopType).filter(ShopType.name == name).first()
+    if existing_shop_type:
+        raise HTTPException(status_code=400, detail="Shop type with this name already exists")
+
+    # Handle the icon upload
+    if icon:
+        file_extension = icon.filename.split(".")[-1]
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        save_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        with open(save_path, "wb") as f:
+            f.write(await icon.read())
+
+        icon_url = unique_filename
+    else:
+        icon_url = None
+
+    # Create a new ShopType instance
+    new_shop_type = ShopType(name=name, icon=icon_url)
+    db.add(new_shop_type)
+    db.commit()
+    db.refresh(new_shop_type)
+    return {"message": "ShopType created successfully", "shop_type_id": new_shop_type.id}
+
+
+@router.get("/shop-types", tags=["Shops", "Types"])
+def get_shop_types(
+        request: Request,
+        db: Session = Depends(get_db),
+):
+    base_url = str(request.base_url)
+
+    try:
+        shop_types = db.query(ShopType).all()
+        if not shop_types:
+            raise HTTPException(status_code=404, detail="No shop types found")
+
+        return [{"id": shop_type.id, "name": shop_type.name, "icon": f"{base_url}static/{UPLOAD_DIR}/{shop_type.icon}"} for shop_type in shop_types]
+    except Exception as e:
+        logging.error(f"Error retrieving shop types: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
 @router.get("/user/{telegram_id}", response_model=list[OwnerShopResponse])
 async def get_by_owner(telegram_id: str, request: Request, db: Session = Depends(get_db)):
     user_id = get_user_id_by_tg_id(telegram_id, db)
@@ -145,9 +199,10 @@ async def get_by_owner(telegram_id: str, request: Request, db: Session = Depends
         ) for shop in shops
     ]
 
+
 @router.get("/subdomain", response_model=ShopResponse)
 def get_shop_by_domain(
-    request: Request, db: Session = Depends(get_db)
+        request: Request, db: Session = Depends(get_db)
 ):
     subdomain = request.headers.get("X-Subdomain")
     if not subdomain:
@@ -164,7 +219,6 @@ def get_shop_by_domain(
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Невалидный формат для адресов: {str(e)}")
 
-
     base_url = str(request.base_url)
     return ShopResponse(
         id=shop.id,
@@ -176,9 +230,10 @@ def get_shop_by_domain(
         logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None,
     )
 
+
 @router.get("/{shop_id}", response_model=ShopResponse)
 def get_shop_by_id(
-    shop_id: int, request: Request, db: Session = Depends(get_db)
+        shop_id: int, request: Request, db: Session = Depends(get_db)
 ):
     shop = db.query(Shop).filter(Shop.id == shop_id).first()
     if not shop:
@@ -202,17 +257,18 @@ def get_shop_by_id(
         logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None,
     )
 
+
 @router.put("/{shop_id}")
 async def update_shop(
-    shop_id: int,
-    user: dict = Depends(get_current_user),
-    subdomain: str = Form(...),
-    color: str = Form(...),
-    inn: str = Form(...),
-    phone: str = Form(...),
-    logo: Optional[UploadFile] = None,
-    addresses: str = Form(...),
-    db: Session = Depends(get_db),
+        shop_id: int,
+        user: dict = Depends(get_current_user),
+        subdomain: str = Form(...),
+        color: str = Form(...),
+        inn: str = Form(...),
+        phone: str = Form(...),
+        logo: Optional[UploadFile] = None,
+        addresses: str = Form(...),
+        db: Session = Depends(get_db),
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
     print(addresses)
@@ -253,6 +309,7 @@ async def update_shop(
     db.refresh(shop)
     return shop
 
+
 @router.delete("/{shop_id}")
 def delete_shop(shop_id: int, user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     find_user = db.query(User).filter(User.id == user.id).first()
@@ -275,10 +332,10 @@ def delete_shop(shop_id: int, user: dict = Depends(get_current_user), db: Sessio
 
 @router.get("/{shop_id}/products", response_model=list[ProductResponse])
 def get_products(
-    request: Request,
-    shop_id: int,
-    db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+        request: Request,
+        shop_id: int,
+        db: Session = Depends(get_db),
+        user: dict = Depends(get_current_user)
 ):
     products = db.query(Product).filter(Product.shop_id == shop_id).all()
     if not products:
@@ -297,12 +354,13 @@ def get_products(
         for product in products
     ]
 
+
 @router.get("/{shop_id}/products/{product_id}", response_model=ProductResponse)
 def get_product(
-    shop_id: int,
-    product_id: int,
-    db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+        shop_id: int,
+        product_id: int,
+        db: Session = Depends(get_db),
+        user: dict = Depends(get_current_user)
 ):
     product = db.query(Product).filter(
         Product.shop_id == shop_id, Product.id == product_id
@@ -321,18 +379,19 @@ def get_product(
         availability=product.availability
     )
 
+
 @router.post("/{shop_id}/products", response_model=ProductResponse)
 async def create_product(
-    shop_id: int,
-    name: str = Form(...),
-    price: str = Form(...),
-    category_id: int = Form(...),
-    availability: Optional[str] = Form(None),
-    description: str = Form(""),
-    ingredients: str = Form(""),
-    image: UploadFile = None,
-    db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+        shop_id: int,
+        name: str = Form(...),
+        price: str = Form(...),
+        category_id: int = Form(...),
+        availability: Optional[str] = Form(None),
+        description: str = Form(""),
+        ingredients: str = Form(""),
+        image: UploadFile = None,
+        db: Session = Depends(get_db),
+        user: dict = Depends(get_current_user)
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
 
@@ -374,6 +433,7 @@ async def create_product(
 
     return new_product
 
+
 def get_user_id_by_tg_id(user_tg_id: str, db: Session):
     user = db.execute(
         text('''
@@ -390,6 +450,7 @@ def get_user_id_by_tg_id(user_tg_id: str, db: Session):
         raise HTTPException(status_code=403, detail="Пользователю запрещено создавать новые продукты")
 
     return user.id
+
 
 @router.post("/telegram/{shop_id}/products", response_model=ProductResponse)
 async def create_product_from_telegram(
@@ -436,20 +497,21 @@ async def create_product_from_telegram(
 
     return new_product
 
+
 @router.put("/{shop_id}/products/{product_id}", response_model=ProductResponse)
 async def update_product(
-    request: Request,
-    shop_id: int,
-    product_id: int,
-    name: str = Form(...),
-    description: Optional[str] = Form(None),
-    category_id: Optional[int] = Form(None),
-    availability: Optional[str] = Form(None),
-    price: str = Form(...),
-    ingredients: Optional[str] = Form(None),
-    image: Optional[UploadFile] = None,
-    db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+        request: Request,
+        shop_id: int,
+        product_id: int,
+        name: str = Form(...),
+        description: Optional[str] = Form(None),
+        category_id: Optional[int] = Form(None),
+        availability: Optional[str] = Form(None),
+        price: str = Form(...),
+        ingredients: Optional[str] = Form(None),
+        image: Optional[UploadFile] = None,
+        db: Session = Depends(get_db),
+        user: dict = Depends(get_current_user)
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
 
@@ -504,8 +566,6 @@ def get_shop_categories(
     ) for category in categories]
 
 
-
-
 @router.post("/{shop_id}/categories")
 def add_shop_categories(
         request: Request,
@@ -513,7 +573,7 @@ def add_shop_categories(
         category_list: list[int],
         db: Session = Depends(get_db),
         user: User = Depends(get_current_user)
-    ):
+):
     shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
     if shop.owner_id != user.id:
         raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
@@ -525,6 +585,7 @@ def add_shop_categories(
         value=category.value,
         imageUrl=HttpUrl(f"{request.base_url}{category.image_url}"),
     ) for category in categories]
+
 
 @router.delete("/{shop_id}/categories/{category_id}")
 def delete_category_from_shop(
@@ -540,6 +601,7 @@ def delete_category_from_shop(
     shop_repository.delete_shop_category(db=db, shop_id=shop_id, category_id=category_id)
     return {"detail": "Категория удалена"}
 
+
 @router.post("/{shop_id}/categories/{category_id}")
 def add_category_to_shop(
         shop_id: int,
@@ -553,6 +615,7 @@ def add_category_to_shop(
 
     shop_repository.add_shop_category(db=db, shop_id=shop_id, category_id=category_id)
     return {"detail": "Категория добавлена"}
+
 
 @router.delete("/{shop_id}/products/{product_id}")
 def delete_product(
@@ -598,8 +661,8 @@ def delete_product(
 
 @router.get("/{shop_id}/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
 def get_shop_delivery_cost(
-    shop_id: int,
-    db: Session = Depends(get_db),
+        shop_id: int,
+        db: Session = Depends(get_db),
 ):
     shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
     if not shop or not shop.delivery_cost:
@@ -610,12 +673,16 @@ def get_shop_delivery_cost(
         fixed_cost=shop.delivery_cost.fixed_cost,
         radius_cost=shop.delivery_cost.radius_cost
     )
+
+
 from app.services import Shop as ShopServices
+
+
 @router.post("/{shop_id}/delivery/cost/calculate", tags=["Shops", "Delivery"])
 def calculate_shop_delivery_cost(
-    shop_id: int,
-    delivery_distance_services: DeliveryDistanceServiceDep,
-    db: Session = Depends(get_db),
+        shop_id: int,
+        delivery_distance_services: DeliveryDistanceServiceDep,
+        db: Session = Depends(get_db),
 ):
     shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
     if not shop or not shop.delivery_cost:
@@ -630,12 +697,13 @@ def calculate_shop_delivery_cost(
                 smallest_distance = distance
         return ShopServices.calculate_delivery_cost(delivery_cost=shop.delivery_cost, distance=smallest_distance)
 
+
 @router.post("/{shop_id}/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
 def create_shop_delivery_cost(
-    shop_id: int,
-    delivery_cost: ShopDeliveryCostCreate,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+        shop_id: int,
+        delivery_cost: ShopDeliveryCostCreate,
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user),
 ):
     shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
     if not shop:
@@ -657,12 +725,14 @@ def create_shop_delivery_cost(
         radius_cost=new_delivery_cost.radius_cost
     )
 
-@router.put("/{shop_id}/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
+
+@router.put("/{shop_id}/delivery/cost", response_model=ShopDeliveryCostResponse,
+            tags=["Shops", "Delivery"])
 def update_shop_delivery_cost(
-    shop_id: int,
-    delivery_cost: ShopDeliveryCostCreate,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+        shop_id: int,
+        delivery_cost: ShopDeliveryCostCreate,
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user),
 ):
     shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
     if not shop:
@@ -682,3 +752,37 @@ def update_shop_delivery_cost(
         fixed_cost=new_delivery_cost.fixed_cost,
         radius_cost=new_delivery_cost.radius_cost
     )
+
+
+# Ensure this route is defined before any routes with path parameters like {shop_id}
+@router.get("/{shop_id}/shop-attributes", tags=["Shops", "Attributes"])
+def get_shop_attributes(
+        shop_id: int,
+        db: Session = Depends(get_db)
+):
+    # Join ShopAttribute with ProductAttribute to get attribute details
+    attributes = (
+        db.query(ShopAttribute.attribute_id, ProductAttribute.name)
+        .join(ProductAttribute, ShopAttribute.attribute_id == ProductAttribute.id)
+        .filter(ShopAttribute.shop_id == shop_id)
+        .all()
+    )
+
+    if not attributes:
+        raise HTTPException(status_code=404, detail="No attributes found for this shop")
+
+    return [{"attribute_id": attr.attribute_id, "name": attr.name} for attr in attributes]
+
+
+@router.post("/{shop_id}/apply-attributes", tags=["Shops", "Attributes"])
+def apply_shop_attributes(
+        shop_id: int,
+        shop_type_id: int,
+        db: Session = Depends(get_db)
+):
+    try:
+        shop = apply_attributes_to_shop(db, shop_id, shop_type_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return {"message": "Attributes successfully applied to shop", "shop_id": shop.id}
