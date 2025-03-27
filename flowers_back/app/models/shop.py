@@ -74,7 +74,11 @@ class ShopType(Base):
 
     # Связь с характеристиками
     attributes = relationship("ProductAttribute", secondary="shop_type_attributes", back_populates="shop_types")
-
+    type_attributes = relationship(
+        "ShopTypeAttribute",
+        back_populates="shop_type",
+        overlaps="shop_type_attributes"
+    )
 
 class ShopTypeAttribute(Base):
     """Характеристики для типа магазина"""
@@ -82,6 +86,16 @@ class ShopTypeAttribute(Base):
 
     shop_type_id = Column(Integer, ForeignKey("shop_types.id"), primary_key=True)
     attribute_id = Column(Integer, ForeignKey("product_attributes.id"), primary_key=True)
+
+    # Explicit relationships with back_populates
+    shop_type = relationship(
+        "ShopType",
+        back_populates="type_attributes"
+    )
+    product_attribute = relationship(
+        "ProductAttribute",
+        back_populates="shop_type_attributes"
+    )
 
 
 class ShopAttribute(Base):

@@ -1,6 +1,7 @@
 from starlette_admin import *
 from starlette_admin.contrib.sqla import ModelView
 from app.models.shop import Shop, ShopType, ShopTypeAttribute
+from app.models.product import ProductAttribute  # Make sure to import this
 
 class ShopAdmin(ModelView):
     model = Shop
@@ -49,11 +50,18 @@ class ShopTypeAttributeAdmin(ModelView):
     icon = "fa fa-link"
 
     fields = [
-        IntegerField("id", label="ID", read_only=True),
         HasOne("shop_type", identity="ShopType".lower(), label="Shop Type", required=True),
-        HasOne("attribute", identity="ProductAttribute".lower(), label="Attribute", required=True),
+        HasOne("product_attribute", identity="ProductAttribute".lower(), label="Product Attribute", required=True),
     ]
 
-    list_display = ["id", "shop_type", "attribute"]
-    sortable_fields = ["id"]
-    default_sort = [("id", True)]
+    list_display = ["shop_type", "product_attribute"]
+    sortable_fields = ["shop_type_id", "attribute_id"]
+    default_sort = [("shop_type_id", True)]
+
+    def get_list_query(self):
+        return (
+            super()
+            .get_list_query()
+            .join(ShopType, ShopTypeAttribute.shop_type_id == ShopType.id)
+            .join(ProductAttribute, ShopTypeAttribute.attribute_id == ProductAttribute.id)
+        )
