@@ -33,7 +33,6 @@ class ShopTypeAdmin(ModelView):
     fields = [
         IntegerField("id", label="ID", read_only=True),
         StringField("name", label="Type Name", required=True),
-        HasMany("shops", identity="Shop".lower(), label="Shops"),
         HasMany("attributes", identity="ProductAttribute".lower(), label="Attributes"),
     ]
 
