@@ -11,7 +11,7 @@ from app.routes import admin as admin_router
 from app.routes import superadmin
 from app.seed.admin import create_superadmin
 from app.seed.category import seed_categories
-from app.services.Superadmin import admin, AdminAuthMiddleware
+from app.services.Superadmin.main import admin, AdminAuthMiddleware
 
 
 def run_seed():

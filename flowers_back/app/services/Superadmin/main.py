@@ -1,17 +1,14 @@
 from importlib import import_module
 
-from fastapi.params import Depends
-from sqlalchemy.orm import Session
 from starlette_admin.contrib.sqla import Admin, ModelView
 
 from app.core.database import engine, get_db
-from app.models import User
-from app.routes.admin import get_current_user, get_user_by_token
-from app.routes.auth import decode_token
+from app.routes.admin import get_user_by_token
+from app.services.Superadmin.product import ProductAdmin
 
 models_module = import_module("app.models")
 
-from fastapi import Request, APIRouter
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi import status
@@ -69,12 +66,16 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
 # Настройка Starlette Admin
 admin = Admin(engine, title="Admin Panel")
 
-
+storage = {
+    "Product": ProductAdmin
+}
 
 # Регистрируем все модели из списка __all__
 for model_name in models_module.__all__:
+    view = storage.get(model_name, ModelView)
     model = getattr(models_module, model_name)
-    admin.add_view(ModelView(model, icon="fas fa-table"))  # Иконка для всех моделей
+    admin.add_view(view(model, icon="fas fa-table"))  # Иконка для всех моделей
+
 
 
 # from starlette_admin import BaseAdmin, fields
