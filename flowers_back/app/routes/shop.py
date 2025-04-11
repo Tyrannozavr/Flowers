@@ -37,6 +37,8 @@ async def create_shop(
         inn: str = Form(...),
         phone: str = Form(...),
         logo: UploadFile = None,
+        tg: str = Form(...),
+        whatsapp: str = Form(...),
         addresses: str = Form(...),
         db: Session = Depends(get_db),
         security=[{"BearerAuth": []}]
@@ -72,6 +74,8 @@ async def create_shop(
         inn=inn,
         phone=phone,
         addresses=addresses,
+        tg=tg,
+        whatsapp=whatsapp,
         logo_url=logo_url,
         owner_id=find_user.id
     )
@@ -93,6 +97,8 @@ async def create_shop(
         subdomain=new_shop.subdomain,
         primary_color=new_shop.primary_color,
         inn=new_shop.inn,
+        tg=new_shop.tg,
+        whatsapp=new_shop.whatsapp,
         phone=new_shop.phone,
         addresses=new_shop.addresses,
         logo_url=f"{base_url}static/uploads/{new_shop.logo_url}" if new_shop.logo_url else None

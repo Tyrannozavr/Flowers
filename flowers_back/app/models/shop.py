@@ -22,6 +22,8 @@ class Shop(Base):
     logo_url = Column(String, nullable=True)
     primary_color = Column(String, nullable=True)
     inn = Column(String, nullable=True)
+    tg = Column(String, nullable=True)
+    whatsapp = Column(String, nullable=True)
     phone = Column(String, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
