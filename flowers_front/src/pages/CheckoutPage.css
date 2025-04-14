@@ -1,0 +1,770 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+.checkout-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.checkout-content {
+    position: relative;
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 32px 16px;
+    padding-bottom: 100px;
+}
+
+.checkout-header {
+    width: 608px;
+    margin-left: 0;
+    margin-right: auto;
+    margin-bottom: 40px;
+    text-align: left;
+    position: relative;
+}
+
+.back-button {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.back-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.checkout-header-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+    text-align: left;
+    margin-left: 56px;
+}
+
+.progress-bar {
+    width: calc(100% - 56px);
+    margin-left: 56px;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #3DB77B;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.contact-section {
+    width: 608px;
+    margin-left: 0;
+    margin-right: auto;
+}
+
+/* Стили для переключателя Самовывоз/Доставка */
+.delivery-method-toggle {
+    display: flex;
+    gap: 6px;
+    padding: 3px;
+    background-color: #f5f5f5;
+    border: none;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.toggle-button {
+    flex: 1;
+    padding: 9px 22px;
+    border: none;
+    border-radius: 10px;
+    background-color: #f5f5f5;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    cursor: pointer;
+    text-align: center;
+}
+
+.toggle-button.active {
+    background-color: #fff;
+}
+
+/* Стили для выбора адреса самовывоза */
+.address-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.address-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    cursor: pointer;
+}
+
+.address-option input[type="radio"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 50%;
+    background-color: #fff;
+    position: relative;
+    cursor: pointer;
+}
+
+.address-option input[type="radio"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 50%;
+}
+
+/* Стили для полей адреса доставки */
+.address-details {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.address-details .form-group {
+    flex: 1;
+}
+
+.contact-section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.checkout-contact-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.checkout-contact-form .form-group:nth-child(2) {
+    margin-bottom: 32px;
+}
+
+.form-group-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 16px;
+    justify-content: flex-start;
+}
+
+.checkout-form-input {
+    width: 100%;
+    height: 44px;
+    padding-top: 4px;
+    padding-right: 32px;
+    padding-bottom: 4px;
+    padding-left: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.checkout-form-input::placeholder {
+    color: #999;
+}
+
+/* Стили для поля даты */
+.date-input-wrapper {
+    position: relative;
+}
+
+.date-input {
+    position: relative;
+    z-index: 1;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    width: 32px; /* Увеличиваем область клика */
+    height: 100%;
+    position: absolute;
+    right: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.date-input-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 13px;
+    height: 13.5px;
+    background: url('../assets/data.svg') no-repeat center;
+    background-size: contain;
+    pointer-events: none;
+    z-index: 3; /* Убедимся, что кастомная иконка выше */
+}
+
+/* Стили для поля времени (select) */
+.time-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: url('../assets/arrowd.svg') no-repeat right 10px center;
+    background-size: 10.5px 6px;
+}
+
+/* Дополнительно скрываем стандартную стрелку в Firefox */
+.time-select::-ms-expand {
+    display: none;
+}
+
+.checkout-form-textarea {
+    width: 100%;
+    height: 88px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    background-color: #fff;
+    box-sizing: border-box;
+    resize: none;
+}
+
+.checkout-form-textarea::placeholder {
+    color: #999;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    cursor: pointer;
+}
+
+.toggle-input {
+    display: none;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 24px;
+    background-color: #e0e0e0;
+    border-radius: 12px;
+    transition: background-color 0.2s ease;
+}
+
+.toggle-switch::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+}
+
+.toggle-input:checked + .toggle-switch {
+    background-color: #30aa6e;
+}
+
+.toggle-input:checked + .toggle-switch::before {
+    transform: translateX(16px);
+}
+
+.continue-button {
+    background-color: #30aa6e;
+    color: #fff;
+    border: none;
+    width: 100%;
+    height: 44px;
+    padding-top: 12px;
+    padding-right: 24px;
+    padding-bottom: 12px;
+    padding-left: 24px;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 16px;
+    box-sizing: border-box;
+}
+
+.continue-button:hover {
+    background-color: #268a56;
+}
+
+/* Стили для третьего этапа (подтверждение) */
+.confirmation-section {
+    margin-bottom: 24px;
+}
+
+.confirmation-cart-item {
+    position: relative;
+    width: 100%;
+    height: 104px;
+    padding: 16px;
+    border: none;
+    border-radius: 16px;
+    background-color: #fff;
+    margin-bottom: 150px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.confirmation-cart-item-left {
+    position: relative;
+    width: 104px;
+    height: 104px;
+}
+
+.confirmation-cart-item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+}
+
+.confirmation-cart-item-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    position: relative;
+}
+
+.confirmation-cart-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.confirmation-cart-item-total-price {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 24px;
+    letter-spacing: 0px;
+    color: #333;
+    margin: 0;
+}
+
+.confirmation-cart-item-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 16px;
+    letter-spacing: 0px;
+    color: #666;
+    margin: 0;
+}
+
+.confirmation-cart-item-price {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0px;
+    color: #666;
+    margin: 0;
+}
+
+.confirmation-cart-item-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Выравниваем по правому краю */
+    width: 100%;
+    margin-top: 8px;
+    position: relative;
+    gap: 16px; /* Добавляем расстояние между кнопками количества и иконкой мусорки */
+}
+
+.confirmation-quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.confirmation-quantity-button-minus,
+.confirmation-quantity-button-plus {
+    width: 28px;
+    height: 28px;
+    background-color: #f5f5f5;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.confirmation-quantity-value {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    width: 32px;
+    height: 28px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirmation-remove-from-cart-button {
+    width: 28px;
+    height: 28px;
+    background-color: #f5f5f5;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirmation-remove-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.confirmation-order-total {
+    margin-bottom: 24px;
+}
+
+.confirmation-order-total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.confirmation-order-total h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.confirmation-order-total p {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+}
+
+.confirmation-pay-button {
+    width: 100%;
+    height: 44px;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    cursor: pointer;
+    margin-bottom: 12px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirmation-pay-with-sbp {
+    background-color: #30aa6e;
+    color: #fff;
+}
+
+.confirmation-pay-with-sbp:hover {
+    background-color: #268a56;
+}
+
+.confirmation-submit-without-payment {
+    background-color: #f5f5f5; /* Серый фон по умолчанию */
+    color: #333;
+    border: none; /* Убираем обводку */
+}
+
+.confirmation-submit-without-payment:hover {
+    background-color: #e0e0e0; /* Чуть темнее при наведении */
+}
+
+.confirmation-privacy-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #999;
+    text-align: left; /* Выровняли по левому краю */
+    margin-top: 16px;
+}
+
+.confirmation-privacy-link {
+    color: #30aa6e;
+    text-decoration: none;
+}
+
+.confirmation-privacy-link:hover {
+    text-decoration: underline;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .checkout-header {
+        width: 100%;
+        max-width: 360px;
+        margin-left: 0;
+        margin-bottom: 24px;
+    }
+
+    .back-button {
+        width: 28px;
+        height: 28px;
+        padding: 8px;
+        top: 10px;
+    }
+
+    .back-icon {
+        width: 12px;
+        height: 12px;
+    }
+
+    .checkout-header-title {
+        font-size: 20px;
+        text-align: left;
+        margin-left: 48px;
+    }
+
+    .progress-bar {
+        width: calc(100% - 48px);
+        margin-left: 48px;
+        height: 8px;
+        border-radius: 3px;
+    }
+
+    .progress-bar-fill {
+        border-radius: 3px;
+    }
+
+    .contact-section {
+        width: 100%;
+        max-width: 360px;
+        margin-left: 0;
+    }
+
+    .contact-section-title {
+        font-size: 16px;
+        text-align: left;
+    }
+
+    .delivery-method-toggle {
+        gap: 4px;
+        padding: 2px;
+        border-radius: 10px;
+    }
+
+    .toggle-button {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 12px;
+    }
+
+    .address-details {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .checkout-form-input {
+        width: 100%;
+        height: 40px;
+        padding-top: 4px;
+        padding-right: 28px;
+        padding-bottom: 4px;
+        padding-left: 12px;
+        font-size: 14px;
+        border-radius: 10px;
+    }
+
+    .date-input-wrapper::after {
+        right: 8px;
+        width: 11px;
+        height: 11.5px;
+    }
+
+    .time-select {
+        background-position: right 8px center;
+        background-size: 8.5px 5px;
+    }
+
+    .checkout-form-textarea {
+        height: 80px;
+    }
+
+    .address-option {
+        font-size: 12px;
+    }
+
+    .address-option input[type="radio"] {
+        width: 16px;
+        height: 16px;
+    }
+
+    .address-option input[type="radio"]:checked::before {
+        width: 8px;
+        height: 8px;
+    }
+
+    .confirmation-cart-item {
+        width: 100%;
+        height: auto;
+        padding: 12px;
+        flex-direction: row;
+        gap: 12px;
+        margin-bottom: 150px; /* Увеличиваем отступ до 32px */
+    }
+
+    .confirmation-cart-item-left {
+        width: 104px;
+        height: 104px;
+    }
+
+    .confirmation-cart-item-image {
+        width: 100%;
+        height: 100%;
+        border-radius: 16px;
+    }
+
+    .confirmation-cart-item-details {
+        gap: 4px;
+    }
+
+    .confirmation-cart-item-total-price {
+        font-size: 17px;
+        line-height: 24px;
+    }
+
+    .confirmation-cart-item-title {
+        font-size: 13px;
+        line-height: 16px;
+    }
+
+    .confirmation-cart-item-price {
+        font-size: 11px;
+        line-height: 16px;
+    }
+
+    .confirmation-cart-item-controls {
+        margin-top: 4px;
+        gap: 12px; /* Уменьшаем расстояние для мобильной версии */
+    }
+
+    .confirmation-remove-from-cart-button {
+        width: 28px;
+        height: 28px;
+    }
+
+    .confirmation-remove-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .confirmation-quantity-controls {
+        gap: 4px;
+    }
+
+    .confirmation-quantity-button-minus,
+    .confirmation-quantity-button-plus {
+        width: 28px;
+        height: 28px;
+    }
+
+    .confirmation-quantity-value {
+        font-size: 14px;
+        width: 32px;
+        height: 28px;
+    }
+
+    .confirmation-pay-button {
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .confirmation-privacy-text {
+        font-size: 10px;
+    }
+
+    .continue-button {
+        width: 100%;
+        height: 40px;
+        padding-top: 10px;
+        padding-right: 16px;
+        padding-bottom: 10px;
+        padding-left: 16px;
+        font-size: 14px;
+        border-radius: 10px;
+        margin-top: 12px;
+    }
+}

@@ -60,7 +60,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(AdminAuthMiddleware)
+#app.add_middleware(AdminAuthMiddleware)
 
 @app.on_event("startup")
 async def startup():

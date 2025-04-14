@@ -6,7 +6,7 @@ import Admins from "./pages/Admins";
 import ProductForm from "./pages/ProductForm";
 import ShopDetails from "./pages/ShopDetails";
 import ShopForm from "./pages/ShopForm";
-import Shops from "./pages/Shops";
+import AssortmentPage from './pages/AssortmentPage';
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminLayout from "./pages/AdminLayout";
@@ -14,6 +14,7 @@ import AuthPage from './pages/AuthPage';
 import { handleLogout } from "./api/axios";
 import PolicyPage from './components/PolicyPage';
 import OfferPage from './components/OfferPage'
+import StoresPage from "./pages/StoresPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -50,7 +51,7 @@ const App: React.FC = () => {
                         path="shops"
                         element={
                             <ProtectedRoute>
-                                <Shops />
+                                <StoresPage />
                             </ProtectedRoute>
                         }
                     />
@@ -109,6 +110,14 @@ const App: React.FC = () => {
                         element={
                             <ProtectedRoute>
                                 <Admins />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="assortment"
+                        element={
+                            <ProtectedRoute>
+                                <AssortmentPage />
                             </ProtectedRoute>
                         }
                     />

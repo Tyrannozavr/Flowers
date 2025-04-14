@@ -1,0 +1,17 @@
+.admin-layout {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.admin-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .admin-content {
+        padding: 16px 12px;
+    }
+}

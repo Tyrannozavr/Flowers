@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './AdminSubHeader.css';
 import { useAuth } from '../../context/AuthContext';
 
-export type AdminSection = 'shops' | 'admins' | 'profile';
+export type AdminSection = 'shops' | 'admins' | 'profile' | 'assortment' | 'orders' | 'delivery';
 
 interface AdminSubHeaderProps {
     activeSection: AdminSection;
@@ -24,7 +24,9 @@ const AdminSubHeader: React.FC<AdminSubHeaderProps> = ({
     const sections: { id: AdminSection; label: string; path: string }[] = [
         { id: 'shops', label: 'Магазины', path: '/shops' },
         { id: 'admins', label: isSuperadmin?'Администраторы':'Мой профиль', path: '/admins' },
-//         { id: 'assortment', label: 'Ассортимент', path: '/assortment' },
+        { id: 'assortment', label: 'Ассортимент', path: '/assortment' },
+        { id: 'orders', label: 'Заказы', path: '/orders' },
+        { id: 'delivery', label: 'Доставка', path: '/delivery' },
         { id: 'profile', label: 'Профиль', path: '/profile' },
     ];
 

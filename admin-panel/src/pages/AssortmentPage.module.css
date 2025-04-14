@@ -1,0 +1,413 @@
+.container {
+  padding: 12px;
+  margin-bottom: 24px;
+  padding-left: 38px;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.pageTitle {
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0px;
+  color: #000000;
+  margin: 0 0 8px 0;
+  text-align: left;
+}
+
+/* Стили для категорий */
+.categoriesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 34px;
+}
+
+.categoryCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  position: relative;
+}
+
+.categoryImage {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  background: #30AA6E;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  top: -8px;
+  z-index: 1;
+}
+
+.categoryImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.categoryIcon {
+  width: 12.5px !important;
+  height: 12.5px !important;
+  position: relative;
+  top: 0.75px;
+  left: 0.75px;
+  object-fit: contain;
+}
+
+.categoryPlaceholder {
+  color: #FFFFFF;
+  font-size: 12px;
+}
+
+.categoryName {
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0px;
+  color: #000000;
+  margin: 0;
+  text-align: center;
+  z-index: 1;
+}
+
+.hoverRectangle {
+  width: 72px;
+  height: 16px;
+  background: #30AA6E;
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(15deg);
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.categoryCard:hover .hoverRectangle {
+  opacity: 1;
+}
+
+/* Стили для товаров */
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(221px, 1fr));
+  gap: 24px;
+  margin-top: 34px;
+  width: 100%;
+}
+
+.productCard {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.04);
+  width: 221px;
+  height: 302px;
+  text-decoration: none;
+  position: relative;
+}
+
+.productImage {
+  width: 221px;
+  height: 200px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #E8E8E8;
+  position: relative;
+}
+
+.productImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.productPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #30AA6E;
+  position: relative;
+}
+
+.productIcon {
+  width: 131.84654235839844px !important;
+  height: 129.1875px !important;
+  position: relative;
+  top: 0.91px;
+  left: 0.58px;
+  object-fit: contain;
+}
+
+.productInfo {
+  padding: 8px 16px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(302px - 200px - 16px);
+}
+
+.price {
+  font-family: Inter, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.name {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.editButton,
+.addProductButton {
+  width: 100%;
+  height: 36px;
+  padding: 9px 16px;
+  background: #30AA6E;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-decoration: none;
+}
+
+.editButton:hover,
+.addProductButton:hover {
+  background: #2a9961;
+}
+
+.plusIcon {
+  display: none;
+}
+
+/* Стили для формы */
+.form {
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+}
+
+.formTitle {
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 24px;
+  letter-spacing: 0px;
+  text-align: center;
+  color: #000000;
+  margin: 0 0 24px 0;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #D9D9D9;
+  border-radius: 6px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  background: white;
+}
+
+.input::placeholder {
+  color: #8C8C8C;
+}
+
+textarea.input {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #30AA6E;
+}
+
+.uploadButton {
+  width: 352px;
+  height: 44px;
+  padding: 12px 24px;
+  background: #F5F5F5;
+  border: 1px solid #D9D9D9;
+  border-radius: 6px;
+  color: #8C8C8C;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 0;
+}
+
+.uploadButton:hover {
+  background: #E8E8E8;
+}
+
+.previewImages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.previewImage {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.previewImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeImageButton {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.removeImageButton:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Контейнер для кнопок */
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.inStockButton {
+  width: 352px;
+  height: 44px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  background: #30AA6E; /* Всегда зелёный фон */
+  color: white; /* Всегда белый текст */
+}
+
+.inStockButton:hover {
+  background: #2a9961; /* Более тёмный зелёный при наведении */
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.saveButton {
+  width: 211px;
+  height: 44px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  background: #30AA6E;
+  color: white;
+}
+
+.saveButton:hover {
+  background: #2a9961;
+}
+
+.deleteButton {
+  width: 130px;
+  height: 44px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  background: #FF5C5C;
+  color: white;
+}
+
+.deleteButton:hover {
+  background: #ff3333;
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  background: #FFE6E6;
+  color: #FF4D4F;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 12px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.errorIcon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  background: #FF4D4F;
+  color: white;
+  border-radius: 50%;
+  margin-right: 8px;
+  font-size: 12px;
+}
