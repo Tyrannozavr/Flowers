@@ -5,6 +5,7 @@ import shopIcon from '../assets/shop.svg';
 import {useQuery} from "react-query";
 import {addCategory, fetchShops, getShopCategories} from "../api/shops.ts";
 import {createCategory} from "../api/categories.ts";
+import {createProduct} from "../api/products.ts";
 
 
 interface Category {
@@ -29,9 +30,9 @@ interface NewProductForm {
     name?: string;
     description?: string;
     composition?: string;
-    category?: string;
+    category_id?: number;
     price?: string;
-    images?: string[];
+    images?: File[];
     inStock?: boolean;
 }
 
@@ -184,7 +185,7 @@ export const AssortmentPage: React.FC = () => {
         setSelectedImages(prev => prev.filter((_, i) => i !== index));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!newProduct.name || !newProduct.price) {
             setError('Ошибка при сохранении. Заполните название и цену');
             return;
@@ -200,22 +201,26 @@ export const AssortmentPage: React.FC = () => {
             setError('Ошибка при сохранении. Укажите корректную цену');
             return;
         }
+        newProduct.images = selectedImages;
+        const createdProduct = await createProduct(newProduct);
+        setProducts([...products, createdProduct]);
+        // console.log(newProduct);
 
-        const product: Product = {
-            id: Date.now().toString(),
-            name: newProduct.name,
-            description: newProduct.description || '',
-            composition: newProduct.composition || '',
-            category: newProduct.category || '',
-            price: priceValue,
-            images: selectedImages.map(file => URL.createObjectURL(file)),
-        };
+        // const product: Product = {
+        //     id: Date.now().toString(),
+        //     name: newProduct.name,
+        //     description: newProduct.description || '',
+        //     composition: newProduct.composition || '',
+        //     category: newProduct.category || '',
+        //     price: priceValue,
+        //     images: selectedImages.map(file => URL.createObjectURL(file)),
+        // };
 
-        setProducts([...products, product]);
-        setNewProduct({inStock: true});
-        setSelectedImages([]);
-        setIsCreatingProduct(false);
-        setError(null);
+        // setProducts([...products, product]);
+        // setNewProduct({inStock: true});
+        // setSelectedImages([]);
+        // setIsCreatingProduct(false);
+        // setError(null);
     };
 
     const handleDelete = () => {
@@ -314,14 +319,19 @@ export const AssortmentPage: React.FC = () => {
                         onChange={handleInputChange}
                         className={styles.input}
                     />
-                    <input
-                        type="text"
-                        name="category"
-                        placeholder="Категория"
-                        value={newProduct.category || ''}
+                    <select
+                        name="category_id"
+                        value={newProduct.category_id || ''}
                         onChange={handleInputChange}
                         className={styles.input}
-                    />
+                    >
+                        <option value="">Выберите категорию</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
                     <input
                         type="text"
                         name="price"

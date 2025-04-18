@@ -2,11 +2,10 @@ import logging
 import os
 import uuid
 from typing import Optional, List
-from urllib.parse import urlparse
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request, File
 from pydantic import HttpUrl
-from sqlalchemy import text, and_
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 import app.repositories.categories
@@ -14,6 +13,7 @@ from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR, CATEGORY_IMAGE_UPLOAD_
 from app.core.database import get_db
 from app.dependencies.Orders import DeliveryDistanceServiceDep
 from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate
+from app.dependencies.subdomain import ShopDep
 from app.models import Category
 from app.models.product import Product, ProductAttribute
 from app.models.shop import Shop, ShopAttribute, ShopType, ShopCategories
@@ -107,24 +107,18 @@ async def create_shop(
         logo_url=f"{base_url}static/uploads/{new_shop.logo_url}" if new_shop.logo_url else None
     )
 
+
 @router.post("/categories", response_model=CategoryResponse)
 def create_category_for_shop(
         request: Request,
+        shop: ShopDep,
         name: str = Form(),
         image: UploadFile = None,
         user: User = Depends(get_current_user),
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
 ):
-    # Extract subdomain from the origin header
-    subdomain = None
-    origin = request.headers.get('origin')
-    if origin:
-        parsed_url = urlparse(origin)
-        host_parts = parsed_url.netloc.split('.')
-        if len(host_parts) >= 2:
-            subdomain = host_parts[0]
-    if subdomain is None:
-        raise HTTPException(status_code=400, detail="Subdomain header is required")
+    if shop.owner_id!= user.id:
+        raise HTTPException(status_code=403, detail="You do not have access to this shop")
     domain = request.base_url
     unique_filename = None
     if image:
@@ -135,8 +129,6 @@ def create_category_for_shop(
         with open(save_path, "wb") as f:
             f.write(image.file.read())
 
-    # Find the shop based on the user and subdomain
-    shop = db.query(Shop).filter(and_(Shop.owner_id == user.id, Shop.subdomain == subdomain)).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Shop not found for this user and subdomain")
 
@@ -159,6 +151,69 @@ def create_category_for_shop(
         value=category.value,
         imageUrl=HttpUrl(image_url_response)
     )
+
+
+@router.post("/products", response_model=ProductResponse)
+async def create_product(
+        shop: ShopDep,
+        name: str = Form(...),
+        price: str = Form(...),
+        category_id: int = Form(...),
+        availability: Optional[str] = Form(None),
+        description: str = Form(""),
+        ingredients: str = Form(""),
+        images: List[UploadFile] = File(None),
+        db: Session = Depends(get_db),
+        user: dict = Depends(get_current_user),
+):
+    """creates product for a shop based on subdomain request were sent"""
+    find_user = db.query(User).filter(User.id == user.id).first()
+
+    if not find_user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    if find_user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено создавать новые продукты")
+
+    price = int(price, 10)
+    photos = []
+
+    if images:
+        os.makedirs("static/uploads", exist_ok=True)
+        for image in images:
+            file_extension = image.filename.split(".")[-1]
+            unique_filename = f"{uuid.uuid4()}.{file_extension}"
+            save_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+            with open(save_path, "wb") as f:
+                f.write(await image.read())
+
+            photos.append(unique_filename)
+
+    new_product = Product(
+        shop_id=shop.id,
+        name=name,
+        price=price,
+        category_id=category_id,
+        description=description,
+        ingredients=ingredients,
+        photo_url=photos[0] if photos else None,  # Set the first photo as photo_url for backward compatibility
+        photos=photos,
+        availability=availability
+    )
+    db.add(new_product)
+    db.commit()
+    db.refresh(new_product)
+    return ProductResponse(
+        id=new_product.id,
+        name=new_product.name,
+        price=new_product.price,
+        description=new_product.description,
+        ingredients=new_product.ingredients,
+        photo_url=f"{os.path.join(UPLOAD_DIR, new_product.photo_url)}" if new_product.photo_url else None,
+        availability=new_product.availability,
+    )
+
 
 @router.get("/", response_model=list[ShopResponse])
 def get_shops(
@@ -239,7 +294,8 @@ def get_shop_types(
         if not shop_types:
             raise HTTPException(status_code=404, detail="No shop types found")
 
-        return [{"id": shop_type.id, "name": shop_type.name, "icon": f"{base_url}static/{UPLOAD_DIR}/{shop_type.icon}"} for shop_type in shop_types]
+        return [{"id": shop_type.id, "name": shop_type.name, "icon": f"{base_url}static/{UPLOAD_DIR}/{shop_type.icon}"}
+                for shop_type in shop_types]
     except Exception as e:
         logging.error(f"Error retrieving shop types: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
@@ -508,9 +564,10 @@ async def create_product(
 def get_user_id_by_tg_id(user_tg_id: str, db: Session):
     user = db.execute(
         text('''
-                    SELECT * FROM Users u
-                    WHERE u.telegram_ids @> :telegram_id
-                '''),
+             SELECT *
+             FROM Users u
+             WHERE u.telegram_ids @ > :telegram_id
+             '''),
         {"telegram_id": f'["{user_tg_id}"]'}
     ).fetchone()
 
