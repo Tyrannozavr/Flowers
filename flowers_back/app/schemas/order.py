@@ -55,23 +55,23 @@ class ShopResponse(BaseModel):
 
 class OrderResponse(BaseModel):
     id: int
-    fullName: Optional[str] = Field(alias="full_name")
-    phoneNumber: Optional[str] = Field(alias="phone_number")
-    recipientName: Optional[str] = Field(alias="recipient_name")
-    recipientPhone: Optional[str] = Field(alias="recipient_phone")
+    fullName: Optional[str] = Field()
+    phoneNumber: Optional[str] = Field()
+    recipientName: Optional[str] = Field()
+    recipientPhone: Optional[str] = Field()
     city: Optional[str] = None
     street: Optional[str] = None
     house: Optional[str] = None
     building: Optional[str] = None
     apartment: Optional[str] = None
-    deliveryMethod: Optional[str] = Field(alias="delivery_method")
-    deliveryDate: Optional[str] = Field(alias="delivery_date")
-    deliveryTime: Optional[str] = Field(alias="delivery_time")
+    deliveryMethod: Optional[str] = Field()
+    deliveryDate: Optional[str] = Field()
+    deliveryTime: Optional[str] = Field()
     wishes: Optional[str] = None
-    cardText: Optional[str] = Field(alias="card_text")
-    isSelfPickup: Optional[bool] = Field(alias="is_self_pickup")
+    cardText: Optional[str] = Field()
+    isSelfPickup: Optional[bool] = Field()
     status: Optional[str] = None
-    isSent: Optional[bool] = Field(alias="is_sent")
+    isSent: Optional[bool] = Field()
     items: List[Item] = []
     shop_id: Optional[int] = None
 

@@ -1,16 +1,20 @@
-from fastapi import APIRouter, HTTPException, Depends, Query, Request
+from typing import List, Optional
 
-from app.dependencies.Orders import DeliveryDistanceServiceDep
-from app.schemas.order import Order, OrderStatus, OrderResponse
-from app.models.order import Order as OrderDb
-from app.models.shop import Shop 
-from app.models.order import OrderItem as OrderItemDb
+from fastapi import APIRouter, HTTPException, Depends, Query, Request
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
-from app.core.database import get_db  
-from typing import List
+
+from app.core.database import get_db
+from app.dependencies.Orders import DeliveryDistanceServiceDep
+from app.dependencies.subdomain import ShopDep
+from app.models.order import Order as OrderDb, OrderItem
+from app.models.order import OrderItem as OrderItemDb
+from app.models.shop import Shop
 from app.repositories import shop as shop_repository
+from app.schemas.order import Order, OrderStatus, OrderResponse
 
 router = APIRouter()
+
 
 @router.post("/")
 async def create_order(request: Request, order: Order, db: Session = Depends(get_db)):
@@ -18,11 +22,11 @@ async def create_order(request: Request, order: Order, db: Session = Depends(get
         subdomain = request.headers.get("X-Subdomain")
         if not subdomain:
             raise HTTPException(status_code=400, detail="Subdomain header is required")
-        
+
         shop = db.query(Shop).filter(Shop.subdomain == subdomain).first()
         if not shop:
             raise HTTPException(status_code=404, detail="Магазин не найден")
-        
+
         db_order = OrderDb(
             full_name=order.fullName,
             phone_number=order.phoneNumber,
@@ -63,6 +67,7 @@ async def create_order(request: Request, order: Order, db: Session = Depends(get
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error processing order: {str(e)}")
 
+
 @router.get("/", response_model=List[OrderResponse])
 async def get_orders(db: Session = Depends(get_db)):
     try:
@@ -73,16 +78,70 @@ async def get_orders(db: Session = Depends(get_db)):
         db.commit()
 
         order_responses = [OrderResponse.from_orm(order) for order in orders]
-
         return order_responses
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=f"Error retrieving orders: {str(e)}")
 
+
+@router.get("/shop", response_model=List[OrderResponse])
+async def get_orders_by_shop(
+        shop: ShopDep,
+        db: Session = Depends(get_db),
+        search: Optional[str] = Query(None, description="Search by recipient name"),
+):
+    try:
+        orders = db.query(OrderDb).options(joinedload(OrderDb.items)).filter(OrderDb.shop_id == shop.id)
+        if search:
+            search_term = f"%{search}%"
+            orders = orders.filter(
+                or_(
+                    OrderDb.recipient_name.ilike(search_term),
+                    OrderDb.full_name.ilike(search_term)
+                )
+            )
+        order_responses = []
+        for order in orders.all():
+            order_items = [OrderItem(
+                id=item.product_id,
+                name=item.name,
+                price=item.price,
+                quantity=item.quantity
+            ) for item in order.items]
+
+            order_response = OrderResponse(
+                id=order.id,
+                fullName=order.full_name,
+                phoneNumber=order.phone_number,
+                recipientName=order.recipient_name,
+                recipientPhone=order.recipient_phone,
+                city=order.city,
+                street=order.street,
+                house=order.house,
+                building=order.building,
+                apartment=order.apartment,
+                deliveryMethod=order.delivery_method,
+                deliveryDate=order.delivery_date,
+                deliveryTime=order.delivery_time,
+                wishes=order.wishes,
+                cardText=order.card_text,
+                isSelfPickup=order.is_self_pickup,
+                status=order.status,
+                isSent=order.is_sent,
+                items=order_items,
+                shop_id=order.shop_id
+            )
+            order_responses.append(order_response)
+
+        return order_responses
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving orders: {str(e)}")
+
+
 @router.get("/status", response_model=List[OrderResponse])
 async def get_orders_by_status(
-    status: OrderStatus = Query(..., description="Фильтр по статусу заказа"),
-    db: Session = Depends(get_db),
+        status: OrderStatus = Query(..., description="Фильтр по статусу заказа"),
+        db: Session = Depends(get_db),
 ):
     try:
         orders = db.query(OrderDb).filter(OrderDb.status == status).all()
@@ -92,11 +151,12 @@ async def get_orders_by_status(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving orders: {str(e)}")
 
+
 @router.put("/{order_id}")
 async def update_order_status(
-    order_id: int,
-    status: OrderStatus = Query(..., description="Новый статус заказа"),
-    db: Session = Depends(get_db),
+        order_id: int,
+        status: OrderStatus = Query(..., description="Новый статус заказа"),
+        db: Session = Depends(get_db),
 ):
     """
     Обновляет статус заказа по ID.
@@ -114,6 +174,7 @@ async def update_order_status(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error updating order status: {str(e)}")
+
 
 @router.get("/delivery/cost/{shop_id}")
 def get_delivery_cost(
