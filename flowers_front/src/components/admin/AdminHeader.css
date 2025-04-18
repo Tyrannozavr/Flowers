@@ -1,0 +1,323 @@
+:root {
+    --primary-color: #30AA6E;
+    --primary-hover: #268A56;
+    --white: #FFFFFF;
+    --text-color: #333333;
+}
+
+.admin-header {
+    width: 100%;
+    height: 58px;
+    background-color: #30AA6E;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+.admin-header * {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.admin-header-content {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 40px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.admin-logo {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-decoration: none;
+    height: 100%;
+    color: #FFFFFF;
+}
+
+.admin-logo:hover {
+    opacity: 0.8;
+}
+
+.logo-image {
+    height: 40px;
+    width: 215px;
+    filter: brightness(0) invert(1);
+    transition: transform 0.2s ease;
+    object-fit: contain;
+    display: block;
+    margin: 0;
+    flex-shrink: 0;
+    object-position: left;
+    transform-origin: center;
+    pointer-events: none;
+    max-width: 100%;
+}
+
+/* Скрываем иконки и центрируем логотип на всех экранах меньше 1200px */
+@media screen and (max-width: 1200px) {
+    .header-icons,
+    nav.header-icons,
+    .admin-header .header-icons,
+    .admin-header-content .header-icons {
+        display: none !important;
+    }
+
+    .contact-modal {
+        right: 50%;
+        transform: translateX(50%);
+    }
+
+    .admin-header-content {
+        justify-content: center;
+        padding: 6px 20px;
+    }
+
+    .mobile-navigation {
+        display: flex;
+    }
+
+    body {
+        padding-bottom: 60px;
+    }
+}
+
+/* Адаптация размера логотипа для экранов 780px и меньше */
+@media screen and (max-width: 780px) {
+    .admin-header-content {
+        padding: 6px 20px;
+    }
+
+    .logo-image {
+        width: 180px;
+        height: 34px;
+    }
+
+    .contact-modal {
+        width: 90%;
+        max-width: 280px;
+    }
+}
+
+/* Уменьшаем отступы для очень маленьких экранов */
+@media screen and (max-width: 480px) {
+    .admin-header-content {
+        padding: 6px 16px;
+    }
+}
+
+/* Дополнительное уменьшение логотипа для самых маленьких экранов */
+@media screen and (max-width: 360px) {
+    .logo-image {
+        width: 160px;
+        height: 30px;
+    }
+}
+
+/* Mobile Navigation Styles */
+.mobile-navigation {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background-color: #b088e9;
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-top-width: 1px;
+    border-top-color: #a77de0;
+    border-top-style: solid;
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    width: 33.33%;
+    color: #e8e0f4;
+}
+
+.mobile-nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    position: relative;
+}
+
+.mobile-nav-icon img,
+.mobile-nav-icon svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ff5252;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.mobile-nav-item span {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    color: white;
+    text-align: center;
+    font-weight: 400;
+}
+
+.mobile-nav-item:hover .mobile-nav-icon,
+.mobile-nav-item:hover span {
+    color: var(--primary-color);
+}
+
+.mobile-nav-item:hover .mobile-nav-icon img {
+    opacity: 0.8;
+}
+
+/* Contact Modal Styles */
+.contact-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1100;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    pointer-events: none;
+}
+
+.contact-modal {
+    position: absolute;
+    top: 58px;
+    right: 40px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    width: 280px;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 1200;
+}
+
+.contact-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.contact-option:hover {
+    background-color: rgba(48, 170, 110, 0.1);
+}
+
+.contact-option:hover span {
+    color: var(--primary-color);
+}
+
+.contact-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.contact-option span {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.admin-logo:hover .logo-image {
+    transform: scale(1.1);
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    height: 100%;
+}
+
+.header-icon-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 6px 0;
+    color: #FFFFFF;
+}
+
+.header-icon-wrapper:hover {
+    opacity: 0.8;
+}
+
+.header-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-icon-image {
+    width: 28px;
+    height: 28px;
+    filter: brightness(0) invert(1);
+    opacity: 1;
+    transition: transform 0.2s ease;
+    pointer-events: none;
+}
+
+.header-icon-wrapper:hover .header-icon-image {
+    transform: scale(1.1);
+}
+
+.icon-label {
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1;
+    opacity: 1;
+}

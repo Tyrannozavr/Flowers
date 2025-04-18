@@ -27,6 +27,8 @@ class ShopResponse(BaseModel):
     primary_color: Optional[str]
     inn: Optional[str]
     phone: Optional[str]
+    tg: Optional[str]
+    whatsapp: Optional[str]
     addresses: List[Address]
 
     class Config:

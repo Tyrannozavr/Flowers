@@ -131,6 +131,8 @@ def get_shops(
             primary_color=shop.primary_color,
             inn=shop.inn,
             phone=shop.phone,
+            tg=shop.tg,
+            whatsapp=shop.whatsapp,
             addresses=addresses,
             logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None
         ))
@@ -231,6 +233,8 @@ def get_shop_by_domain(
         subdomain=shop.subdomain,
         primary_color=shop.primary_color,
         inn=shop.inn,
+        tg=shop.tg,
+        whatsapp=shop.whatsapp,
         phone=shop.phone,
         addresses=addresses,
         logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None,
@@ -258,6 +262,8 @@ def get_shop_by_id(
         subdomain=shop.subdomain,
         primary_color=shop.primary_color,
         inn=shop.inn,
+        tg=shop.tg,
+        whatsapp=shop.whatsapp,
         phone=shop.phone,
         addresses=addresses,
         logo_url=f"{base_url}static/uploads/{shop.logo_url}" if shop.logo_url else None,
@@ -272,6 +278,8 @@ async def update_shop(
         color: str = Form(...),
         inn: str = Form(...),
         phone: str = Form(...),
+        tg: str = Form(...),
+        whatsapp: str = Form(...),
         logo: Optional[UploadFile] = None,
         addresses: str = Form(...),
         db: Session = Depends(get_db),
@@ -293,6 +301,8 @@ async def update_shop(
     shop.inn = inn
     shop.phone = phone
     shop.address = addresses
+    shop.tg = tg
+    shop.whatsapp = whatsapp
 
     if addresses:
         try:

@@ -32,3 +32,13 @@ export const deleteShop = async (id: number) => {
     const response = await axios.delete(`/shops/${id}`);
     return response.data;
 };
+
+export const getShopCategories = async (shopId: number) => {
+    const response = await axios.get(`/shops/${shopId}/categories`);
+    return response.data;
+}
+
+export const addCategory = async (shopId: number, categoryId: number) => {
+    const response = await axios.post(`/shops/${shopId}/categories/${categoryId}`);
+    return response.data;
+}
