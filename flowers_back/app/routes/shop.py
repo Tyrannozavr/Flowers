@@ -1,7 +1,7 @@
 import logging
 import os
 import uuid
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request, File
 from pydantic import HttpUrl
@@ -391,7 +391,7 @@ def get_product(
         description=product.description,
         ingredients=product.ingredients,
         categoryId=product.category_id,
-        photo_url=product.photo_url if product.photo_url else None,
+        photo_url=product.photo_url if product.photo_url else (product.photos[0] if product.photos else None),
         availability=product.availability
     )
 
@@ -405,7 +405,7 @@ async def create_product(
         availability: Optional[str] = Form(None),
         description: str = Form(""),
         ingredients: str = Form(""),
-        image: UploadFile = None,
+        images: List[UploadFile] = File(None),
         db: Session = Depends(get_db),
         user: dict = Depends(get_current_user)
 ):
@@ -418,20 +418,19 @@ async def create_product(
         raise HTTPException(status_code=403, detail="Пользователю запрещено создавать новые продукты")
 
     price = int(price, 10)
+    photos = []
 
-    if image:
+    if images:
         os.makedirs("static/uploads", exist_ok=True)
+        for image in images:
+            file_extension = image.filename.split(".")[-1]
+            unique_filename = f"{uuid.uuid4()}.{file_extension}"
+            save_path = os.path.join(UPLOAD_DIR, unique_filename)
 
-        file_extension = image.filename.split(".")[-1]
-        unique_filename = f"{uuid.uuid4()}.{file_extension}"
-        save_path = os.path.join(UPLOAD_DIR, unique_filename)
+            with open(save_path, "wb") as f:
+                f.write(await image.read())
 
-        with open(save_path, "wb") as f:
-            f.write(await image.read())
-
-        photo_url = unique_filename
-    else:
-        photo_url = None
+            photos.append(unique_filename)
 
     new_product = Product(
         shop_id=shop_id,
@@ -440,7 +439,8 @@ async def create_product(
         category_id=category_id,
         description=description,
         ingredients=ingredients,
-        photo_url=photo_url,
+        photo_url=photos[0] if photos else None,  # Set the first photo as photo_url for backward compatibility
+        photos=photos,
         availability=availability
     )
     db.add(new_product)
@@ -483,6 +483,7 @@ async def create_product_from_telegram(
     get_user_id_by_tg_id(user_tg_id, db)
 
     price = int(price, 10)
+    photos = []
 
     if image:
         os.makedirs("static/uploads", exist_ok=True)
@@ -494,9 +495,7 @@ async def create_product_from_telegram(
         with open(save_path, "wb") as f:
             f.write(await image.read())
 
-        photo_url = unique_filename
-    else:
-        photo_url = None
+        photos.append(unique_filename)
 
     new_product = Product(
         shop_id=shop_id,
@@ -505,7 +504,8 @@ async def create_product_from_telegram(
         category_id=category_id,
         description=description,
         ingredients=ingredients,
-        photo_url=photo_url,
+        photo_url=photos[0] if photos else None,
+        photos=photos,
     )
     db.add(new_product)
     db.commit()

@@ -4,7 +4,7 @@ from app.models.product import Product, ProductAttribute, ProductAttributeValue,
 from app.core.database import engine  # Make sure to import your database engine
 
 # Create an Admin instance
-admin = Admin(engine, title="Your Admin Title")
+admin = Admin(engine, title="Your Admin Title", base_url="/superadmin")
 
 class ProductAdmin(ModelView):
     model = Product

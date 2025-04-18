@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, String, Integer, ForeignKey
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from enum import Enum
@@ -37,7 +37,8 @@ class Product(Base):
     description = Column(String, nullable=True)
     ingredients = Column(String, nullable=False)
     price = Column(Integer, nullable=False)
-    photo_url = Column(String, nullable=False)
+    photo_url = Column(String, nullable=True)  # Keep this for backward compatibility
+    photos = Column(JSON, nullable=True)  # New field to store multiple photos
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     availability = Column(String, nullable=False, default=ProductAvailabilityVariants.AVAILABLE.value)
     shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)
@@ -62,19 +63,16 @@ class ProductAttribute(Base):
 
     # Связь с вариантами характеристик
     attribute_values = relationship("ProductAttributeValue", back_populates="attribute")
-    shop_type_attributes = relationship(
-        "ShopTypeAttribute",
-        back_populates="product_attribute",
-        overlaps="type_attributes"
-    )
-
-    # If you have this relationship, update it:
+    
     shop_types = relationship(
         "ShopType",
         secondary="shop_type_attributes",
-        back_populates="attributes",
-        viewonly=True,  # Add this if it's read-only
-        overlaps="shop_type_attributes,type_attributes"
+        back_populates="attributes"
+    )
+    shop_type_attributes = relationship(
+        "ShopTypeAttribute",
+        back_populates="product_attribute",
+        overlaps="shop_types"
     )
 
 class ProductAttributeValue(Base):

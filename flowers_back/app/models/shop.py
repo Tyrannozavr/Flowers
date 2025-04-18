@@ -75,15 +75,19 @@ class ShopType(Base):
     icon = Column(String, nullable=True)  # Иконка (необязательное поле)
 
     # Связь с характеристиками
-    attributes = relationship("ProductAttribute", secondary="shop_type_attributes", back_populates="shop_types")
+    attributes = relationship(
+        "ProductAttribute",
+        secondary="shop_type_attributes",
+        back_populates="shop_types"
+    )
     type_attributes = relationship(
         "ShopTypeAttribute",
         back_populates="shop_type",
-        overlaps="shop_type_attributes"
+        overlaps="attributes"
     )
 
 class ShopTypeAttribute(Base):
-    """Характеристики для типа магазина"""
+    "Характеристики для типа магазина"
     __tablename__ = "shop_type_attributes"
 
     shop_type_id = Column(Integer, ForeignKey("shop_types.id"), primary_key=True)
@@ -92,16 +96,18 @@ class ShopTypeAttribute(Base):
     # Explicit relationships with back_populates
     shop_type = relationship(
         "ShopType",
-        back_populates="type_attributes"
+        back_populates="type_attributes",
+        overlaps="attributes"
     )
     product_attribute = relationship(
         "ProductAttribute",
-        back_populates="shop_type_attributes"
+        back_populates="shop_type_attributes",
+        overlaps="shop_types"
     )
 
 
 class ShopAttribute(Base):
-    """Характеристики для конкретного магазина"""
+    "Характеристики для конкретного магазина"
     __tablename__ = "shop_attributes"
 
     shop_id = Column(Integer, ForeignKey("shops.id"), primary_key=True)

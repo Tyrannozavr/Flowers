@@ -37,8 +37,13 @@
   gap: 8px;
   text-decoration: none;
   position: relative;
+  cursor: pointer;
 }
 
+.categoriesGrid button {
+  border: none;
+  background: transparent;
+}
 .categoryImage {
   width: 44px;
   height: 44px;
