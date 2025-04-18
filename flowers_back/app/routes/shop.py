@@ -21,7 +21,7 @@ from app.models.user import User
 from app.repositories import shop as shop_repository
 from app.routes.admin import get_current_user
 from app.schemas.category import CategoryResponse
-from app.schemas.product import ProductResponse
+from app.schemas.product import ProductResponse, ProductImagesResponse
 from app.schemas.shop import ShopResponse, OwnerShopResponse
 from app.services.shop_service import apply_attributes_to_shop
 
@@ -153,7 +153,7 @@ def create_category_for_shop(
     )
 
 
-@router.post("/products", response_model=ProductResponse)
+@router.post("/products", response_model=ProductImagesResponse)
 async def create_product(
         shop: ShopDep,
         name: str = Form(...),
@@ -214,6 +214,32 @@ async def create_product(
         availability=new_product.availability,
     )
 
+@router.get("/products", response_model=list[ProductImagesResponse])
+def get_products(
+        request: Request,
+        shop: ShopDep,
+        db: Session = Depends(get_db),
+):
+    products = db.query(Product).filter(Product.shop_id == shop.id).all()
+    if not products:
+        raise HTTPException(status_code=404, detail="Продукты не найдены")
+
+    base_url = str(request.base_url)
+    response = [
+        ProductImagesResponse(
+            id=product.id,
+            name=product.name,
+            price=product.price,
+            description=product.description,
+            ingredients=product.ingredients,
+            images=[f"{base_url}static/uploads/{photo}" for photo in product.photos]
+            if product.photos else [f"{base_url}static/uploads/{product.photo_url}"],
+            categoryId=product.category_id
+        )
+        for product in products
+    ]
+    print("Response products: ", response)
+    return response
 
 @router.get("/", response_model=list[ShopResponse])
 def get_shops(

@@ -19,7 +19,7 @@ const ShopDetails: React.FC = () => {
 
     const { data: products, isLoading: isLoadingProducts } = useQuery(
         ["products", id],
-        () => fetchProducts(Number(id)),
+        () => fetchProducts(),
         {
             retry: false,
             onError: (error) => {

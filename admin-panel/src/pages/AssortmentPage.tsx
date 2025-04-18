@@ -1,12 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import styles from './AssortmentPage.module.css';
 import plussIcon from '../assets/pluss.svg';
 import shopIcon from '../assets/shop.svg';
 import {useQuery} from "react-query";
 import {addCategory, fetchShops, getShopCategories} from "../api/shops.ts";
 import {createCategory} from "../api/categories.ts";
-import {createProduct} from "../api/products.ts";
-
+import {createProduct, fetchProducts} from "../api/products.ts";
 
 interface Category {
     id: string;
@@ -19,10 +18,11 @@ interface Product {
     id: string;
     name: string;
     description: string;
-    composition: string;
-    category: string;
     price: number;
-    images?: string[];
+    ingredients: string;
+    category: string;
+    images: string[];
+    availability: string;
 }
 
 interface NewProductForm {
@@ -51,12 +51,26 @@ export const AssortmentPage: React.FC = () => {
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
     const [error, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        const loadProducts = async () => {
+            try {
+                const fetchedProducts = await fetchProducts();
+                console.log("Fetched products:", fetchedProducts);
+                setProducts(fetchedProducts);
+            } catch (err) {
+                console.error("Failed to fetch products:", err);
+                setError("Failed to load products. Please try again later.");
+            }
+        };
+
+        loadProducts();
+    }, []);
+
     const {
         data: shops,
     } = useQuery("shops", fetchShops, {
         retry: false,
         onSuccess: async (data) => {
-            console.log(data);
             if (data.length > 0) {
                 const shopId = data[0].id;
                 try {
@@ -64,7 +78,6 @@ export const AssortmentPage: React.FC = () => {
                     if (categoriesData.length > 0) {
                         setCategories(categoriesData);
                     }
-                    console.log(categoriesData);
                 } catch (err) {
                     console.log(err);
                 }
@@ -202,25 +215,18 @@ export const AssortmentPage: React.FC = () => {
             return;
         }
         newProduct.images = selectedImages;
-        const createdProduct = await createProduct(newProduct);
-        setProducts([...products, createdProduct]);
-        // console.log(newProduct);
-
-        // const product: Product = {
-        //     id: Date.now().toString(),
-        //     name: newProduct.name,
-        //     description: newProduct.description || '',
-        //     composition: newProduct.composition || '',
-        //     category: newProduct.category || '',
-        //     price: priceValue,
-        //     images: selectedImages.map(file => URL.createObjectURL(file)),
-        // };
-
-        // setProducts([...products, product]);
-        // setNewProduct({inStock: true});
-        // setSelectedImages([]);
-        // setIsCreatingProduct(false);
-        // setError(null);
+        try {
+            await createProduct(newProduct);
+            const updatedProducts = await fetchProducts();
+            setProducts(updatedProducts);
+            setIsCreatingProduct(false);
+            setNewProduct({inStock: true});
+            setSelectedImages([]);
+            setError(null);
+        } catch (err) {
+            console.error("Failed to create product:", err);
+            setError("Failed to create product. Please try again.");
+        }
     };
 
     const handleDelete = () => {
@@ -475,8 +481,7 @@ export const AssortmentPage: React.FC = () => {
                                         <img src={product.images[0]} alt={product.name}/>
                                     ) : (
                                         <div className={styles.productPlaceholder}>
-                                            <img src={shopIcon} alt="Product placeholder"
-                                                 className={styles.productIcon}/>
+                                            <img src={shopIcon} alt="Product placeholder" className={styles.productIcon}/>
                                         </div>
                                     )}
                                 </div>
