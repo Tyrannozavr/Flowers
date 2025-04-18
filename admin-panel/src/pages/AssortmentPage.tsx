@@ -206,13 +206,8 @@ export const AssortmentPage: React.FC = () => {
     };
 
     const handleSave = async () => {
-        if (!newProduct.name || !newProduct.price) {
-            setError('Ошибка при сохранении. Заполните название и цену');
-            return;
-        }
-
-        if (selectedImages.length === 0 && !editingProduct) {
-            setError('Ошибка при сохранении. Загрузите хотя бы одно фото');
+        if (!newProduct.name || !newProduct.price || !newProduct.composition || !newProduct.category_id) {
+            setError('Ошибка при сохранении. Заполните название, цену, состав и выберите категорию');
             return;
         }
 
@@ -222,32 +217,24 @@ export const AssortmentPage: React.FC = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('name', newProduct.name);
-        formData.append('price', priceValue.toString());
-        formData.append('category_id', newProduct.category_id?.toString() || '');
-        if (newProduct.description) formData.append('description', newProduct.description);
-        if (newProduct.composition) formData.append('ingredients', newProduct.composition);
-        if (newProduct.inStock !== undefined) formData.append('availability', newProduct.inStock ? 'AVAILABLE' : 'HIDDEN');
-
-        // Handle both new and existing images
-        selectedImages.forEach((image, index) => {
-            if (image instanceof File) {
-                formData.append(`images`, image);
-            } else {
-                formData.append(`existing_images[${index}]`, image.url);
-            }
-        });
+        const productData = {
+            name: newProduct.name,
+            price: priceValue.toString(),
+            category_id: newProduct.category_id,
+            availability: newProduct.inStock ? 'AVAILABLE' : 'HIDDEN',
+            description: newProduct.description || undefined,
+            ingredients: newProduct.composition || undefined,
+            images: selectedImages.filter((image): image is File => image instanceof File)
+        };
 
         try {
             if (editingProduct) {
                 await updateProduct({
-                    shopId: Number(shops[0].id),
                     productId: Number(editingProduct.id),
-                    formData
+                    ...productData
                 });
             } else {
-                await createProduct(formData);
+                await createProduct(productData);
             }
             const updatedProducts = await fetchProducts();
             setProducts(updatedProducts);
@@ -368,6 +355,7 @@ export const AssortmentPage: React.FC = () => {
                     />
                     <input
                         type="text"
+                        required={true}
                         name="composition"
                         placeholder="Состав"
                         value={newProduct.composition || ''}
@@ -543,6 +531,21 @@ export const AssortmentPage: React.FC = () => {
                                 </div>
                             </div>
                         ))}
+                        <div className={styles.productCard}>
+                            <div className={styles.productImage}>
+                                <div className={styles.productPlaceholder}>
+                                    <img src={shopIcon} alt="Add product" className={styles.productIcon}/>
+                                </div>
+                            </div>
+                            <div className={styles.productInfo}>
+                                <button
+                                    onClick={() => setIsCreatingProduct(true)}
+                                    className={styles.addProductButton}
+                                >
+                                    + Добавить товар
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

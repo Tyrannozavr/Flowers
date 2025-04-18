@@ -60,16 +60,41 @@ export const createProduct = async ({
 };
 
 export const updateProduct = async ({
-    shopId,
     productId,
-    formData,
+    name,
+    price,
+    category_id,
+    availability,
+    description,
+    ingredients,
+    images,
 }: {
-    shopId: number;
     productId: number;
-    formData: FormData;
+    name: string;
+    price: string;
+    category_id: number;
+    availability?: string;
+    description?: string;
+    ingredients?: string;
+    images?: File[];
 }) => {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('price', price);
+    formData.append('category_id', category_id.toString());
+    
+    if (availability) formData.append('availability', availability);
+    if (description) formData.append('description', description);
+    if (ingredients) formData.append('ingredients', ingredients);
+    
+    if (images && images.length > 0) {
+        images.forEach((image) => {
+            formData.append(`images`, image);
+        });
+    }
+
     const response = await axios.put(
-        `/shops/${shopId}/products/${productId}`,
+        `/shops/products/${productId}`,
         formData,
         {
             headers: {

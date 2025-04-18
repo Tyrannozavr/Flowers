@@ -238,8 +238,61 @@ def get_products(
         )
         for product in products
     ]
-    print("Response products: ", response)
     return response
+
+@router.put("/products/{product_id}", response_model=ProductResponse)
+async def update_product(
+        shop: ShopDep,
+        product_id: int,
+        name: str = Form(...),
+        description: Optional[str] = Form(None),
+        category_id: Optional[int] = Form(None),
+        availability: Optional[str] = Form(None),
+        price: str = Form(...),
+        ingredients: Optional[str] = Form(None),
+        images: List[UploadFile] = File(None),
+        db: Session = Depends(get_db),
+        user: dict = Depends(get_current_user)
+):
+    find_user = db.query(User).filter(User.id == user.id).first()
+    image = images[0]
+    if not find_user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    if find_user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено создавать обновлять продукты")
+
+    price = int(price, 10)
+    product = db.query(Product).filter(
+        Product.shop_id == shop.id, Product.id == product_id
+    ).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Продукт не найден")
+
+    product.name = name
+    product.description = description
+    product.price = price
+    product.ingredients = ingredients
+    product.category_id = category_id
+    product.availability = availability
+    product.photos = []
+
+    if images:
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        for image in images:
+            file_extension = image.filename.split(".")[-1]
+            unique_filename = f"{uuid.uuid4()}.{file_extension}"
+            save_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+            with open(save_path, "wb") as f:
+                f.write(await image.read())
+            product.photos.append(unique_filename)
+        product.photo_url = unique_filename
+    db.add(product)
+    db.commit()
+    db.refresh(product)
+    return product
+
 
 @router.get("/", response_model=list[ShopResponse])
 def get_shops(
@@ -652,7 +705,7 @@ async def create_product_from_telegram(
     return new_product
 
 
-@router.put("/{shop_id}/products/{product_id}", response_model=ProductResponse)
+@router.put("/{shop_id}/products/{product_id}", response_model=ProductImagesResponse)
 async def update_product(
         request: Request,
         shop_id: int,
@@ -663,17 +716,17 @@ async def update_product(
         availability: Optional[str] = Form(None),
         price: str = Form(...),
         ingredients: Optional[str] = Form(None),
-        image: Optional[UploadFile] = None,
+        images: List[UploadFile] = File(None),
         db: Session = Depends(get_db),
         user: dict = Depends(get_current_user)
 ):
-    find_user = db.query(User).filter(User.id == user.id).first()
+    find_user = db.query(User).filter(User.id == user['id']).first()
 
     if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
     if find_user.is_removed:
-        raise HTTPException(status_code=403, detail="Пользователю запрещено создавать обновлять продукты")
+        raise HTTPException(status_code=403, detail="Пользователю запрещено обновлять продукты")
 
     price = int(price, 10)
     product = db.query(Product).filter(
@@ -689,20 +742,38 @@ async def update_product(
     product.category_id = category_id
     product.availability = availability
 
-    if image:
+    if images:
         os.makedirs("static/uploads", exist_ok=True)
-        file_extension = image.filename.split(".")[-1]
-        unique_filename = f"{uuid.uuid4()}.{file_extension}"
-        save_path = os.path.join(UPLOAD_DIR, unique_filename)
+        new_photos = []
+        for image in images:
+            file_extension = image.filename.split(".")[-1]
+            unique_filename = f"{uuid.uuid4()}.{file_extension}"
+            save_path = os.path.join(UPLOAD_DIR, unique_filename)
 
-        with open(save_path, "wb") as f:
-            f.write(await image.read())
+            with open(save_path, "wb") as f:
+                f.write(await image.read())
 
-        product.photo_url = unique_filename
+            new_photos.append(unique_filename)
+
+        # Update the photos list
+        product.photos = new_photos
+        # Update the photo_url to be the first new photo
+        product.photo_url = new_photos[0] if new_photos else None
 
     db.commit()
     db.refresh(product)
-    return product
+
+    base_url = str(request.base_url)
+    return ProductImagesResponse(
+        id=product.id,
+        name=product.name,
+        price=product.price,
+        description=product.description,
+        ingredients=product.ingredients,
+        images=[f"{base_url}static/uploads/{photo}" for photo in product.photos] if product.photos else [],
+        categoryId=product.category_id,
+        availability=product.availability
+    )
 
 
 @router.get("/{shop_id}/categories", response_model=list[CategoryResponse])
