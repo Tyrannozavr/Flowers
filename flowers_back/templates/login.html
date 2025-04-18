@@ -97,7 +97,7 @@
                 document.cookie = `access_token=${data.access_token}; path=/; max-age=3600; SameSite=Lax`;
                 // console.log("Token is", data.access_token)
                 // console.log("cookie are", document.cookie)
-                window.location.href = "/admin";
+                window.location.href = "/superadmin";
             } catch (error) {
                 alert("Login failed. Please check your credentials.");
                 console.error(error);

@@ -22,11 +22,6 @@ def run_seed():
 
 app = FastAPI()
 
-
-# Подключение Starlette Admin к FastAPI
-admin.mount_to(app)
-
-
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -82,6 +77,9 @@ app.include_router(order.router, prefix="/orders", tags=["Orders"])
 app.include_router(pay.router, prefix="/pay", tags=["Pay"])
 app.include_router(superadmin.router, prefix="/superadmin", tags=["Superadmin"])
 
+
+# Подключение Starlette Admin к FastAPI
+admin.mount_to(app)
 # Монтирование статических файлов
 app.mount("/static/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/static/categories", StaticFiles(directory="categories"), name="categories")

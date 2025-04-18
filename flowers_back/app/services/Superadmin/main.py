@@ -42,7 +42,7 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
         - For non-admin routes or after successful authorization, it calls the next handler.
         """
         # Проверяем, начинается ли путь с /admin
-        if request.url.path.startswith("/admin"):
+        if request.url.path.startswith("/superadmin") and not request.url.path.startswith("/superadmin/login"):
             # Проверка токена или сессии
             token = request.cookies.get("access_token")
             if not token:
@@ -63,7 +63,11 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
         return response
 
 # Настройка Starlette Admin
-admin = Admin(engine, title="Admin Panel")
+admin = Admin(
+    engine,
+    title="Admin Panel",
+    base_url="/superadmin",
+)
 
 # Define a mapping of model names to their custom admin views
 admin_views = {
