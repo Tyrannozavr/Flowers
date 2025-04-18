@@ -1,5 +1,6 @@
 import { instance as axios } from "./axios";
 
+
 export const fetchProducts = async () => {
     try {
         const response = await axios.get(`/shops/products`);
@@ -27,7 +28,6 @@ export const createProduct = async ({
     ingredients,
     images,
 }: {
-    shopId: number;
     name: string;
     price: string;
     category_id: number;
@@ -46,7 +46,7 @@ export const createProduct = async ({
     if (ingredients) formData.append('ingredients', ingredients);
     
     if (images && images.length > 0) {
-        images.forEach((image, index) => {
+        images.forEach((image) => {
             formData.append(`images`, image);
         });
     }

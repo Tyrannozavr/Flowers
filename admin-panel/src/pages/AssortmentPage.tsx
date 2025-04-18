@@ -5,10 +5,10 @@ import shopIcon from '../assets/shop.svg';
 import {useQuery} from "react-query";
 import {addCategory, fetchShops, getShopCategories} from "../api/shops.ts";
 import {createCategory} from "../api/categories.ts";
-import {createProduct, fetchProducts} from "../api/products.ts";
+import {createProduct, fetchProducts, updateProduct} from "../api/products.ts";
 
 interface Category {
-    id: string;
+    id: number;
     name: string;
     value: string;
     imageUrl?: string;
@@ -20,7 +20,7 @@ interface Product {
     description: string;
     price: number;
     ingredients: string;
-    category: string;
+    categoryId?: number;
     images: string[];
     availability: string;
 }
@@ -48,8 +48,9 @@ export const AssortmentPage: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [newProduct, setNewProduct] = useState<NewProductForm>({inStock: true});
     const [newCategory, setNewCategory] = useState<NewCategoryForm>({});
-    const [selectedImages, setSelectedImages] = useState<File[]>([]);
+    const [selectedImages, setSelectedImages] = useState<(File | { url: string, isExisting: true })[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
     useEffect(() => {
         const loadProducts = async () => {
@@ -65,6 +66,20 @@ export const AssortmentPage: React.FC = () => {
 
         loadProducts();
     }, []);
+
+    useEffect(() => {
+        if (editingProduct) {
+            setNewProduct({
+                name: editingProduct.name,
+                description: editingProduct.description,
+                composition: editingProduct.ingredients,
+                category_id: Number(editingProduct.categoryId),
+                price: editingProduct.price.toString(),
+                inStock: editingProduct.availability === 'AVAILABLE'
+            });
+            // Note: We don't set selectedImages here because we can't retrieve the File objects from URLs
+        }
+    }, [editingProduct]);
 
     const {
         data: shops,
@@ -84,16 +99,6 @@ export const AssortmentPage: React.FC = () => {
             }
         }
     });
-
-    // const {
-    //   data: categories,
-    // } = useQuery("shops", fetchShops, {
-    //   retry: false,
-    //   onSuccess: (data) => {
-    //     console.log(data);
-    //   }
-    // });
-
     const handleCategoryInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
         setNewCategory(prev => ({...prev, [name]: value}));
@@ -165,11 +170,13 @@ export const AssortmentPage: React.FC = () => {
         setError(null);
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const {name, value} = e.target;
         if (name === 'price') {
             const sanitizedValue = value.replace(/[^\d.,]/g, '');
             setNewProduct(prev => ({...prev, [name]: sanitizedValue}));
+        } else if (name === 'category_id') {
+            setNewProduct(prev => ({...prev, [name]: Number(value)}));
         } else {
             setNewProduct(prev => ({...prev, [name]: value}));
         }
@@ -204,7 +211,7 @@ export const AssortmentPage: React.FC = () => {
             return;
         }
 
-        if (selectedImages.length === 0) {
+        if (selectedImages.length === 0 && !editingProduct) {
             setError('Ошибка при сохранении. Загрузите хотя бы одно фото');
             return;
         }
@@ -214,18 +221,44 @@ export const AssortmentPage: React.FC = () => {
             setError('Ошибка при сохранении. Укажите корректную цену');
             return;
         }
-        newProduct.images = selectedImages;
+
+        const formData = new FormData();
+        formData.append('name', newProduct.name);
+        formData.append('price', priceValue.toString());
+        formData.append('category_id', newProduct.category_id?.toString() || '');
+        if (newProduct.description) formData.append('description', newProduct.description);
+        if (newProduct.composition) formData.append('ingredients', newProduct.composition);
+        if (newProduct.inStock !== undefined) formData.append('availability', newProduct.inStock ? 'AVAILABLE' : 'HIDDEN');
+
+        // Handle both new and existing images
+        selectedImages.forEach((image, index) => {
+            if (image instanceof File) {
+                formData.append(`images`, image);
+            } else {
+                formData.append(`existing_images[${index}]`, image.url);
+            }
+        });
+
         try {
-            await createProduct(newProduct);
+            if (editingProduct) {
+                await updateProduct({
+                    shopId: Number(shops[0].id),
+                    productId: Number(editingProduct.id),
+                    formData
+                });
+            } else {
+                await createProduct(formData);
+            }
             const updatedProducts = await fetchProducts();
             setProducts(updatedProducts);
             setIsCreatingProduct(false);
             setNewProduct({inStock: true});
             setSelectedImages([]);
+            setEditingProduct(null);
             setError(null);
         } catch (err) {
-            console.error("Failed to create product:", err);
-            setError("Failed to create product. Please try again.");
+            console.error("Failed to save product:", err);
+            setError("Failed to save product. Please try again.");
         }
     };
 
@@ -233,7 +266,23 @@ export const AssortmentPage: React.FC = () => {
         setIsCreatingProduct(false);
         setNewProduct({inStock: true});
         setSelectedImages([]);
+        setEditingProduct(null);
         setError(null);
+    };
+
+    const handleEditProduct = (product: Product) => {
+        console.log("Editing product:", product);
+        setEditingProduct(product);
+        setNewProduct({
+            name: product.name,
+            description: product.description,
+            composition: product.ingredients,
+            category_id: Number(product.categoryId),
+            price: product.price.toString(),
+            inStock: product.availability === 'AVAILABLE'
+        });
+        setSelectedImages(product.images.map(url => ({ url, isExisting: true })));
+        setIsCreatingProduct(true);
     };
 
     if (isCreatingCategory) {
@@ -261,7 +310,7 @@ export const AssortmentPage: React.FC = () => {
                         <div className={styles.previewImages}>
                             {selectedImages.map((image, index) => (
                                 <div key={index} className={styles.previewImage}>
-                                    <img src={URL.createObjectURL(image)} alt={`Preview ${index}`}/>
+                                    <img src={image instanceof File ? URL.createObjectURL(image) : image.url} alt={`Preview ${index}`}/>
                                     <button
                                         onClick={() => handleRemoveImage(index)}
                                         className={styles.removeImageButton}
@@ -299,9 +348,9 @@ export const AssortmentPage: React.FC = () => {
     if (isCreatingProduct) {
         return (
             <div className={styles.container}>
-                <h2 className={styles.pageTitle}>Создание товара</h2>
+                <h2 className={styles.pageTitle}>{editingProduct ? "Редактирование товара" : "Создание товара"}</h2>
                 <div className={styles.form}>
-                    <h3 className={styles.formTitle}>Новый товар</h3>
+                    <h3 className={styles.formTitle}>{editingProduct ? "Редактировать товар" : "Новый товар"}</h3>
                     <input
                         type="text"
                         name="name"
@@ -327,13 +376,13 @@ export const AssortmentPage: React.FC = () => {
                     />
                     <select
                         name="category_id"
-                        value={newProduct.category_id || ''}
+                        value={newProduct.category_id?.toString() || ''}
                         onChange={handleInputChange}
                         className={styles.input}
                     >
                         <option value="">Выберите категорию</option>
                         {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
+                            <option key={category.id} value={category.id.toString()}>
                                 {category.name}
                             </option>
                         ))}
@@ -358,7 +407,7 @@ export const AssortmentPage: React.FC = () => {
                         <div className={styles.previewImages}>
                             {selectedImages.map((image, index) => (
                                 <div key={index} className={styles.previewImage}>
-                                    <img src={URL.createObjectURL(image)} alt={`Preview ${index}`}/>
+                                    <img src={image instanceof File ? URL.createObjectURL(image) : image.url} alt={`Preview ${index}`}/>
                                     <button
                                         onClick={() => handleRemoveImage(index)}
                                         className={styles.removeImageButton}
@@ -488,7 +537,9 @@ export const AssortmentPage: React.FC = () => {
                                 <div className={styles.productInfo}>
                                     <p className={styles.price}>{product.price} ₽</p>
                                     <p className={styles.name}>{product.name}</p>
-                                    <button className={styles.editButton}>Редактировать</button>
+                                    <button onClick={() => handleEditProduct(product)} className={styles.editButton}>
+                                        Редактировать
+                                    </button>
                                 </div>
                             </div>
                         ))}

@@ -31,7 +31,22 @@ class ProductResponse(BaseModel):
 
     class Config:
         from_attributes = True
-        
+
+class ProductImagesResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+    price: float
+    ingredients: Optional[str]
+    images: List[str] = []
+    categoryId: Optional[int] = None,
+    availability: ProductAvailabilityVariants = ProductAvailabilityVariants.AVAILABLE
+
+    class Config:
+        from_attributes = True
+
+
+
 class ProductPageResponse(BaseModel):
     total: int
     page: int
