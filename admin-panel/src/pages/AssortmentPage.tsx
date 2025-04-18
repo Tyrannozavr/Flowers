@@ -5,7 +5,7 @@ import shopIcon from '../assets/shop.svg';
 import {useQuery} from "react-query";
 import {addCategory, fetchShops, getShopCategories} from "../api/shops.ts";
 import {createCategory} from "../api/categories.ts";
-import {createProduct, fetchProducts, updateProduct} from "../api/products.ts";
+import {createProduct, deleteProduct, fetchProducts, updateProduct} from "../api/products.ts";
 
 interface Category {
     id: number;
@@ -249,16 +249,32 @@ export const AssortmentPage: React.FC = () => {
         }
     };
 
-    const handleDelete = () => {
-        setIsCreatingProduct(false);
-        setNewProduct({inStock: true});
-        setSelectedImages([]);
-        setEditingProduct(null);
-        setError(null);
+    const handleDelete = async () => {
+        if (editingProduct) {
+            try {
+                await deleteProduct(Number(editingProduct.id));
+                const updatedProducts = await fetchProducts();
+                setProducts(updatedProducts);
+                setIsCreatingProduct(false);
+                setNewProduct({inStock: true});
+                setSelectedImages([]);
+                setEditingProduct(null);
+                setError(null);
+            } catch (err) {
+                console.error("Failed to delete product:", err);
+                setError("Failed to delete product. Please try again.");
+            }
+        } else {
+            // This is the existing behavior for canceling product creation
+            setIsCreatingProduct(false);
+            setNewProduct({inStock: true});
+            setSelectedImages([]);
+            setEditingProduct(null);
+            setError(null);
+        }
     };
 
     const handleEditProduct = (product: Product) => {
-        console.log("Editing product:", product);
         setEditingProduct(product);
         setNewProduct({
             name: product.name,

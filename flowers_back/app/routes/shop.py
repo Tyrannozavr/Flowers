@@ -293,6 +293,46 @@ async def update_product(
     db.refresh(product)
     return product
 
+@router.delete("/products/{product_id}")
+def delete_product(
+        shop: ShopDep,
+        product_id: int,
+        db: Session = Depends(get_db),
+        user: dict = Depends(get_current_user)
+):
+    # Проверка пользователя
+    find_user = db.query(User).filter(User.id == user.id).first()
+
+    if not find_user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    if find_user.is_removed:
+        raise HTTPException(status_code=403, detail="Пользователю запрещено удалять продукты")
+
+    # Проверка продукта
+    product = db.query(Product).filter(
+        Product.shop_id == shop.id, Product.id == product_id
+    ).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Продукт не найден")
+
+    # Удаление файла изображения
+    if product.photo_url:
+        file_path = os.path.join(UPLOAD_DIR, product.photo_url)
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Файл {file_path} успешно удален.")
+            else:
+                print(f"Файл {file_path} не найден, возможно, он уже был удален.")
+        except Exception as e:
+            print(f"Ошибка при удалении файла {file_path}: {e}")
+            raise HTTPException(status_code=500, detail="Ошибка при удалении файла продукта")
+
+    # Удаление продукта из базы данных
+    db.delete(product)
+    db.commit()
+    return {"detail": "Продукт удален"}
 
 @router.get("/", response_model=list[ShopResponse])
 def get_shops(

@@ -1,6 +1,5 @@
 import { instance as axios } from "./axios";
 
-
 export const fetchProducts = async () => {
     try {
         const response = await axios.get(`/shops/products`);
@@ -105,9 +104,9 @@ export const updateProduct = async ({
     return response.data;
 };
 
-export const deleteProduct = async (shopId: number, productId: number) => {
+export const deleteProduct = async (productId: number) => {
     const response = await axios.delete(
-        `/shops/${shopId}/products/${productId}`
+        `/shops/products/${productId}`
     );
     return response.data;
 };
@@ -115,4 +114,29 @@ export const deleteProduct = async (shopId: number, productId: number) => {
 export const fetchAvailabilityOptions = async () => {
     const response = await axios.get(`/products/availability-options`);
     return response.data;
+};
+
+const handleDelete = async () => {
+    if (editingProduct) {
+        try {
+            await deleteProduct(Number(editingProduct.id));
+            const updatedProducts = await fetchProducts();
+            setProducts(updatedProducts);
+            setIsCreatingProduct(false);
+            setNewProduct({inStock: true});
+            setSelectedImages([]);
+            setEditingProduct(null);
+            setError(null);
+        } catch (err) {
+            console.error("Failed to delete product:", err);
+            setError("Failed to delete product. Please try again.");
+        }
+    } else {
+        // This is the existing behavior for canceling product creation
+        setIsCreatingProduct(false);
+        setNewProduct({inStock: true});
+        setSelectedImages([]);
+        setEditingProduct(null);
+        setError(null);
+    }
 };
