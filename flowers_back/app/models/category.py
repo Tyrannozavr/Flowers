@@ -9,7 +9,7 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
-    value = Column(String, unique=True, nullable=False)
+    value = Column(String, unique=False, nullable=False)
     image_url = Column(String, nullable=True)
 
     shops = relationship("ShopCategories", back_populates="category")

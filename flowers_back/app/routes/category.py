@@ -1,18 +1,22 @@
 import os
 import uuid
 
-from fastapi import APIRouter, Request, Depends, UploadFile, Form
+from fastapi import APIRouter, Request, Depends, UploadFile, Form, HTTPException
 from pydantic import HttpUrl
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
+from urllib.parse import urlparse
 
 import app.repositories.categories
 from app.core.config import CATEGORY_IMAGE_UPLOAD_DIR, CATEGORY_IMAGE_RETRIEVAL_DIR
 from app.core.database import get_db
 from app.dependencies.subdomain import ShopDep
+from app.models import User
 from app.models.category import Category
-from app.models.shop import Shop
-from app.schemas.category import CategoryResponse
 from app.repositories import categories as categories_repository
+from app.routes.admin import get_current_user
+from app.schemas.category import CategoryResponse
+from app.models import Shop
 
 router = APIRouter()
 
@@ -23,7 +27,6 @@ def get_categories(
         shop: ShopDep,
         db: Session = Depends(get_db),
 ):
-
     base_url = str(request.base_url)
     if shop is None:
         categories = categories_repository.get_categories(db=db)
@@ -47,7 +50,6 @@ def get_categories(
 def create_category(
         request: Request,
         name: str = Form(),
-        value: str = Form(...),
         image: UploadFile = None,
         db: Session = Depends(get_db)
 ):
@@ -63,6 +65,7 @@ def create_category(
     domain = request.base_url
     image_url = f"{os.path.join(CATEGORY_IMAGE_RETRIEVAL_DIR, unique_filename)}" if unique_filename else ""
     image_url_response = f"{domain}{os.path.join(CATEGORY_IMAGE_RETRIEVAL_DIR, unique_filename)}" if unique_filename else ""
+    value = name.lower().replace(" ", "_")
     category = Category(name=name, image_url=image_url, value=value)
     db.add(category)
     db.commit()
@@ -73,6 +76,8 @@ def create_category(
         value=category.value,
         imageUrl=HttpUrl(image_url_response)
     )
+
+
 
 @router.delete("/{category_id}")
 def delete_category(

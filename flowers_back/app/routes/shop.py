@@ -2,18 +2,21 @@ import logging
 import os
 import uuid
 from typing import Optional, List
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request, File
 from pydantic import HttpUrl
-from sqlalchemy import text
+from sqlalchemy import text, and_
 from sqlalchemy.orm import Session
 
 import app.repositories.categories
+from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR, CATEGORY_IMAGE_UPLOAD_DIR
 from app.core.database import get_db
 from app.dependencies.Orders import DeliveryDistanceServiceDep
 from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate
+from app.models import Category
 from app.models.product import Product, ProductAttribute
-from app.models.shop import Shop, ShopAttribute, ShopType
+from app.models.shop import Shop, ShopAttribute, ShopType, ShopCategories
 from app.models.user import User
 from app.repositories import shop as shop_repository
 from app.routes.admin import get_current_user
@@ -104,6 +107,58 @@ async def create_shop(
         logo_url=f"{base_url}static/uploads/{new_shop.logo_url}" if new_shop.logo_url else None
     )
 
+@router.post("/categories", response_model=CategoryResponse)
+def create_category_for_shop(
+        request: Request,
+        name: str = Form(),
+        image: UploadFile = None,
+        user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    # Extract subdomain from the origin header
+    subdomain = None
+    origin = request.headers.get('origin')
+    if origin:
+        parsed_url = urlparse(origin)
+        host_parts = parsed_url.netloc.split('.')
+        if len(host_parts) >= 2:
+            subdomain = host_parts[0]
+    if subdomain is None:
+        raise HTTPException(status_code=400, detail="Subdomain header is required")
+    domain = request.base_url
+    unique_filename = None
+    if image:
+        file_extension = image.filename.split(".")[-1]
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        save_path = os.path.join(CATEGORY_IMAGE_UPLOAD_DIR, unique_filename)
+
+        with open(save_path, "wb") as f:
+            f.write(image.file.read())
+
+    # Find the shop based on the user and subdomain
+    shop = db.query(Shop).filter(and_(Shop.owner_id == user.id, Shop.subdomain == subdomain)).first()
+    if not shop:
+        raise HTTPException(status_code=404, detail="Shop not found for this user and subdomain")
+
+    image_url = f"{os.path.join(CATEGORY_IMAGE_RETRIEVAL_DIR, unique_filename)}" if unique_filename else ""
+    image_url_response = f"{domain}{os.path.join(CATEGORY_IMAGE_RETRIEVAL_DIR, unique_filename)}" if unique_filename else ""
+
+    value = name.lower().replace(" ", "_")
+    category = Category(name=name, image_url=image_url, value=value)
+    db.add(category)
+    db.flush()
+    # Create the ShopCategories association
+    shop_category = ShopCategories(shop_id=shop.id, category_id=category.id)
+    db.add(shop_category)
+    db.add(shop)
+    db.commit()
+    db.refresh(category)
+    return CategoryResponse(
+        id=category.id,
+        name=category.name,
+        value=category.value,
+        imageUrl=HttpUrl(image_url_response)
+    )
 
 @router.get("/", response_model=list[ShopResponse])
 def get_shops(
