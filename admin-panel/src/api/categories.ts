@@ -6,12 +6,30 @@ export const fetchCategories = async () => {
 };
 
 
-export const createCategory = async (data: { name: string; value: string; image: File | null }) => {
+export const createCategory = async (data: {
+    name: string;
+    value: string;
+    image: File | { url: string, name: string } | null;
+}) => {
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('value', data.value);
+    
     if (data.image) {
-        formData.append('image', data.image);
+        if (data.image instanceof File) {
+            // If it's a File object, append it directly
+            formData.append('image', data.image);
+        } else if (typeof data.image === 'object' && 'url' in data.image) {
+            // If it's an object with url, we need to fetch the image and create a Blob
+            try {
+                const response = await fetch(data.image.url);
+                const blob = await response.blob();
+                formData.append('image', blob, data.image.name);
+            } catch (error) {
+                console.error('Error fetching image:', error);
+                // Handle the error appropriately
+            }
+        }
     }
 
     const response = await axios.post(`/categories/`, formData, {

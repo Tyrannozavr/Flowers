@@ -48,7 +48,7 @@ export const AssortmentPage: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [newProduct, setNewProduct] = useState<NewProductForm>({inStock: true});
     const [newCategory, setNewCategory] = useState<NewCategoryForm>({});
-    const [selectedImages, setSelectedImages] = useState<(File | { url: string, isExisting: true })[]>([]);
+    const [selectedImages, setSelectedImages] = useState<(File | { url: string, name: string, isExisting: boolean })[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
@@ -216,25 +216,30 @@ export const AssortmentPage: React.FC = () => {
             setError('Ошибка при сохранении. Укажите корректную цену');
             return;
         }
+        const formData = new FormData();
+        formData.append('name', newProduct.name);
+        formData.append('price', priceValue.toString());
+        formData.append('category_id', newProduct.category_id.toString());
+        formData.append('availability', newProduct.inStock ? 'AVAILABLE' : 'HIDDEN');
+        formData.append('description', newProduct.description || '');
+        formData.append('ingredients', newProduct.composition || '');
 
-        const productData = {
-            name: newProduct.name,
-            price: priceValue.toString(),
-            category_id: newProduct.category_id,
-            availability: newProduct.inStock ? 'AVAILABLE' : 'HIDDEN',
-            description: newProduct.description || undefined,
-            ingredients: newProduct.composition || undefined,
-            images: selectedImages.filter((image): image is File => image instanceof File)
-        };
-
+        // Append images
+        selectedImages.forEach((image) => {
+            if (image instanceof File) {
+                formData.append(`images`, image, image.name);
+            }
+        });
         try {
             if (editingProduct) {
                 await updateProduct({
                     productId: Number(editingProduct.id),
-                    ...productData
+                    formData
                 });
             } else {
-                await createProduct(productData);
+                await createProduct({
+                    formData
+                });
             }
             const updatedProducts = await fetchProducts();
             setProducts(updatedProducts);
@@ -252,7 +257,7 @@ export const AssortmentPage: React.FC = () => {
     const handleDelete = async () => {
         if (editingProduct) {
             try {
-                await deleteProduct(Number(editingProduct.id));
+                await deleteProduct({productId: Number(editingProduct.id)});
                 const updatedProducts = await fetchProducts();
                 setProducts(updatedProducts);
                 setIsCreatingProduct(false);
@@ -284,7 +289,11 @@ export const AssortmentPage: React.FC = () => {
             price: product.price.toString(),
             inStock: product.availability === 'AVAILABLE'
         });
-        setSelectedImages(product.images.map(url => ({ url, isExisting: true })));
+        setSelectedImages(product.images.map(url => ({
+            url,
+            name: url.split('/').pop() || 'image', // Extract filename from URL or use 'image' as fallback
+            isExisting: true
+        })));
         setIsCreatingProduct(true);
     };
 
@@ -313,7 +322,7 @@ export const AssortmentPage: React.FC = () => {
                         <div className={styles.previewImages}>
                             {selectedImages.map((image, index) => (
                                 <div key={index} className={styles.previewImage}>
-                                    <img src={image instanceof File ? URL.createObjectURL(image) : image.url} alt={`Preview ${index}`}/>
+                                    <img src={image instanceof File ? URL.createObjectURL(image) : (image as { url: string }).url} alt={`Preview ${index}`}/>
                                     <button
                                         onClick={() => handleRemoveImage(index)}
                                         className={styles.removeImageButton}
@@ -411,7 +420,7 @@ export const AssortmentPage: React.FC = () => {
                         <div className={styles.previewImages}>
                             {selectedImages.map((image, index) => (
                                 <div key={index} className={styles.previewImage}>
-                                    <img src={image instanceof File ? URL.createObjectURL(image) : image.url} alt={`Preview ${index}`}/>
+                                    <img src={image instanceof File ? URL.createObjectURL(image) : (image as { url: string }).url} alt={`Preview ${index}`}/>
                                     <button
                                         onClick={() => handleRemoveImage(index)}
                                         className={styles.removeImageButton}

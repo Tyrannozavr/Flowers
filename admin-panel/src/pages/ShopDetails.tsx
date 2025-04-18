@@ -30,7 +30,7 @@ const ShopDetails: React.FC = () => {
 
     const deleteMutation = useMutation(
         ({ shopId, productId }: { shopId: number; productId: number }) =>
-            deleteProduct(shopId, productId),
+            deleteProduct({shopId: shopId, productId: productId}),
         {
             onSuccess: () => {
                 console.log("Продукт удален, обновляем список...");
