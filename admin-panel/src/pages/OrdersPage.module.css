@@ -1,0 +1,131 @@
+.container {
+    padding: 12px;
+    margin-bottom: 24px;
+    padding-left: 38px;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+.pageTitle {
+    font-family: Inter, sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 0px;
+    color: #000000;
+    margin: 0 0 8px 0;
+    text-align: left;
+}
+
+/* Стили для поля поиска и кнопки */
+.searchBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.searchInput {
+    width: 172px; /* Обновлено */
+    height: 28px; /* Обновлено */
+    padding-top: 2px; /* Обновлено */
+    padding-right: 2px; /* Обновлено */
+    padding-bottom: 2px; /* Обновлено */
+    padding-left: 8px; /* Обновлено */
+    gap: 2px; /* Обновлено */
+    border: 1px solid #d9d9d9; /* Обновлено: border-width: 1px */
+    border-radius: 6px; /* M radius, предполагаем 6px */
+    font-family: Inter, sans-serif;
+    font-size: 13px;
+    color: #000000;
+}
+
+.searchInput::placeholder {
+    color: #8c8c8c;
+}
+
+.startButton {
+    width: 172px; /* Обновлено */
+    height: 28px; /* Обновлено */
+    padding-top: 5px; /* Обновлено */
+    padding-right: 12px; /* Обновлено */
+    padding-bottom: 5px; /* Обновлено */
+    padding-left: 12px; /* Обновлено */
+    gap: 8px; /* Обновлено */
+    border-radius: 6px; /* M radius, предполагаем 6px */
+    background-color: #30AA6E;
+    color: #ffffff;
+    border: none;
+    font-family: Inter, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.startButton:hover {
+    background-color: #2a9961;
+}
+
+/* Стили для заголовков таблицы */
+.tableHeader {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 16px;
+}
+
+.tableHeaderItem {
+    font-family: Inter, sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    color: #6c757d;
+    flex: 1;
+    text-align: left;
+}
+
+.tableHeaderItem:last-child {
+    text-align: right;
+}
+
+/* Стили для пустого состояния */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 200px);
+    text-align: center;
+}
+
+.emptyTitle {
+    font-family: Inter, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 24px;
+    color: #000000;
+    margin: 0 0 8px 0;
+}
+
+.emptySubtitle {
+    font-family: Inter, sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 20px;
+    color: #6c757d;
+    margin: 0;
+}
+.orderRow {
+    display: grid;
+    grid-template-columns: 80px 1.5fr 1fr 1fr 1fr 1fr;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    align-items: center;
+}
+
+.orderRow > div:last-child {
+    text-align: right;
+    justify-self: end;
+}

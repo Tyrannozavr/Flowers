@@ -1,7 +1,7 @@
 import React from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import {QueryClient, QueryClientProvider} from "react-query";
+import {Navigate, Route, Routes} from "react-router-dom";
+import {ToastContainer} from "react-toastify";
 import Admins from "./pages/Admins";
 import ProductForm from "./pages/ProductForm";
 import ShopDetails from "./pages/ShopDetails";
@@ -11,10 +11,11 @@ import Profile from "./pages/Profile";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminLayout from "./pages/AdminLayout";
 import AuthPage from './pages/AuthPage';
-import { handleLogout } from "./api/axios";
+import {handleLogout} from "./api/axios";
 import PolicyPage from './components/PolicyPage';
 import OfferPage from './components/OfferPage'
 import StoresPage from "./pages/StoresPage.tsx";
+import OrdersPage from "./pages/OrdersPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -27,14 +28,14 @@ const App: React.FC = () => {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <ToastContainer position="bottom-right" autoClose={3000} />
+            <ToastContainer position="bottom-right" autoClose={3000}/>
             <Routes>
 
                 {/* Login route */}
                 <Route
                     path="/login"
                     element={
-                        <AuthPage />
+                        <AuthPage/>
                     }
                 />
 
@@ -51,7 +52,7 @@ const App: React.FC = () => {
                         path="shops"
                         element={
                             <ProtectedRoute>
-                                <StoresPage />
+                                <StoresPage/>
                             </ProtectedRoute>
                         }
                     />
@@ -59,7 +60,7 @@ const App: React.FC = () => {
                         path="shops/:id"
                         element={
                             <ProtectedRoute>
-                                <ShopDetails />
+                                <ShopDetails/>
                             </ProtectedRoute>
                         }
                     />
@@ -67,7 +68,7 @@ const App: React.FC = () => {
                         path="shops/new"
                         element={
                             <ProtectedRoute>
-                                <ShopForm />
+                                <ShopForm/>
                             </ProtectedRoute>
                         }
                     />
@@ -75,7 +76,7 @@ const App: React.FC = () => {
                         path="shops/:id/edit"
                         element={
                             <ProtectedRoute>
-                                <ShopForm />
+                                <ShopForm/>
                             </ProtectedRoute>
                         }
                     />
@@ -83,7 +84,7 @@ const App: React.FC = () => {
                         path="shops/:id/products/new"
                         element={
                             <ProtectedRoute>
-                                <ProductForm />
+                                <ProductForm/>
                             </ProtectedRoute>
                         }
                     />
@@ -91,7 +92,7 @@ const App: React.FC = () => {
                         path="shops/:id/products/:productId"
                         element={
                             <ProtectedRoute>
-                                <ProductForm />
+                                <ProductForm/>
                             </ProtectedRoute>
                         }
                     />
@@ -100,7 +101,7 @@ const App: React.FC = () => {
                         path="profile"
                         element={
                             <ProtectedRoute>
-                                <Profile />
+                                <Profile/>
                             </ProtectedRoute>
                         }
                     />
@@ -109,7 +110,7 @@ const App: React.FC = () => {
                         path="admins"
                         element={
                             <ProtectedRoute>
-                                <Admins />
+                                <Admins/>
                             </ProtectedRoute>
                         }
                     />
@@ -117,10 +118,16 @@ const App: React.FC = () => {
                         path="assortment"
                         element={
                             <ProtectedRoute>
-                                <AssortmentPage />
+                                <AssortmentPage/>
                             </ProtectedRoute>
                         }
                     />
+                    <Route path="orders" element={
+                        <ProtectedRoute>
+                            <OrdersPage/>
+                        </ProtectedRoute>
+                    }/>
+
                     {/* index */}
                     <Route
                         index
@@ -130,10 +137,10 @@ const App: React.FC = () => {
                     />
                 </Route>
 
-                <Route path="/policy" element={<PolicyPage />} />
-                <Route path="/offer" element={<OfferPage />} />
+                <Route path="/policy" element={<PolicyPage/>}/>
+                <Route path="/offer" element={<OfferPage/>}/>
 
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to="/" replace/>}/>
             </Routes>
         </QueryClientProvider>
     );
