@@ -51,3 +51,4 @@ services:
       - ./flowers_back/uploads:/uploads
       - ./flowers_back/categories:/categories
       - ./flowers_back/static:/static
+      - ./nginx/flourum.ru:/etc/letsencrypt/live/flourum.ru
