@@ -7,19 +7,13 @@ import SwiperCategories from '../components/SwiperCategories';
 import './HomePage.css';
 import magnoliaImage from '../assets/magnolia.png';
 
-
-const MOBILE_BREAKPOINT = 480;
-const TABLET_BREAKPOINT = 780;
+// const MOBILE_BREAKPOINT = 480;
+// const TABLET_BREAKPOINT = 780;
 
 const HomePage: React.FC = () => {
-
-
-
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<number | null>(
-        null
-    );
+  // const [isMobile, setIsMobile] = useState(false);
+  // const [isTablet, setIsTablet] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<number>(1); // Set to the ID of the "All" category
 
   const categories = [
     { id: 1, name: 'Все', image: magnoliaImage },
@@ -38,10 +32,9 @@ const HomePage: React.FC = () => {
   }, []);
 
   const handleResize = useCallback(() => {
-    const width = window.innerWidth;
-    setIsMobile(width <= MOBILE_BREAKPOINT);
-    setIsTablet(width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
-    console.log('Window width:', width, 'isMobile:', width <= MOBILE_BREAKPOINT, 'isTablet:', width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
+    // const width = window.innerWidth;
+    // setIsMobile(width <= MOBILE_BREAKPOINT);
+    // setIsTablet(width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
   }, []);
 
   useEffect(() => {
@@ -56,19 +49,19 @@ const HomePage: React.FC = () => {
   }, [categories]);
 
   return (
-      <div className="home-page">
-        <AdminHeader />
-        <main className="main-content">
-          <SwiperCategories
-              categories={categories}
-              activeCategory={activeCategory}
-              onCategoryClick={handleCategoryClick}
-          />
-          <ProductGrid categoryId={activeCategory} />
-          <ContactForm />
-        </main>
-        <Footer />
-      </div>
+    <div className="home-page">
+      <AdminHeader />
+      <main className="main-content">
+        <SwiperCategories
+          categories={categories}
+          activeCategory={activeCategory}
+          onCategoryClick={handleCategoryClick}
+        />
+        <ProductGrid categoryId={activeCategory} />
+        <ContactForm />
+      </main>
+      <Footer />
+    </div>
   );
 };
 

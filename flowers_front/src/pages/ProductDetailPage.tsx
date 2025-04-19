@@ -1,12 +1,9 @@
 // src/pages/ProductDetailPage.tsx
 import React, {useEffect, useState} from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import AdminHeader from '../components/admin/AdminHeader';
 import Footer from '../components/footer/Footer';
-import ProductGrid from '../components/product/ProductGrid';
 import cartIcon from '../assets/icon-white.svg';
-import { products, Product } from '../data/products';
-import './ProductDetailPage.css';
 import {fetchProductById, IProduct} from "../api/product.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../redux/store.ts";
@@ -14,22 +11,21 @@ import {addToCart} from "../redux/cart/slice.ts";
 
 const ProductDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-
     const productId = id ? parseInt(id, 10) : NaN;
-
-    if (isNaN(productId)) {
-        return <div>Некорректный ID продукта</div>;
-    }
-
-    const [product, setProduct] = useState<IProduct>();
+    const [product, setProduct] = useState<IProduct | null>(null);
     const dispatch = useDispatch();
     const cart = useSelector((state: RootState) => state.cart.cart);
 
     useEffect(() => {
         const loadProduct = async () => {
-            if (productId) {
-                const data = await fetchProductById(Number(productId));
-                setProduct(data);
+            if (!isNaN(productId)) {
+                try {
+                    const data = await fetchProductById(productId);
+                    setProduct(data);
+                } catch (error) {
+                    console.error("Error fetching product:", error);
+                    setProduct(null);
+                }
             }
         };
         loadProduct();
@@ -39,41 +35,29 @@ const ProductDetailPage: React.FC = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, []);
 
-
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const navigate = useNavigate();
-
-    const handleAddToCart = (product: Product) => {
-        if (!cart.some((item) => item?.product?.id === product.id)) {
-            dispatch(addToCart({ product, quantity: 1 }));
-        }
-    };
-
-    if (!product) {
-        return <div>Продукт не найден</div>;
+    if (isNaN(productId)) {
+        return <div>Некорректный ID продукта</div>;
     }
 
-    const description = product?.description;
-    const composition = [
-        { name: 'Роза', quantity: 15 },
-        { name: 'Кексы', quantity: 2 },
-    ];
-
-    // Миниатюры — всегда magnolia.png
-    // const thumbnails = ['/magnolia.png', '/magnolia.png', '/magnolia.png', '/magnolia.png'];
-    // Основное изображение — берём из product.images или используем заглушку
-    // const mainImages = product.photoUrl || ['/magnolia.png', '/magnolia.png', '/magnolia.png', '/magnolia.png'];
-
-    // const relatedProducts = Object.values(products)
-    //     .flat()
-    //     .filter((p: Product) => p.categoryId === product.categoryId && p.id !== productId)
-    //     .slice(0, 4);
-
-    // const handleThumbnailClick = (index: number) => {
-    //     setCurrentImageIndex(index);
-    // };
+    if (!product) {
+        return <div>Загрузка...</div>;
+    }
 
     const isInCart = cart.some((item) => item.product.id === product.id);
+
+    const handleAddToCart = (product: IProduct) => {
+        if (!cart.some((item) => item?.product?.id === product.id)) {
+            dispatch(addToCart({ 
+                product: {
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    photoUrl: product.photoUrl || '' // Provide a default value if photoUrl is missing
+                }, 
+                quantity: 1 
+            }));
+        }
+    };
 
     return (
         <div className="product-detail-page">
@@ -103,7 +87,7 @@ const ProductDetailPage: React.FC = () => {
                         <h1>{product.name}</h1>
                         <div className="product-detail-description-section">
                             <h2>Описание</h2>
-                            <p className="product-detail-description">{description}</p>
+                            <p className="product-detail-description">{product.description}</p>
                         </div>
                         <div className="product-detail-composition">
                             <h2>Состав</h2>
@@ -116,12 +100,13 @@ const ProductDetailPage: React.FC = () => {
                             </ul>
                         </div>
                         {!isInCart ? (
-                        <button className="product-detail-add-to-cart-button bg-accent-color" onClick={() => {
-                            dispatch(addToCart({ product, quantity: 1 }));
-                        }}>
-                            <img src={cartIcon} alt="" className="product-detail-cart-icon" aria-hidden="true" />
-                            В корзину
-                        </button>
+                            <button 
+                                className="product-detail-add-to-cart-button bg-accent-color" 
+                                onClick={() => handleAddToCart(product)}
+                            >
+                                <img src={cartIcon} alt="" className="product-detail-cart-icon" aria-hidden="true" />
+                                В корзину
+                            </button>
                         ) : (
                             <button className="product-detail-add-to-cart-button bg-accent-color">
                                 <img src={cartIcon} alt="" className="product-detail-cart-icon" aria-hidden="true" />

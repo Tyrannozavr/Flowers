@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { Swiper, SwiperSlide } from 'swiper/react'; // Импортируем Swiper
-import 'swiper/css'; // Импортируем базовые стили Swiper
+import 'swiper/swiper.min.css';
 
 interface CategoryTabsProps {
     categoryCount: number;
@@ -185,7 +185,7 @@ const CategoryText = styled.div`
 
 interface SwiperCategoriesProps {
     categories: { id: number; name: string; image: string }[];
-    activeCategory: number;
+    activeCategory: number | null;
     onCategoryClick: (id: number) => void;
 }
 
