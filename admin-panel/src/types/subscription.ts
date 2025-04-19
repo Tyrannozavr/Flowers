@@ -25,9 +25,12 @@ export interface SubscriptionProps {
 }
 
 export interface SubscriptionBlockProps {
-  currentState: SubscriptionState; // Обязательное состояние
-  email?: string; // Опциональный email для состояния
+  currentState: SubscriptionState;
+  userId: number;
+  email: string;
+  backUrl: string;
   onStateChange: (newState: SubscriptionState) => void;
-  onEmailSubmit?: (email: string) => Promise<void>; // Асинхронный тип
-  onCancel?: () => Promise<void>; // Асинхронный тип
+  onEmailSubmit?: (email: string) => Promise<void>;
+  onCancel?: () => Promise<void>;
+  until: string;
 }
