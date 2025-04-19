@@ -16,7 +16,7 @@ from app.services.Superadmin.main import admin, AdminAuthMiddleware
 
 def run_seed():
     db = next(get_db())
-    create_superadmin()
+    # create_superadmin()
     # seed_categories(db)
 
 
