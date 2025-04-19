@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import uuid
@@ -240,6 +241,7 @@ def get_products(
     ]
     return response
 
+
 @router.put("/products/{product_id}", response_model=ProductResponse)
 async def update_product(
         shop: ShopByOwnerDep,
@@ -250,11 +252,13 @@ async def update_product(
         availability: Optional[str] = Form(None),
         price: str = Form(...),
         ingredients: Optional[str] = Form(None),
+        existing_images: List[str] = Form(None),
         images: List[UploadFile] = File(None),
         db: Session = Depends(get_db),
         user: dict = Depends(get_current_user)
 ):
-    print("IMages are ", images)
+    print("Images are ", images)
+    print("Existing images are ", existing_images)
     find_user = db.query(User).filter(User.id == user.id).first()
     if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -275,8 +279,30 @@ async def update_product(
     product.ingredients = ingredients
     product.category_id = category_id
     product.availability = availability
-    product.photos = []
 
+    # Handle existing images
+    if existing_images:
+        existing_images = json.loads(existing_images[0])  # Parse the JSON string
+        current_images = product.photos or []
+        images_to_keep = [os.path.basename(img) for img in existing_images]
+        images_to_remove = [img for img in current_images if img not in images_to_keep]
+
+        # Remove images not in existing_images
+        for img_to_remove in images_to_remove:
+            if img_to_remove in product.photos:
+                product.photos.remove(img_to_remove)
+            if product.photo_url == img_to_remove:
+                product.photo_url = None
+
+            # Remove the file from the server
+            file_path = os.path.join(UPLOAD_DIR, img_to_remove)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+        # Keep existing images
+        product.photos = images_to_keep
+
+    # Handle new images
     if images:
         os.makedirs(UPLOAD_DIR, exist_ok=True)
         for image in images:
@@ -286,12 +312,20 @@ async def update_product(
 
             with open(save_path, "wb") as f:
                 f.write(await image.read())
+
+            if not product.photos:
+                product.photos = []
             product.photos.append(unique_filename)
-        product.photo_url = unique_filename
+
+    # Ensure photo_url is set
+    if product.photos and not product.photo_url:
+        product.photo_url = product.photos[0]
+
     db.add(product)
     db.commit()
     db.refresh(product)
     return product
+
 
 @router.delete("/products/{product_id}")
 def delete_product(
