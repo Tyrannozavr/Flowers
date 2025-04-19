@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     T_BANK_TERMINAL_KEY: str = ''
     T_BANK_SECRET: str = ''
     YANDEX_GEOCODER_API_KEY: str = ''
+    SMTP_SERVER: str = 'smtp.gmail.com'
+    SMTP_PORT: int = 587
+    SENDER_EMAIL: str = ''
+    SENDER_PASSWORD: str = ''
 
     class Config:
         env_file = BASE_DIR / ".env"

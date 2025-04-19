@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Header
+from fastapi.responses import JSONResponse
+from fastapi.requests import Request
 from datetime import datetime, timedelta
 import jwt
 from dotenv import load_dotenv
@@ -7,7 +9,10 @@ from app.core.config import settings
 from app.models.user import User
 from sqlalchemy.orm import Session 
 from app.core.database import get_db
-from app.core.security import verify_password  
+from app.core.security import verify_password, hash_password
+from app.schemas.auth import UserRegistrationSchema
+from app.services.auth import register_user
+from app.services.email import EmailNotification
 
 load_dotenv()
 
@@ -45,6 +50,7 @@ class LoginSchema(BaseModel):
     username: str
     password: str
 
+
 @router.get("/check")
 async def get_current_user(authorization: str = Header(None)):
     if not authorization:
@@ -69,3 +75,37 @@ async def login(form_data: LoginSchema, db: Session = Depends(get_db)):
     
     access_token = create_access_token({"username": form_data.username, "id": find_user.id})
     return {"access_token": access_token}
+
+
+
+@router.post("/register")
+async def register(
+        request: Request,
+        form_data: UserRegistrationSchema,
+        db: Session = Depends(get_db)
+):
+    base_url = request.base_url
+    # Check if email already exists
+    if db.query(User).filter(User.email == form_data.email).first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    user = await register_user(form_data, db)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An error occurred while creating the user")
+    else:
+        email_notification = EmailNotification(
+            smtp_server=settings.SMTP_SERVER,
+            smtp_port=settings.SMTP_PORT,
+            sender_email=settings.SENDER_EMAIL,
+            sender_password=settings.SENDER_PASSWORD
+        )
+        await email_notification.send_email(
+            email=form_data.email,
+            login=user.username,
+            password=form_data.password,
+            base_url=base_url
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        content={"message": "User created successfully"}
+    )

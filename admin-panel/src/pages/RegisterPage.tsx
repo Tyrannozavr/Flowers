@@ -10,7 +10,7 @@ const RegisterPage = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState("");
-    const navigate = useNavigate();
+    const [message, setMessage] = useState("");
 
     const validateEmail = (email: string) => {
         const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -20,6 +20,7 @@ const RegisterPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setMessage("");
 
         if (!validateEmail(email)) {
             setError("Пожалуйста, введите корректный email адрес");
@@ -36,10 +37,21 @@ const RegisterPage = () => {
                 email,
                 password,
             });
-            localStorage.setItem("token", response.data.access_token);
-            navigate("/");
+
+            if (response.status === 201) {
+                setMessage("Вы успешно зарегистрировались. Ваш логин и пароль были отправлены на указанный email. Если вы не видите письмо, проверьте папку 'Спам'.");
+                // Clear the form
+                setEmail('');
+                setPassword('');
+                setConfirmPassword('');
+            }
         } catch (err) {
-            setError("Ошибка при регистрации");
+            if (err.response && err.response.status === 400 && err.response.data.detail == "Email already registered") {
+                setError("Этот email уже зарегистрирован");
+            } else {
+                setError("Ошибка при регистрации");
+
+            }
         }
     };
 
@@ -79,6 +91,11 @@ const RegisterPage = () => {
                     {error && (
                         <Alert severity="error" sx={{ mt: 2, mb: 2, width: "100%" }}>
                             {error}
+                        </Alert>
+                    )}
+                    {message && (
+                        <Alert severity="success" sx={{ mt: 2, mb: 2, width: "100%" }}>
+                            {message}
                         </Alert>
                     )}
                     <button type="submit" className={styles.loginButton}>
