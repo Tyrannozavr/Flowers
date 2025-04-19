@@ -9,19 +9,19 @@ class EmailNotification:
         self._sender_email = sender_email
         self._sender_password = sender_password
 
-    def _render_message(self, login: str, password: str, base_url: str) -> str:
+    def _render_message(self, login: str, password: str, login_url: str) -> str:
         message = f"""
         <h2>Добро пожаловать! Вы успешно зарегистрировались на flourum.ru.</h2>
         <p>Ваши учетные данные:</p>
         <p><strong>Логин:</strong> {login}</p>
         <p><strong>Пароль:</strong> {password}</p>
-        <p>Вы можете войти в систему, используя эту ссылку: <a href="{base_url}/login">{base_url}/login</a></p>
+        <p>Вы можете войти в систему, используя эту ссылку: <a href="{login_url}">{login_url}</a></p>
         """
         return message
 
-    async def send_email(self, login: str, password: str, email: str, base_url: str):
+    async def send_email(self, login: str, password: str, email: str):
         subject = "Регистрация успешно завершена"
-        html_content = self._render_message(login, password, base_url)
+        html_content = self._render_message(login, password, "https://admin.flourum.ru/login")
 
         try:
             message = MIMEMultipart("alternative")
@@ -31,11 +31,10 @@ class EmailNotification:
 
             html_part = MIMEText(html_content, "html")
             message.attach(html_part)
-            print(f"Sending message to email {email}: {html_part}")
-            # with smtplib.SMTP(self._smtp_server, self._smtp_port) as server:
-            #     server.starttls()
-            #     server.login(self._sender_email, self._sender_password)
-            #     server.sendmail(self._sender_email, email, message.as_string())
+            with smtplib.SMTP(self._smtp_server, self._smtp_port) as server:
+                server.starttls()
+                server.login(self._sender_email, self._sender_password)
+                server.sendmail(self._sender_email, email, message.as_string())
 
             print(f"Письмо с регистрационными данными отправлено на адрес {email}")
         except Exception as e:
