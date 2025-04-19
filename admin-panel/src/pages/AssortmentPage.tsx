@@ -237,13 +237,11 @@ export const AssortmentPage: React.FC = () => {
 
         try {
             if (editingProduct) {
-                console.log("Updating product", formData);
                 await updateProduct({
                     productId: Number(editingProduct.id),
                     formData
                 });
             } else {
-                console.log("Creating new product", formData);
                 await createProduct({
                     formData
                 });
