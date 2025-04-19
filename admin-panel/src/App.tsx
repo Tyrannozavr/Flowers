@@ -16,6 +16,7 @@ import PolicyPage from './components/PolicyPage';
 import OfferPage from './components/OfferPage'
 import StoresPage from "./pages/StoresPage.tsx";
 import OrdersPage from "./pages/OrdersPage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,6 @@ const App: React.FC = () => {
         <QueryClientProvider client={queryClient}>
             <ToastContainer position="bottom-right" autoClose={3000}/>
             <Routes>
-
                 {/* Login route */}
                 <Route
                     path="/login"
@@ -38,7 +38,12 @@ const App: React.FC = () => {
                         <AuthPage/>
                     }
                 />
-
+                <Route
+                    path="/register"
+                    element={
+                        <RegisterPage/>
+                    }
+                />
                 <Route
                     path="/"
                     element={

@@ -1,6 +1,6 @@
 import { Alert } from "@mui/material";
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import AuthHeader from '../components/auth/AuthHeader';
 import styles from './AuthPage.module.css';
 import { instance as axios } from "../api/axios";
@@ -57,6 +57,10 @@ const AuthPage = () => {
           <button type="submit" className={styles.loginButton}>
             Войти
           </button>
+            <div className={styles.registerLink}>
+              <span>Еще не зарегистрированы?</span>
+              <Link to="/register">Регистрация</Link>
+            </div>
         </form>
       </div>
     </div>
