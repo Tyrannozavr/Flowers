@@ -6,7 +6,6 @@ export const fetchProducts = async () => {
         return response.data;
     } catch (error: any) {
         if (error.response && error.response.status === 404) {
-            console.log("Продукты не найдены, возвращаем пустой список.");
             return [];
         }
         throw error;

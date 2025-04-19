@@ -56,7 +56,6 @@ export const AssortmentPage: React.FC = () => {
         const loadProducts = async () => {
             try {
                 const fetchedProducts = await fetchProducts();
-                console.log("Fetched products:", fetchedProducts);
                 setProducts(fetchedProducts);
             } catch (err) {
                 console.error("Failed to fetch products:", err);
@@ -225,18 +224,26 @@ export const AssortmentPage: React.FC = () => {
         formData.append('ingredients', newProduct.composition || '');
 
         // Append images
-        selectedImages.forEach((image) => {
-            if (image instanceof File) {
-                formData.append(`images`, image, image.name);
-            }
+        const newImages = selectedImages.filter(image => image instanceof File);
+        newImages.forEach((image: File) => {
+            formData.append(`images`, image, image.name);
         });
+
+        // Append existing image URLs
+        const existingImages = selectedImages
+            .filter(image => typeof image === 'object' && 'isExisting' in image)
+            .map(image => (image as { url: string }).url);
+        formData.append('existing_images', JSON.stringify(existingImages));
+
         try {
             if (editingProduct) {
+                console.log("Updating product", formData);
                 await updateProduct({
                     productId: Number(editingProduct.id),
                     formData
                 });
             } else {
+                console.log("Creating new product", formData);
                 await createProduct({
                     formData
                 });
@@ -291,7 +298,7 @@ export const AssortmentPage: React.FC = () => {
         });
         setSelectedImages(product.images.map(url => ({
             url,
-            name: url.split('/').pop() || 'image', // Extract filename from URL or use 'image' as fallback
+            name: url.split('/').pop() || 'image',
             isExisting: true
         })));
         setIsCreatingProduct(true);

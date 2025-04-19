@@ -12,7 +12,7 @@ import app.repositories.categories
 from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR, CATEGORY_IMAGE_UPLOAD_DIR
 from app.core.database import get_db
 from app.dependencies.Orders import DeliveryDistanceServiceDep
-from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate
+from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate, ShopByOwnerDep
 from app.dependencies.subdomain import ShopDep
 from app.models import Category
 from app.models.product import Product, ProductAttribute
@@ -111,7 +111,7 @@ async def create_shop(
 @router.post("/categories", response_model=CategoryResponse)
 def create_category_for_shop(
         request: Request,
-        shop: ShopDep,
+        shop: ShopByOwnerDep,
         name: str = Form(),
         image: UploadFile = None,
         user: User = Depends(get_current_user),
@@ -155,7 +155,7 @@ def create_category_for_shop(
 
 @router.post("/products", response_model=ProductImagesResponse)
 async def create_product(
-        shop: ShopDep,
+        shop: ShopByOwnerDep,
         name: str = Form(...),
         price: str = Form(...),
         category_id: int = Form(...),
@@ -164,7 +164,7 @@ async def create_product(
         ingredients: str = Form(""),
         images: List[UploadFile] = File(None),
         db: Session = Depends(get_db),
-        user: dict = Depends(get_current_user),
+        user: User = Depends(get_current_user),
 ):
     """creates product for a shop based on subdomain request were sent"""
     find_user = db.query(User).filter(User.id == user.id).first()
@@ -217,7 +217,7 @@ async def create_product(
 @router.get("/products", response_model=list[ProductImagesResponse])
 def get_products(
         request: Request,
-        shop: ShopDep,
+        shop: ShopByOwnerDep,
         db: Session = Depends(get_db),
 ):
     products = db.query(Product).filter(Product.shop_id == shop.id).all()
@@ -242,7 +242,7 @@ def get_products(
 
 @router.put("/products/{product_id}", response_model=ProductResponse)
 async def update_product(
-        shop: ShopDep,
+        shop: ShopByOwnerDep,
         product_id: int,
         name: str = Form(...),
         description: Optional[str] = Form(None),
@@ -254,8 +254,8 @@ async def update_product(
         db: Session = Depends(get_db),
         user: dict = Depends(get_current_user)
 ):
+    print("IMages are ", images)
     find_user = db.query(User).filter(User.id == user.id).first()
-    image = images[0]
     if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
@@ -295,7 +295,7 @@ async def update_product(
 
 @router.delete("/products/{product_id}")
 def delete_product(
-        shop: ShopDep,
+        shop: ShopByOwnerDep,
         product_id: int,
         db: Session = Depends(get_db),
         user: dict = Depends(get_current_user)
