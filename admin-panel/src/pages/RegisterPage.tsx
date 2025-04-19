@@ -1,9 +1,14 @@
 import { Alert } from "@mui/material";
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import AuthHeader from '../components/auth/AuthHeader';
 import styles from './RegisterPage.module.css';
 import { instance as axios } from "../api/axios";
+import { AxiosError, isAxiosError } from "axios";
+
+interface ErrorResponse {
+  detail: string;
+}
 
 const RegisterPage = () => {
     const [email, setEmail] = useState('');
@@ -46,11 +51,15 @@ const RegisterPage = () => {
                 setConfirmPassword('');
             }
         } catch (err) {
-            if (err.response && err.response.status === 400 && err.response.data.detail == "Email already registered") {
-                setError("Этот email уже зарегистрирован");
+            if (isAxiosError(err)) {
+                const axiosError = err as AxiosError<ErrorResponse>;
+                if (axiosError.response?.status === 400 && axiosError.response.data?.detail === "Email already registered") {
+                    setError("Этот email уже зарегистрирован");
+                } else {
+                    setError("Ошибка при регистрации");
+                }
             } else {
-                setError("Ошибка при регистрации");
-
+                setError("Произошла неизвестная ошибка");
             }
         }
     };
