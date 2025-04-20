@@ -20,7 +20,7 @@ interface ProductGridProps {
   isSmallCard?: boolean;
 }
 
-const ProductGrid: React.FC<ProductGridProps> = ({ categoryId, products: propProducts, isSmallCard = false }) => {
+const ProductGrid: React.FC<ProductGridProps> = ({ categoryId}) => {
   // Mock data for products
     const [products, setProducts] = useState<IProduct[]>([]);
     const currentPage = 1;

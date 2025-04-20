@@ -8,9 +8,9 @@ import { ThemeProvider } from "./theme/ThemeProvider";
 import store from "./redux/store";
 import "./styles/global.css";
 import "./index.css";
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
+// import 'swiper/css';
+// import 'swiper/css/navigation';
+// import 'swiper/css/pagination';
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>

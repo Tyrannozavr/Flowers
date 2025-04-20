@@ -8,17 +8,17 @@ import './HomePage.css';
 import magnoliaImage from '../assets/magnolia.png';
 
 
-const MOBILE_BREAKPOINT = 480;
-const TABLET_BREAKPOINT = 780;
+// const MOBILE_BREAKPOINT = 480;
+// const TABLET_BREAKPOINT = 780;
 
 const HomePage: React.FC = () => {
 
 
 
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<number | null>(
-        null
+  // const [isMobile, setIsMobile] = useState(false);
+  // const [isTablet, setIsTablet] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<number >(
+        -1
     );
 
   const categories = [
@@ -38,10 +38,10 @@ const HomePage: React.FC = () => {
   }, []);
 
   const handleResize = useCallback(() => {
-    const width = window.innerWidth;
-    setIsMobile(width <= MOBILE_BREAKPOINT);
-    setIsTablet(width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
-    console.log('Window width:', width, 'isMobile:', width <= MOBILE_BREAKPOINT, 'isTablet:', width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
+    // const width = window.innerWidth;
+    // setIsMobile(width <= MOBILE_BREAKPOINT);
+    // setIsTablet(width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
+    // console.log('Window width:', width, 'isMobile:', width <= MOBILE_BREAKPOINT, 'isTablet:', width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
   }, []);
 
   useEffect(() => {

@@ -66,7 +66,7 @@ export const SubscriptionBlock: React.FC<SubscriptionBlockProps> = ({
             return;
         }
         setShowErrorAfterSubmit(false); // Сбрасываем ошибку, если email корректен
-        if (onEmailSubmit) {
+        if (onEmailSubmit && userId && backUrl) {
             onEmailSubmit(localEmail)
                 .then(async () => {
                     setHandleEmailSubmitDisable(true);
@@ -241,7 +241,7 @@ export const SubscriptionBlock: React.FC<SubscriptionBlockProps> = ({
                 return (
                     <>
                         <h2 className={styles.subscriptionTitle}>Подписка на Флаурум</h2>
-                        <div className={styles.activeBadge}>{'Активна до ' + until.trim()}</div>
+                        <div className={styles.activeBadge}>{'Активна до ' + until?.trim()}</div>
                         <button className={styles.subscribeButtonCancel} onClick={() => handleStateChange(SubscriptionState.CANCEL_CONFIRMATION)}>
                             Отменить подписку
                         </button>

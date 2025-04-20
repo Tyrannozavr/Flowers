@@ -30,4 +30,7 @@ export interface SubscriptionBlockProps {
   onStateChange: (newState: SubscriptionState) => void;
   onEmailSubmit?: (email: string) => Promise<void>; // Асинхронный тип
   onCancel?: () => Promise<void>; // Асинхронный тип
+  userId?: number;
+  backUrl?: string;
+  until?: string;
 }

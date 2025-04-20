@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import FloatingCartButton from "./components/FloatingCart";
 import Header from "./components/Header";
-import Order from "./pages/Order";
+//import Order from "./pages/Order";
 import ProductPage from "./pages/ProductPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import HomePage from "./pages/HomePage";

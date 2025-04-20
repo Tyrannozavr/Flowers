@@ -1,11 +1,9 @@
 // src/pages/ProductDetailPage.tsx
 import React, {useEffect, useState} from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import AdminHeader from '../components/admin/AdminHeader';
 import Footer from '../components/footer/Footer';
-import ProductGrid from '../components/product/ProductGrid';
 import cartIcon from '../assets/icon-white.svg';
-import { products, Product } from '../data/products';
 import './ProductDetailPage.css';
 import {fetchProductById, IProduct} from "../api/product.ts";
 import {useDispatch, useSelector} from "react-redux";
@@ -40,24 +38,11 @@ const ProductDetailPage: React.FC = () => {
     }, []);
 
 
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const navigate = useNavigate();
-
-    const handleAddToCart = (product: Product) => {
-        if (!cart.some((item) => item?.product?.id === product.id)) {
-            dispatch(addToCart({ product, quantity: 1 }));
-        }
-    };
-
     if (!product) {
         return <div>Продукт не найден</div>;
     }
 
     const description = product?.description;
-    const composition = [
-        { name: 'Роза', quantity: 15 },
-        { name: 'Кексы', quantity: 2 },
-    ];
 
     // Миниатюры — всегда magnolia.png
     // const thumbnails = ['/magnolia.png', '/magnolia.png', '/magnolia.png', '/magnolia.png'];
