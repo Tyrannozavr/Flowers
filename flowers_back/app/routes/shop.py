@@ -213,6 +213,7 @@ async def create_product(
         ingredients=new_product.ingredients,
         photo_url=f"{os.path.join(UPLOAD_DIR, new_product.photo_url)}" if new_product.photo_url else None,
         availability=new_product.availability,
+        categoryId=new_product.category_id
     )
 
 @router.get("/products", response_model=list[ProductImagesResponse])
