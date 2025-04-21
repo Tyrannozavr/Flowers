@@ -90,6 +90,7 @@ async def get_orders_by_shop(
         db: Session = Depends(get_db),
         search: Optional[str] = Query(None, description="Search by recipient name"),
 ):
+    print("Strart checking shop is ", shop)
     try:
         orders = db.query(OrderDb).options(joinedload(OrderDb.items)).filter(OrderDb.shop_id == shop.id)
         if search:
