@@ -9,8 +9,6 @@ from app.models.shop import Shop
 from app.repositories import shop as shop_repository
 
 def get_subdomain(request: Request) -> str:
-    print(request.headers)
-
     if request.headers.get("X-Subdomain"):
         return request.headers.get("X-Subdomain")
     else:

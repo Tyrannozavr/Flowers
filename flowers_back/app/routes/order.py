@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
 from app.dependencies.Orders import DeliveryDistanceServiceDep
+from app.dependencies.Shops import ShopByOwnerDep
 from app.dependencies.subdomain import ShopDep
 from app.models.order import Order as OrderDb, OrderItem
 from app.models.order import OrderItem as OrderItemDb
@@ -86,11 +87,10 @@ async def get_orders(db: Session = Depends(get_db)):
 
 @router.get("/shop", response_model=List[OrderResponse])
 async def get_orders_by_shop(
-        shop: ShopDep,
+        shop: ShopByOwnerDep,
         db: Session = Depends(get_db),
         search: Optional[str] = Query(None, description="Search by recipient name"),
 ):
-    print("Strart checking shop is ", shop)
     try:
         orders = db.query(OrderDb).options(joinedload(OrderDb.items)).filter(OrderDb.shop_id == shop.id)
         if search:
