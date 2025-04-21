@@ -25,6 +25,7 @@ RUN chmod 0644 /etc/cron.d/mycron && \
 # Скрипт запуска cron и uvicorn
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+EXPOSE 8000
 
 # Запуск приложения
 CMD ["/entrypoint.sh"]

@@ -7,6 +7,8 @@ services:
       - "5173"
     environment:
       - NODE_ENV=development
+    networks:
+      - backend
 
   admin-panel:
     build:
@@ -16,6 +18,8 @@ services:
       - "5174"
     environment:
       - NODE_ENV=development
+    networks:
+      - backend
 
   flowers_back:
     build:
@@ -29,6 +33,8 @@ services:
       - ./flowers_back/uploads:/app/uploads
       - ./flowers_back/categories:/app/categories
       - ./flowers_back/static:/app/static
+    networks:
+      - backend
 
   # Aiogram bot service
   flowers_bot:
@@ -37,6 +43,26 @@ services:
       dockerfile: Dockerfile
     expose:
       - "8001"
+    networks:
+      - backend
+
+  offer_backend:
+    build:
+      context: ./offer/offer_backend
+      dockerfile: Dockerfile
+    expose:
+      - "8080"
+    networks:
+      - backend
+
+  offer_frontend:
+    build:
+      context: ./offer/offer_frontend
+      dockerfile: Dockerfile
+    expose:
+      - "5175"
+    networks:
+      - backend
 
   nginx:
     build: ./nginx
@@ -48,9 +74,17 @@ services:
       - admin-panel
       - flowers_back
       - flowers_bot
+      - offer_frontend
     volumes:
       - ./logs/nginx:/var/log/nginx
       - ./flowers_back/uploads:/uploads
       - ./flowers_back/categories:/categories
       - ./flowers_back/static:/static
       - ./nginx/flourum.ru:/etc/letsencrypt/live/flourum.ru
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
