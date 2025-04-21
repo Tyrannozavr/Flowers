@@ -27,8 +27,6 @@ services:
       dockerfile: Dockerfile
     expose:
       - "8000"
-#    ports:
-#      - "8000:8000"
     volumes:
       - ./flowers_back/uploads:/app/uploads
       - ./flowers_back/categories:/app/categories
