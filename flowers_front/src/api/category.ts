@@ -15,3 +15,8 @@ export const fetchCategories = async (): Promise<CategoryResponse[]> => {
     throw error;
   }
 };
+
+export const getShopCategories = async (shopId: number) => {
+  const response = await axios.get(`/shops/${shopId}/categories`);
+  return response.data;
+}
