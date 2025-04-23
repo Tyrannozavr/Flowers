@@ -99,7 +99,7 @@ const CategoryTab = styled.button`
             position: absolute;
             width: 92.51952237298119px;
             height: 20.559894284517732px;
-            background-color: var(--accent-color);
+            background-color: #30aa6e;
             top: 35%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-15deg);
@@ -119,7 +119,7 @@ const CategoryTab = styled.button`
             position: absolute;
             width: 71.99999902908115px; /* Указанный размер */
             height: 15.999999784240257px; /* Указанный размер */
-            background-color: var(--accent-color);
+            background-color: #30aa6e;
             top: 20px; /* Центр изображения с учетом рамки (48px / 2) */
             left: 50%;
             transform: translate(-50%, 0) rotate(-15deg); /* Убираем смещение по Y, так как top уже задан */

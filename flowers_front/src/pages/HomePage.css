@@ -89,7 +89,7 @@
     position: absolute;
     width: 92.51952237298119px;
     height: 20.559894284517732px;
-    background-color: var(--accent-color);
+    background-color: #30aa6e;
     top: 35%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-15deg);
@@ -133,7 +133,7 @@
 }
 
 .category-tab:hover .category-image {
-  border-color: var(--accent-color);
+  border-color: #30aa6e;
 }
 
 .category-text {
