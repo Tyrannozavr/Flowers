@@ -1,0 +1,62 @@
+/* Base styles for category tabs */
+.categoryTab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 24px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    flex: 0 0 auto; /* Prevent shrinking in scrollable layout */
+}
+
+.categoryTabActive {
+    background-color: #000;
+    color: #fff;
+}
+
+.categoryImage {
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
+    display: block; /* Ensure the image is visible */
+}
+
+.categoryText {
+    font-size: 14px;
+}
+
+/* Desktop: Static layout */
+.categoryTabsDesktop {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 0;
+    justify-content: center; /* Center the tabs on desktop */
+    overflow-x: hidden !important; /* Force no horizontal scrolling */
+    white-space: normal; /* Allow text wrapping */
+}
+
+/* Tablet/Mobile: Scrollable layout */
+.categoryTabsScrollable {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Fallback media query for desktop */
+@media (min-width: 1025px) {
+    .categoryTabsScrollable {
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-x: hidden !important;
+        white-space: normal;
+    }
+}

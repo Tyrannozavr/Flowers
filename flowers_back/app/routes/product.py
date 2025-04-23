@@ -149,7 +149,6 @@ def get_product_with_attributes(
         attributes=attributes
     )
 
-router = APIRouter()
 
 @router.post("/attributes", tags=["Attributes"])
 def create_product_attribute(

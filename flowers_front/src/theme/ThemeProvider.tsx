@@ -7,6 +7,8 @@ const ThemeContext = createContext({
     phone: "",
     inn: "",
     addresses: [],
+    name: "",
+    shopId: 0,
 });
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -15,7 +17,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         logoUrl: "",
         phone: "",
         inn: "",
-        addresses: []
+        addresses: [],
+        name: "",
+        shopId: 0,
     });
 
     useEffect(() => {

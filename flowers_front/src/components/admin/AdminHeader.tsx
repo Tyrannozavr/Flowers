@@ -147,7 +147,7 @@ const MobileNavigation: React.FC = () => {
 };
 
 const AdminHeader: React.FC = () => {
-    const { phone } = useTheme();
+    const { logoUrl, name, phone } = useTheme();
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
     const handleCartClick = () => {
@@ -163,7 +163,11 @@ const AdminHeader: React.FC = () => {
             <header className="admin-header bg-accent-color">
                 <div className="admin-header-content">
                     <a href="/" className="admin-logo" aria-label="На главную страницу">
-                        <img src={logoIcon} alt="Логотип Магнолия" className="logo-image" />
+                        {!logoUrl ? (
+                            <h2>{name}</h2>
+                        ) : (
+                            <img src={logoIcon} alt="Логотип Магнолия" className="logo-image" />
+                        )}
                     </a>
                     <nav className="header-icons" aria-label="User actions">
                         <HeaderIcon

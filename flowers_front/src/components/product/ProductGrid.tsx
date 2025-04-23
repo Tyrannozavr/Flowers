@@ -29,7 +29,11 @@ const ProductGrid: React.FC<ProductGridProps> = ({categoryId}) => {
     };
 
     useEffect(() => {
-        getProducts(categoryId);
+        if (!categoryId || categoryId === -1) {
+            getProducts(null);
+        } else {
+            getProducts(categoryId);
+        }
     }, [categoryId]);
 
     const handleAddToCart = (product: IProduct) => {

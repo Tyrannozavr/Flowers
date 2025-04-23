@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { Swiper, SwiperSlide } from 'swiper/react'; // Импортируем Swiper
-import 'swiper/swiper.min.css';
+// import 'swiper/swiper.min.css';
 
 interface CategoryTabsProps {
     categoryCount: number;
@@ -183,8 +183,15 @@ const CategoryText = styled.div`
     }
 `;
 
+interface Category {
+    id: number;
+    name: string;
+    value: string;
+    imageUrl?: string;
+}
+
 interface SwiperCategoriesProps {
-    categories: { id: number; name: string; image: string }[];
+    categories: Category[];
     activeCategory: number | null;
     onCategoryClick: (id: number) => void;
 }
@@ -230,7 +237,7 @@ const SwiperCategories: React.FC<SwiperCategoriesProps> = ({ categories, activeC
                                 aria-label={`Выбрать категорию: ${category.name}`}
                             >
                                 <CategoryImage
-                                    src={category.image}
+                                    src={category.imageUrl}
                                     alt={category.name}
                                     className="category-image"
                                     loading="lazy"
@@ -270,7 +277,7 @@ const SwiperCategories: React.FC<SwiperCategoriesProps> = ({ categories, activeC
                                 aria-label={`Выбрать категорию: ${category.name}`}
                             >
                                 <CategoryImage
-                                    src={category.image}
+                                    src={category.imageUrl}
                                     alt={category.name}
                                     className="category-image"
                                     loading="lazy"
