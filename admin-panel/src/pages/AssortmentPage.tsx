@@ -115,6 +115,11 @@ export const AssortmentPage: React.FC = () => {
             return;
         }
 
+        if (selectedImages.length === 0) {
+            setError('Ошибка при сохранении. Изображение не может отсутствовать');
+            return;
+        }
+
         // const category: Category = {
         //   id: Date.now().toString(),
         //   name: newCategory.name,
