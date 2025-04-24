@@ -7,6 +7,7 @@ import tgIcon from '../../assets/Tg.svg';
 import vkIcon from '../../assets/Vk.svg';
 import wsIcon from '../../assets/Ws.svg';
 import tlIcon from '../../assets/Tl.svg';
+import { useTheme } from "../../theme/ThemeProvider.tsx";
 
 interface ContactOption {
   icon: string;
@@ -65,6 +66,7 @@ const ContactModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
 const Footer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('');
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const { inn } = useTheme();
 
   const handleTabClick = (tab: string) => {
     if (tab === 'chat') {
@@ -80,7 +82,7 @@ const Footer: React.FC = () => {
         <div className="footer-content">
           <div className="footer-copyright">
             ©2024. All Rights Reserved
-            <span className="footer-inn">ИНН: 1684740126</span>
+            <span className="footer-inn">ИНН: {inn}</span>
           </div>
         </div>
       </footer>
