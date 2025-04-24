@@ -1,12 +1,12 @@
 import { IOrder } from "../redux/order/slice";
 import axios from "./core";
 
-export const createOrder = async (orderData: IOrder): Promise<void> => {
+export const createOrder = async (orderData: IOrder): Promise<boolean> => {
     try {
-        const response = await axios.post("/orders", orderData);
-        console.log("Order created successfully:", response.data);
+        await axios.post("/orders", orderData);
+        return true; // Успех
     } catch (error) {
         console.error("Error creating order:", error);
-        throw error;
+        return false; // Ошибка
     }
 };

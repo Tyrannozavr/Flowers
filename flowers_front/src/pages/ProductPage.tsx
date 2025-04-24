@@ -46,7 +46,7 @@ const ProductPage: React.FC = () => {
                 {/* Изображение букета */}
                 <div className="w-full md:w-1/2">
                     <img
-                        src={product.photoUrl}
+                        src={product.images[0]}
                         alt={product.name}
                         className="w-full rounded-lg shadow-lg object-contain"
                     />

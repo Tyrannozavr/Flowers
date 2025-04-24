@@ -8,6 +8,7 @@ import {fetchProductById, IProduct} from "../api/product.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../redux/store.ts";
 import {addToCart} from "../redux/cart/slice.ts";
+import './ProductDetailPage.css';
 
 const ProductDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -15,6 +16,7 @@ const ProductDetailPage: React.FC = () => {
     const [product, setProduct] = useState<IProduct | null>(null);
     const dispatch = useDispatch();
     const cart = useSelector((state: RootState) => state.cart.cart);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
         const loadProduct = async () => {
@@ -52,12 +54,19 @@ const ProductDetailPage: React.FC = () => {
                     id: product.id,
                     name: product.name,
                     price: product.price,
-                    photoUrl: product.photoUrl || '' // Provide a default value if photoUrl is missing
+                    images: product.images
                 }, 
                 quantity: 1 
             }));
         }
     };
+
+    const handleThumbnailClick = (index: number) => {
+        setCurrentImageIndex(index);
+    };
+
+    const thumbnails = product.images;
+    const mainImages = product.images;
 
     return (
         <div className="product-detail-page">
@@ -66,18 +75,18 @@ const ProductDetailPage: React.FC = () => {
                 <div className="product-detail-container">
                     <div className="product-detail-gallery">
                         <div className="product-detail-gallery-thumbnails">
-                            {/*{thumbnails.map((image, index) => (*/}
-                            {/*    <img*/}
-                            {/*        key={index}*/}
-                            {/*        src={image}*/}
-                            {/*        alt={`${product.name} thumbnail ${index + 1}`}*/}
-                            {/*        className={`product-detail-thumbnail ${index === currentImageIndex ? 'active' : ''}`}*/}
-                            {/*        onClick={() => handleThumbnailClick(index)}*/}
-                            {/*    />*/}
-                            {/*))}*/}
+                            {thumbnails.map((image, index) => (
+                                <img
+                                    key={index}
+                                    src={image}
+                                    alt={`${product.name} thumbnail ${index + 1}`}
+                                    className={`product-detail-thumbnail ${index === currentImageIndex ? 'active' : ''}`}
+                                    onClick={() => handleThumbnailClick(index)}
+                                />
+                            ))}
                         </div>
                         <div className="product-detail-main-image">
-                            {/*<img src={mainImages[currentImageIndex]} alt={product.name} />*/}
+                            <img src={mainImages[currentImageIndex]} alt={product.name} />
                         </div>
                     </div>
                     <div className="product-detail-info">
@@ -92,6 +101,9 @@ const ProductDetailPage: React.FC = () => {
                         <div className="product-detail-composition">
                             <h2>Состав</h2>
                             <ul>
+                                <li key={0}>
+                                    {product.ingredients}
+                                </li>
                                 {/*{composition.map((item, index) => (*/}
                                 {/*    <li key={index}>*/}
                                 {/*        {item.name} — {item.quantity} шт*/}

@@ -21,7 +21,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({categoryId}) => {
         try {
             const data = await fetchProducts(currentPage, perPage, category);
             setProducts(data.products);
-            console.log(data.products);
         } catch (error) {
             console.error("Error fetching products:", error);
             setProducts([]);
@@ -49,7 +48,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({categoryId}) => {
         <Link to={`/product/${product.id}`} className="product-card-link">
             <div key={product.id} className="product-card first-row-card">
                 <div className="product-image-container">
-                    <img src={product.photoUrl} alt={product.name} className="product-image"/>
+                    <img src={product.images[0]} alt={product.name} className="product-image"/>
                 </div>
                 <div className="product-info">
                     <div className="product-price accent-color">{formatPrice(product.price)} ₽</div>

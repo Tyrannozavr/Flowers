@@ -6,7 +6,9 @@ export interface IProduct {
     description: string | null;
     price: number;
     ingredients: string;
-    photoUrl: string;
+    images: string[];
+    availability: string;
+    categoryId: number;
 }
 
 export interface IProductBack {
@@ -15,7 +17,9 @@ export interface IProductBack {
     description: string | null;
     price: number;
     ingredients: string;
-    photo_url: string;
+    images: string[];
+    availability: string;
+    categoryId: number;
 }
 
 
@@ -50,8 +54,7 @@ export const fetchProducts = async (
         return {
             ...response.data,
             products: response.data.products.map((el) => ({
-                ...el,
-                photoUrl: el.photo_url,
+                ...el
             })),
         };
     } catch (error) {
@@ -65,7 +68,7 @@ export const fetchProductById = async (
 ): Promise<IProduct> => {
     try {
         const response = await axios.get<IProductBack>(`/products/${productId}`);
-        return { ...response.data, photoUrl: response.data.photo_url };
+        return { ...response.data};
     } catch (error) {
         console.error("Ошибка при загрузке продукта:", error);
         throw error;

@@ -1,11 +1,9 @@
 import { Route, Routes } from "react-router-dom";
-import FloatingCartButton from "./components/FloatingCart";
-import Header from "./components/Header";
-import ProductPage from "./pages/ProductPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import HomePage from "./pages/HomePage";
 import CartPage from './pages/CartPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import ConfirmationPage from './pages/ConfirmationPage';
 import ErrorBoundary from "./utils/errorBoundary/ErrorBoundary";
 
 const App: React.FC = () => {
@@ -44,17 +42,11 @@ const App: React.FC = () => {
                 }
             />
             <Route
-                path="/products/:id"
+                path="/confirmation"
                 element={
-                <>
-                    <div className="flex flex-col min-h-screen">
-                        <Header />
-                        <main className="flex-grow bg-slate-100">
-                            <ProductPage />
-                            <FloatingCartButton />
-                        </main>
-                    </div>
-                </>
+                    <ErrorBoundary>
+                        <ConfirmationPage />
+                    </ErrorBoundary>
                 }
             />
         </Routes>

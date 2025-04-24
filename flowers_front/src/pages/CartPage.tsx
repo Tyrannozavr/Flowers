@@ -120,7 +120,7 @@ const CartPage: React.FC = () => {
                             {cart.map(({ product, quantity }) => (
                                 <div key={product.id} className="cart-item">
                                     <div className="cart-item-left">
-                                        <img src={product.photoUrl} alt={product.name} className="cart-item-image" />
+                                        <img src={product.images[0]} alt={product.name} className="cart-item-image" />
                                     </div>
                                     <div className="cart-item-details">
                                         <div className="cart-item-text">

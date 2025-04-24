@@ -5,9 +5,11 @@ from app.models.product import ProductAvailabilityVariants
 from pydantic import BaseModel
 from typing import List, Optional
 
+
 class ProductAttributeValueResponse(BaseModel):
     attribute_name: str
     value: str
+
 
 class ProductWithAttributesResponse(BaseModel):
     id: int
@@ -32,6 +34,7 @@ class ProductResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class ProductImagesResponse(BaseModel):
     id: int
     name: str
@@ -46,9 +49,8 @@ class ProductImagesResponse(BaseModel):
         from_attributes = True
 
 
-
 class ProductPageResponse(BaseModel):
     total: int
     page: int
     per_page: int
-    products: List[ProductResponse]
+    products: List[ProductImagesResponse]

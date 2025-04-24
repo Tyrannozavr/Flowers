@@ -8,7 +8,8 @@ from app.models.product import ProductAvailabilityVariants, AVAILABILITY_LABELS
 from app.models.shop import Shop
 from app.routes.auth import get_current_user
 from app.schemas.product import ProductPageResponse, ProductWithAttributesResponse, ProductAttributeValueResponse
-from app.schemas.product import ProductResponse
+from app.schemas.product import ProductResponse, ProductImagesResponse
+
 
 router = APIRouter()
 
@@ -41,18 +42,22 @@ def get_products_by_subdomain_with_filtering_and_pagination(
     if not products:
         raise HTTPException(status_code=404, detail="Продукты не найдены")
 
+    base_url = str(request.base_url)
     return ProductPageResponse(
         total=total_products,
         page=page,
         per_page=per_page,
         products=[
-            ProductResponse(
+            ProductImagesResponse(
                 id=product.id,
                 name=product.name,
                 description=product.description,
                 price=product.price,
                 ingredients=product.ingredients,
-                photo_url=f"{request.base_url}static/uploads/{product.photo_url}" if product.photo_url else ""
+                images=[f"{base_url}static/uploads/{photo}" for photo in product.photos]
+                if product.photos else [f"{base_url}static/uploads/{product.photo_url}"],
+                categoryId=product.category_id,
+                availability=product.availability,
             )
             for product in products
         ],
@@ -68,7 +73,7 @@ def get_availability_options(db: Session = Depends(get_db)):
     return availability_options
 
 
-@router.get("/{product_id}", response_model=ProductResponse)
+@router.get("/{product_id}", response_model=ProductImagesResponse)
 def get_product_by_id(
         product_id: int,
         request: Request,
@@ -86,13 +91,17 @@ def get_product_by_id(
     if not product:
         raise HTTPException(status_code=404, detail="Продукт не найден")
 
-    return ProductResponse(
+    base_url = str(request.base_url)
+    return ProductImagesResponse(
         id=product.id,
         name=product.name,
         description=product.description,
         price=product.price,
         ingredients=product.ingredients,
-        photo_url=f"{request.base_url}static/uploads/{product.photo_url}" if product.photo_url else None,
+        images=[f"{base_url}static/uploads/{photo}" for photo in product.photos]
+        if product.photos else [f"{base_url}static/uploads/{product.photo_url}"],
+        categoryId=product.category_id,
+        availability=product.availability,
     )
 
 

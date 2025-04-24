@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+.confirmation-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.confirmation-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 32px 16px;
+    text-align: center;
+}
+
+.confirmation-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* Уменьшаем gap с 16px до 8px */
+}
+
+.confirmation-icon {
+    width: 48px;
+    height: 48px;
+}
+
+.confirmation-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.confirmation-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #666;
+    margin: 0;
+}
+
+.confirmation-home-button {
+    width: 134px; /* Десктопная ширина */
+    height: 44px; /* Десктопная высота */
+    padding: 12px 24px; /* Десктопные отступы */
+    gap: 12px; /* Десктопный gap */
+    border-radius: 12px; /* XL radius для десктопа */
+    background-color: #30aa6e; /* Зеленый цвет, как на изображении */
+    color: #fff;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; /* Десктопный размер шрифта */
+    font-weight: 400;
+    line-height: 20px; /* Десктопная высота строки */
+    letter-spacing: 0px;
+    cursor: pointer;
+    margin-top: 24px; /* Увеличиваем отступ сверху с 16px до 24px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.confirmation-home-button:hover {
+    background-color: #268a56; /* Чуть темнее при наведении */
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .confirmation-content {
+        padding: 24px 16px;
+    }
+
+    .confirmation-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .confirmation-title {
+        font-size: 20px;
+    }
+
+    .confirmation-subtitle {
+        font-size: 14px;
+    }
+
+    .confirmation-home-button {
+        width: 106px; /* Мобильная ширина */
+        height: 36px; /* Мобильная высота */
+        padding: 9px 16px; /* Мобильные отступы */
+        gap: 8px; /* Мобильный gap */
+        border-radius: 10px; /* L radius для мобильной версии */
+        font-size: 13px; /* Мобильный размер шрифта */
+        line-height: 18px; /* Мобильная высота строки */
+        margin-top: 24px; /* Сохраняем отступ сверху 24px и на мобильной версии */
+    }
+}

@@ -9,7 +9,7 @@ interface ProductProps {
 }
 
 const Product: React.FC<ProductProps> = ({ product }) => {
-    const { name, price, photoUrl } = product;
+    const { name, price, images } = product;
     const [isAddedToCart, setIsAddedToCart] = useState(false);
     const dispatch = useDispatch();
     const cart = useSelector((state: RootState) => state.cart.cart);
@@ -37,7 +37,7 @@ const Product: React.FC<ProductProps> = ({ product }) => {
                 className="aspect-w-3 aspect-h-4 bg-gray-100"
             >
                 <img
-                    src={photoUrl}
+                    src={images[0]}
                     alt={name}
                     className="object-cover w-full h-full"
                 />

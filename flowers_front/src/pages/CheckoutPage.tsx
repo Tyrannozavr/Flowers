@@ -174,15 +174,21 @@ const CheckoutPage: React.FC = () => {
     };
 
     const handlePayWithSBP = async () => {
-        await createOrder(formData);
-        // Логика для оплаты по СБП
-        // navigate('/confirmation'); // Теперь перенаправляем на страницу подтверждения
+        const rs = await createOrder(formData);
+        if (rs) {
+            navigate('/confirmation');
+        } else {
+            alert("Произошла ошибка при создании заказа. Попробуйте снова.");
+        }
     };
 
     const handleSubmitWithoutPayment = async () => {
-        await createOrder(formData);
-        // Логика для заявки без оплаты
-        // navigate('/confirmation'); // Уже перенаправляет на страницу подтверждения
+        const rs = await createOrder(formData);
+        if (rs) {
+            navigate('/confirmation');
+        } else {
+            alert("Произошла ошибка при создании заказа. Попробуйте снова.");
+        }
     };
 
     return (
@@ -439,7 +445,7 @@ const CheckoutPage: React.FC = () => {
                             {cart.map(({ product, quantity }) => (
                                 <div className="confirmation-cart-item">
                                     <div className="confirmation-cart-item-left">
-                                        <img src={product.photoUrl} alt={product.name} className="confirmation-cart-item-image" />
+                                        <img src={product.images[0]} alt={product.name} className="confirmation-cart-item-image" />
                                     </div>
                                     <div className="confirmation-cart-item-details">
                                         <div className="confirmation-cart-item-text">
