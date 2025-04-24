@@ -56,10 +56,7 @@ const Cart = () => {
                             >
                                 <div className="w-20 h-20 bg-gray-100 flex-shrink-0 rounded overflow-hidden">
                                     <img
-                                        src={
-                                            product.images[0] ||
-                                            "/placeholder.jpg"
-                                        }
+                                        src={(product.images && product.images[0]) || "/placeholder.jpg"}
                                         alt={product.name}
                                         className="w-full h-full object-cover"
                                     />
