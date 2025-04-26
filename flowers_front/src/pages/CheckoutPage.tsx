@@ -508,7 +508,7 @@ const CheckoutPage: React.FC = () => {
                             </div>
 
                             <button
-                                className="confirmation-pay-button confirmation-pay-with-sbp"
+                                className="confirmation-pay-button confirmation-pay-with-sbp bg-accent"
                                 onClick={handlePayWithSBP}
                             >
                                 Оплатить по СБП
