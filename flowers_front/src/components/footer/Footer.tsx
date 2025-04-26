@@ -8,6 +8,7 @@ import vkIcon from '../../assets/Vk.svg';
 import wsIcon from '../../assets/Ws.svg';
 import tlIcon from '../../assets/Tl.svg';
 import { useTheme } from "../../theme/ThemeProvider.tsx";
+import { useNavigate } from 'react-router-dom';
 
 interface ContactOption {
   icon: string;
@@ -67,11 +68,16 @@ const Footer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('');
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const { inn } = useTheme();
+  const navigate = useNavigate();
 
   const handleTabClick = (tab: string) => {
     if (tab === 'chat') {
       setIsContactModalOpen(true);
-    } else {
+    } else if (tab === 'home') {
+      navigate('/');
+      setActiveTab(tab);
+    } else if (tab === 'cart') {
+      navigate('/cart');
       setActiveTab(tab);
     }
   };

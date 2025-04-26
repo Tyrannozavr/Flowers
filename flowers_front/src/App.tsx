@@ -18,6 +18,14 @@ const App: React.FC = () => {
                 }
             />
             <Route
+                path="/category/:id"
+                element={
+                    <ErrorBoundary>
+                        <HomePage />
+                    </ErrorBoundary>
+                }
+            />
+            <Route
                 path="/cart"
                 element={
                     <ErrorBoundary>

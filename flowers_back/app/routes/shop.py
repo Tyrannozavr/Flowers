@@ -234,6 +234,7 @@ def get_products(
             price=product.price,
             description=product.description,
             ingredients=product.ingredients,
+            availability=product.availability,
             images=[f"{base_url}static/uploads/{photo}" for photo in product.photos]
             if product.photos else [f"{base_url}static/uploads/{product.photo_url}"],
             categoryId=product.category_id

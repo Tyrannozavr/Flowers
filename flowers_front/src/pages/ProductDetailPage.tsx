@@ -4,11 +4,12 @@ import { useParams } from 'react-router-dom';
 import AdminHeader from '../components/admin/AdminHeader';
 import Footer from '../components/footer/Footer';
 import cartIcon from '../assets/icon-white.svg';
-import {fetchProductById, IProduct} from "../api/product.ts";
+import {fetchProductById, IProduct, fetchProducts} from "../api/product.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../redux/store.ts";
 import {addToCart} from "../redux/cart/slice.ts";
 import './ProductDetailPage.css';
+import ProductGrid from '../components/product/ProductGrid';
 
 const ProductDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -17,6 +18,20 @@ const ProductDetailPage: React.FC = () => {
     const dispatch = useDispatch();
     const cart = useSelector((state: RootState) => state.cart.cart);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const currentPage = 1;
+    const perPage = 10;
+    const [products, setProducts] = useState<IProduct[]>([]);
+    const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
+
+    const getProducts = async (category: number | null) => {
+        try {
+            const data = await fetchProducts(currentPage, perPage, category);
+            setProducts(data.products);
+        } catch (error) {
+            console.error("Error fetching products:", error);
+            setProducts([]);
+        }
+    };
 
     useEffect(() => {
         const loadProduct = async () => {
@@ -24,6 +39,12 @@ const ProductDetailPage: React.FC = () => {
                 try {
                     const data = await fetchProductById(productId);
                     setProduct(data);
+                    try {
+                        getProducts(data.categoryId);
+                    } catch (errorFetchProducts) {
+                        console.error("Error fetching products:", errorFetchProducts);
+                        setProduct(null);
+                    }
                 } catch (error) {
                     console.error("Error fetching product:", error);
                     setProduct(null);
@@ -32,6 +53,15 @@ const ProductDetailPage: React.FC = () => {
         };
         loadProduct();
     }, [productId]);
+
+    useEffect(() => {
+        if (product !== null) {
+            setRelatedProducts(Object.values(products)
+                .flat()
+                .filter((p: IProduct) => p.categoryId === product.categoryId && p.id !== productId)
+                .slice(0, 4));
+        }
+    }, [products]);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -91,7 +121,7 @@ const ProductDetailPage: React.FC = () => {
                     </div>
                     <div className="product-detail-info">
                         <p className="product-detail-price">
-                            {product.price} ₽ {/*<span className="product-detail-price-note">• по заказу</span>*/}
+                            {product.price} ₽ <span className="product-detail-price-note">• {product.availability == 'TO_ORDER' ? 'под заказ' : 'в наличии'}</span>
                         </p>
                         <h1>{product.name}</h1>
                         <div className="product-detail-description-section">
@@ -127,14 +157,14 @@ const ProductDetailPage: React.FC = () => {
                         )}
                     </div>
                 </div>
-                {/*<section className="product-detail-related-products">*/}
-                {/*    <h2>Похожие товары</h2>*/}
-                {/*    {relatedProducts.length > 0 ? (*/}
-                {/*        <ProductGrid products={relatedProducts} isSmallCard={true} />*/}
-                {/*    ) : (*/}
-                {/*        <p>Похожие товары отсутствуют.</p>*/}
-                {/*    )}*/}
-                {/*</section>*/}
+                <section className="product-detail-related-products">
+                    <h2>Похожие товары</h2>
+                    {relatedProducts.length > 0 ? (
+                        <ProductGrid categoryId={product.categoryId} products={relatedProducts} isSmallCard={true} />
+                    ) : (
+                        <p>Похожие товары отсутствуют.</p>
+                    )}
+                </section>
             </main>
             <Footer />
         </div>

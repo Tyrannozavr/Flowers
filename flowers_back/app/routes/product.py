@@ -30,7 +30,10 @@ def get_products_by_subdomain_with_filtering_and_pagination(
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
 
-    query = db.query(Product).filter(Product.shop_id == shop.id)
+    query = db.query(Product).filter(
+        Product.shop_id == shop.id,
+        Product.availability != 'HIDDEN'
+    )
 
     if category_id:
         query = query.filter(Product.category_id == category_id)
@@ -87,7 +90,11 @@ def get_product_by_id(
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
 
-    product = db.query(Product).filter(Product.id == product_id, Product.shop_id == shop.id).first()
+    product = db.query(Product).filter(
+        Product.id == product_id,
+        Product.shop_id == shop.id,
+        Product.availability != 'HIDDEN',
+    ).first()
     if not product:
         raise HTTPException(status_code=404, detail="Продукт не найден")
 

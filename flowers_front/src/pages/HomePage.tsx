@@ -49,6 +49,7 @@ const HomePage: React.FC = () => {
     // const width = window.innerWidth;
     // setIsMobile(width <= MOBILE_BREAKPOINT);
     // setIsTablet(width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
+    // console.log('Window width:', width, 'isMobile:', width <= MOBILE_BREAKPOINT, 'isTablet:', width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
   }, []);
 
   useEffect(() => {

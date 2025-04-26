@@ -22,7 +22,7 @@ interface Product {
     ingredients: string;
     categoryId?: number;
     images: string[];
-    availability: string;
+    availability: 'AVAILABLE' | 'TO_ORDER' | 'HIDDEN';
 }
 
 interface NewProductForm {
@@ -33,7 +33,7 @@ interface NewProductForm {
     category_id?: number;
     price?: string;
     images?: File[];
-    inStock?: boolean;
+    availability: string;
 }
 
 interface NewCategoryForm {
@@ -42,15 +42,25 @@ interface NewCategoryForm {
 }
 
 export const AssortmentPage: React.FC = () => {
+    const availabilityOptions = ['AVAILABLE', 'TO_ORDER', 'HIDDEN'];
+    const availableOptionsLabel = {'AVAILABLE': 'В наличии', 'TO_ORDER': 'Под заказ', 'HIDDEN': 'Недоступен'};
+
+    const nextAvailable = (options: typeof availabilityOptions, currentValue: string) => {
+        const currentIndex = options.indexOf(currentValue);
+        const nextIndex = (currentIndex + 1) % options.length;
+        return options[nextIndex];
+    };
+
     const [isCreatingProduct, setIsCreatingProduct] = useState(false);
     const [isCreatingCategory, setIsCreatingCategory] = useState(false);
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
-    const [newProduct, setNewProduct] = useState<NewProductForm>({inStock: true});
+    const [newProduct, setNewProduct] = useState<NewProductForm>({availability: availabilityOptions[0]});
     const [newCategory, setNewCategory] = useState<NewCategoryForm>({});
     const [selectedImages, setSelectedImages] = useState<(File | { url: string, name: string, isExisting: boolean })[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
 
     useEffect(() => {
         const loadProducts = async () => {
@@ -74,7 +84,7 @@ export const AssortmentPage: React.FC = () => {
                 composition: editingProduct.ingredients,
                 category_id: Number(editingProduct.categoryId),
                 price: editingProduct.price.toString(),
-                inStock: editingProduct.availability === 'AVAILABLE'
+                availability: editingProduct.availability,
             });
             // Note: We don't set selectedImages here because we can't retrieve the File objects from URLs
         }
@@ -187,7 +197,8 @@ export const AssortmentPage: React.FC = () => {
     };
 
     const handleInStockToggle = () => {
-        setNewProduct(prev => ({...prev, inStock: !prev.inStock}));
+        setNewProduct(prev => ({...prev, availability: nextAvailable(availabilityOptions, prev.availability)}));
+        console.log(newProduct);
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -224,7 +235,7 @@ export const AssortmentPage: React.FC = () => {
         formData.append('name', newProduct.name);
         formData.append('price', priceValue.toString());
         formData.append('category_id', newProduct.category_id.toString());
-        formData.append('availability', newProduct.inStock ? 'AVAILABLE' : 'HIDDEN');
+        formData.append('availability', newProduct.availability);
         formData.append('description', newProduct.description || '');
         formData.append('ingredients', newProduct.composition || '');
 
@@ -254,7 +265,7 @@ export const AssortmentPage: React.FC = () => {
             const updatedProducts = await fetchProducts();
             setProducts(updatedProducts);
             setIsCreatingProduct(false);
-            setNewProduct({inStock: true});
+            setNewProduct({availability: availabilityOptions[0]});
             setSelectedImages([]);
             setEditingProduct(null);
             setError(null);
@@ -271,7 +282,7 @@ export const AssortmentPage: React.FC = () => {
                 const updatedProducts = await fetchProducts();
                 setProducts(updatedProducts);
                 setIsCreatingProduct(false);
-                setNewProduct({inStock: true});
+                setNewProduct({availability: availabilityOptions[0]});
                 setSelectedImages([]);
                 setEditingProduct(null);
                 setError(null);
@@ -282,7 +293,7 @@ export const AssortmentPage: React.FC = () => {
         } else {
             // This is the existing behavior for canceling product creation
             setIsCreatingProduct(false);
-            setNewProduct({inStock: true});
+            setNewProduct({availability: availabilityOptions[0]});
             setSelectedImages([]);
             setEditingProduct(null);
             setError(null);
@@ -297,7 +308,7 @@ export const AssortmentPage: React.FC = () => {
             composition: product.ingredients,
             category_id: Number(product.categoryId),
             price: product.price.toString(),
-            inStock: product.availability === 'AVAILABLE'
+            availability: product.availability,
         });
         setSelectedImages(product.images.map(url => ({
             url,
@@ -446,7 +457,7 @@ export const AssortmentPage: React.FC = () => {
                             onClick={handleInStockToggle}
                             className={styles.inStockButton} // Убираем динамическое добавление класса .active
                         >
-                            {newProduct.inStock ? 'Товар в наличии' : 'Товар скрыт'}
+                            {availableOptionsLabel[newProduct.availability as keyof typeof availableOptionsLabel]}
                         </button>
                         <label htmlFor="imageUpload" className={styles.uploadButton}>
                             Загрузите до 5 фото
@@ -557,7 +568,7 @@ export const AssortmentPage: React.FC = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className={styles.productInfo}>
+                                <div className={styles.productInfo} style={{display: 'flex', flexDirection: 'column', paddingTop: '20px'}}>
                                     <p className={styles.price}>{product.price} ₽</p>
                                     <p className={styles.name}>{product.name}</p>
                                     <button onClick={() => handleEditProduct(product)} className={styles.editButton}>
