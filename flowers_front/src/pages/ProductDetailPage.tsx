@@ -150,7 +150,10 @@ const ProductDetailPage: React.FC = () => {
                                 В корзину
                             </button>
                         ) : (
-                            <button className="product-detail-add-to-cart-button bg-accent-color">
+                            <button
+                                className="product-detail-add-to-cart-button bg-accent-color"
+                                onClick={() => window.location.href='/cart'}
+                            >
                                 <img src={cartIcon} alt="" className="product-detail-cart-icon" aria-hidden="true" />
                                 В корзине
                             </button>
