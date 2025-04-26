@@ -9,6 +9,8 @@ const ThemeContext = createContext({
     addresses: [],
     name: "",
     shopId: 0,
+    tg: "",
+    whatsapp: "",
 });
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -20,6 +22,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         addresses: [],
         name: "",
         shopId: 0,
+        tg: "",
+        whatsapp: "",
     });
 
     useEffect(() => {

@@ -13,6 +13,8 @@ export interface ThemeData {
     addresses: IAddress[];
     name: string;
     shopId: number;
+    tg: string;
+    whatsapp: string;
 }
 
 interface IShop {
@@ -23,6 +25,8 @@ interface IShop {
     addresses: IAddress[];
     subdomain: string;
     id: number;
+    tg: string;
+    whatsapp: string;
 }
 
 export const fetchShop = async (): Promise<ThemeData> => {
@@ -38,6 +42,8 @@ export const fetchShop = async (): Promise<ThemeData> => {
             addresses: data.addresses,
             name: data.subdomain,
             shopId: data.id,
+            tg: data.tg,
+            whatsapp: data.whatsapp,
         };
     } catch (error) {
         console.error("Ошибка при получении темы:", error);

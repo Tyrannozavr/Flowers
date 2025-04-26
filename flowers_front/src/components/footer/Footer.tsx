@@ -18,6 +18,7 @@ interface ContactOption {
 
 const ContactModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const { tg, whatsapp, phone } = useTheme();
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -38,10 +39,10 @@ const ContactModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
   if (!isOpen) return null;
   
   const contactOptions: ContactOption[] = [
-    { icon: tgIcon, label: 'Telegram', link: 'https://t.me/magnolia_flowers' },
+    { icon: tgIcon, label: 'Telegram', link: 'https://t.me/'+tg },
     { icon: vkIcon, label: 'Вконтакте', link: 'https://vk.com/magnolia_flowers' },
-    { icon: wsIcon, label: 'Whatsapp', link: 'https://wa.me/79223232935' },
-    { icon: tlIcon, label: '+7 922 323-29-35', link: 'tel:+79223232935' },
+    { icon: wsIcon, label: 'Whatsapp', link: 'https://wa.me/'+whatsapp },
+    { icon: tlIcon, label: phone, link: 'tel:'+phone },
   ];
   
   return (
