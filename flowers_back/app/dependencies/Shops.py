@@ -26,6 +26,7 @@ class ShopDeliveryCostCreate(BaseModel):
         10: 0,
         20: 0
     }
+    is_yandex_geo: bool = False
 
 class ShopDeliveryCostResponse(BaseModel):
     type: str

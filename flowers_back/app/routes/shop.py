@@ -259,8 +259,6 @@ async def update_product(
         db: Session = Depends(get_db),
         user: dict = Depends(get_current_user)
 ):
-    print("Images are ", images)
-    print("Existing images are ", existing_images)
     find_user = db.query(User).filter(User.id == user.id).first()
     if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -960,12 +958,11 @@ def delete_product(
     return {"detail": "Продукт удален"}
 
 
-@router.get("/{shop_id}/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
+@router.get("/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
 def get_shop_delivery_cost(
-        shop_id: int,
+        shop: ShopByOwnerDep,
         db: Session = Depends(get_db),
 ):
-    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
     if not shop or not shop.delivery_cost:
         raise HTTPException(status_code=404, detail="Доставка не найдена")
 
@@ -979,34 +976,14 @@ def get_shop_delivery_cost(
 from app.services import Shop as ShopServices
 
 
-@router.post("/{shop_id}/delivery/cost/calculate", tags=["Shops", "Delivery"])
-def calculate_shop_delivery_cost(
-        shop_id: int,
-        delivery_distance_services: DeliveryDistanceServiceDep,
-        db: Session = Depends(get_db),
-):
-    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
-    if not shop or not shop.delivery_cost:
-        raise HTTPException(status_code=404, detail="Доставка не найдена")
-    elif shop.delivery_cost.fixed_cost:
-        return shop.delivery_cost.fixed_cost
-    else:
-        smallest_distance = None
-        for shop_address in shop.addresses:
-            distance = delivery_distance_services.calculate_delivery_distance(shop_address.get("address"))
-            if smallest_distance is None or smallest_distance > distance:
-                smallest_distance = distance
-        return ShopServices.calculate_delivery_cost(delivery_cost=shop.delivery_cost, distance=smallest_distance)
-
-
-@router.post("/{shop_id}/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
+@router.post("/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
 def create_shop_delivery_cost(
-        shop_id: int,
+        shop: ShopByOwnerDep,
         delivery_cost: ShopDeliveryCostCreate,
         db: Session = Depends(get_db),
         user: User = Depends(get_current_user),
 ):
-    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
+    shop_id = shop.id
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
     if shop.owner_id != user.id:
@@ -1027,14 +1004,15 @@ def create_shop_delivery_cost(
     )
 
 
-@router.put("/{shop_id}/delivery/cost", response_model=ShopDeliveryCostResponse,
+@router.put("/delivery/cost", response_model=ShopDeliveryCostResponse,
             tags=["Shops", "Delivery"])
 def update_shop_delivery_cost(
-        shop_id: int,
+        shop: ShopByOwnerDep,
         delivery_cost: ShopDeliveryCostCreate,
         db: Session = Depends(get_db),
         user: User = Depends(get_current_user),
 ):
+    shop_id = shop.id
     shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
@@ -1053,6 +1031,25 @@ def update_shop_delivery_cost(
         fixed_cost=new_delivery_cost.fixed_cost,
         radius_cost=new_delivery_cost.radius_cost
     )
+
+@router.post("/delivery/cost/calculate", tags=["Shops", "Delivery"])
+def calculate_shop_delivery_cost(
+        shop: ShopByOwnerDep,
+        delivery_distance_services: DeliveryDistanceServiceDep,
+):
+    if not shop or not shop.delivery_cost:
+        raise HTTPException(status_code=404, detail="Доставка не найдена")
+    elif shop.delivery_cost.fixed_cost:
+        return shop.delivery_cost.fixed_cost
+    elif shop.delivery_cost.is_yandex:
+        return "Yandex go cost"
+    else:
+        smallest_distance = None
+        for shop_address in shop.addresses:
+            distance = delivery_distance_services.calculate_delivery_distance(shop_address.get("address"))
+            if smallest_distance is None or smallest_distance > distance:
+                smallest_distance = distance
+        return ShopServices.calculate_delivery_cost(delivery_cost=shop.delivery_cost, distance=smallest_distance)
 
 
 # Ensure this route is defined before any routes with path parameters like {shop_id}
