@@ -163,7 +163,7 @@ const ProductDetailPage: React.FC = () => {
                 <section className="product-detail-related-products">
                     <h2>Похожие товары</h2>
                     {relatedProducts.length > 0 ? (
-                        <ProductGrid categoryId={product.categoryId} products={relatedProducts} isSmallCard={true} />
+                        <ProductGrid categoryId={product.categoryId} products={relatedProducts} />
                     ) : (
                         <p>Похожие товары отсутствуют.</p>
                     )}

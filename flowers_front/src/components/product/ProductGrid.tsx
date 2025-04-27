@@ -14,7 +14,7 @@ interface ProductGridProps {
     isSmallCard?: boolean;
 }
 
-const ProductGrid: React.FC<ProductGridProps> = ({categoryId, products: propProducts, isSmallCard = false}) => {
+const ProductGrid: React.FC<ProductGridProps> = ({categoryId, products: propProducts}) => {
     const [products, setProducts] = useState<IProduct[]>([]);
     const currentPage = 1;
     const perPage = 10;
@@ -59,22 +59,22 @@ const ProductGrid: React.FC<ProductGridProps> = ({categoryId, products: propProd
     );
 
     const firstRowProducts = isDesktop
-        ? uniqueDisplayProducts.slice(0, 4)
+        ? uniqueDisplayProducts
         : isTablet
-            ? uniqueDisplayProducts.slice(0, 3)
-            : uniqueDisplayProducts.slice(0, 6);
+            ? uniqueDisplayProducts
+            : uniqueDisplayProducts;
 
-    const secondRowProducts = isDesktop
-        ? uniqueDisplayProducts.slice(4, 7)
-        : isTablet
-            ? uniqueDisplayProducts.slice(3, 5)
-            : [];
+    // const secondRowProducts = isDesktop
+    //     ? uniqueDisplayProducts.slice(4, 7)
+    //     : isTablet
+    //         ? uniqueDisplayProducts.slice(3, 5)
+    //         : [];
 
     useEffect(() => {
         console.log('ProductGrid rendered with categoryId:', categoryId);
         console.log('First row cards rendered:', firstRowProducts.length);
-        console.log('Second row cards rendered:', secondRowProducts.length);
-    }, [categoryId, firstRowProducts, secondRowProducts]);
+        // console.log('Second row cards rendered:', secondRowProducts.length);
+    }, [categoryId, firstRowProducts]);
 
     // Компоненты карточек продуктов
     const FirstRowProductCard = ({product}: { product: IProduct }) => (
@@ -107,35 +107,35 @@ const ProductGrid: React.FC<ProductGridProps> = ({categoryId, products: propProd
         </Link>
     );
 
-    const SecondRowProductCard = ({ product }: { product: IProduct }) => (
-        <Link to={`/product/${product.id}`} className="product-card-link">
-            <div className="product-card second-row-card">
-                <div className="product-image-container">
-                    <img src="/magnolia.png" alt={product.name} className="product-image" />
-                </div>
-                <div className="product-info">
-                    <div className="product-price">{formatPrice(product.price)} ₽</div>
-                    <div className="product-name">{product.name}</div>
-                    <button
-                        className="add-to-cart-button bg-accent-color"
-                        onClick={() => handleAddToCart(product)}
-                        aria-label={
-                            cart.some((item) => item?.product?.id === product.id)
-                                ? `Товар ${product.name} в корзине`
-                                : `Добавить ${product.name} в корзину`
-                        }
-                    >
-                        <img src={cartIcon} alt="" className="cart-icon" aria-hidden="true"/>
-                        {
-                            cart.some((item) => item?.product?.id === product.id)
-                                ? "В корзине"
-                                : "В корзину"
-                        }
-                    </button>
-                </div>
-            </div>
-        </Link>
-    );
+    // const SecondRowProductCard = ({ product }: { product: IProduct }) => (
+    //     <Link to={`/product/${product.id}`} className="product-card-link">
+    //         <div className="product-card second-row-card">
+    //             <div className="product-image-container">
+    //                 <img src="/magnolia.png" alt={product.name} className="product-image" />
+    //             </div>
+    //             <div className="product-info">
+    //                 <div className="product-price">{formatPrice(product.price)} ₽</div>
+    //                 <div className="product-name">{product.name}</div>
+    //                 <button
+    //                     className="add-to-cart-button bg-accent-color"
+    //                     onClick={() => handleAddToCart(product)}
+    //                     aria-label={
+    //                         cart.some((item) => item?.product?.id === product.id)
+    //                             ? `Товар ${product.name} в корзине`
+    //                             : `Добавить ${product.name} в корзину`
+    //                     }
+    //                 >
+    //                     <img src={cartIcon} alt="" className="cart-icon" aria-hidden="true"/>
+    //                     {
+    //                         cart.some((item) => item?.product?.id === product.id)
+    //                             ? "В корзине"
+    //                             : "В корзину"
+    //                     }
+    //                 </button>
+    //             </div>
+    //         </div>
+    //     </Link>
+    // );
 
     // Определяем, какую версию отображать в зависимости от ширины экрана
     return (
@@ -145,13 +145,13 @@ const ProductGrid: React.FC<ProductGridProps> = ({categoryId, products: propProd
                     <FirstRowProductCard key={product.id} product={product} />
                 ))}
             </div>
-            {!isSmallCard && (
-                <div className="product-grid second-row">
-                    {secondRowProducts.map((product) => (
-                        <SecondRowProductCard key={product.id} product={product} />
-                    ))}
-                </div>
-            )}
+            {/*{!isSmallCard && (*/}
+            {/*    <div className="product-grid second-row">*/}
+            {/*        {secondRowProducts.map((product) => (*/}
+            {/*            <SecondRowProductCard key={product.id} product={product} />*/}
+            {/*        ))}*/}
+            {/*    </div>*/}
+            {/*)}*/}
         </div>
     );
 };
