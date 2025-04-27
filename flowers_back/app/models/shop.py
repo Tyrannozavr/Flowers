@@ -1,6 +1,6 @@
 from enum import Enum
 
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
 
@@ -62,6 +62,7 @@ class ShopDeliveryCost(Base):
     type = Column(String, nullable=False)
     fixed_cost = Column(Integer, nullable=True, comment="Если стоимость доставки фиксированная")
     radius_cost = Column(JSON,  nullable=True, comment="{радиус до: цена")
+    is_yandex_geo = Column(Boolean, default=False)  # Является ли этот вариант доставки яндекс-доставкой
 
     shop = relationship("Shop", back_populates="delivery_cost", uselist=False)
 
