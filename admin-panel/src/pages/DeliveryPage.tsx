@@ -29,7 +29,6 @@ const DeliveryPage: React.FC = () => {
             try {
                 setLoading(true);
                 const data = await getDeliveryCost();
-                
                 // Set form values from API data with null checks
                 setFixedCost(data.fixed_cost || 0);
                 
