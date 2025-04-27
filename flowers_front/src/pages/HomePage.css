@@ -27,9 +27,7 @@
   padding: 16px 32px 40px 32px;
   align-items: flex-start;
   overflow-x: auto;
-  flex-wrap: nowrap;
-  max-width: 1200px;
-  padding-left: 80px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .category-tab {
@@ -138,8 +136,6 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Hide scrollbar in Firefox */
-    max-width: 700px;
-    padding-left: 80px;
   }
 
   .category-tabs::-webkit-scrollbar {
@@ -178,7 +174,6 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    max-width: 460px !important;
   }
 
   .category-tabs::-webkit-scrollbar {
