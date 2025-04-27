@@ -1,0 +1,206 @@
+.container {
+    padding: 12px;
+    margin-bottom: 24px;
+    padding-left: 38px;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+.pageTitle {
+    font-family: Inter, sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 0px;
+    color: #000000;
+    margin: 0 0 8px 0;
+    text-align: left;
+}
+
+.section {
+    margin-bottom: 32px;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.sectionTitle {
+    font-family: Inter, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+    color: #000000;
+    margin: 0;
+}
+
+.sectionDescription {
+    font-family: Inter, sans-serif;
+    font-weight: 400;
+    font-size: 13px; /* Изменено */
+    line-height: 20px;
+    color: #000000; /* Изменено */
+    margin: 0 0 16px 0;
+}
+
+.optionColumns {
+    display: flex;
+    gap: 32px; /* Отступ между колонками */
+}
+
+.optionColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Отступ между строками в колонке */
+}
+
+.optionRow {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* S = 8px */
+    position: relative;
+}
+
+.optionInput {
+    width: 172px; /* Указано */
+    height: 28px; /* Указано */
+    margin-left: 0px; /* Изменено */
+    padding: 8px; /* Оставляем для читаемости текста */
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    font-family: Inter, sans-serif;
+    font-size: 13px; /* Изменено */
+    color: #000000;
+}
+
+.optionInput::placeholder {
+    color: #8c8c8c;
+}
+
+.optionInput:disabled {
+    background-color: #f5f5f5;
+    color: #8c8c8c;
+}
+
+.changeButton {
+    width: 172px; /* Указано */
+    height: 28px; /* Указано */
+    margin-left: 8px; /* Изменено */
+    padding-top: 5px; /* Указано */
+    padding-right: 12px; /* Указано */
+    padding-bottom: 5px; /* Указано */
+    padding-left: 12px; /* Указано */
+    gap: 8px; /* Указано */
+    background-color: #30AA6E;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px; /* M radius = 6px */
+    font-family: Inter, sans-serif;
+    font-size: 13px; /* Изменено */
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.changeButton:hover {
+    background-color: #2a9961;
+}
+
+.changeButton:disabled {
+    background-color: #2a9961; /* Изменено */
+    cursor: not-allowed;
+}
+
+/* Стили для кнопки "Сохранить" */
+.saveButton {
+    width: 172px;
+    height: 28px;
+    margin-left: 0px; /* Выравниваем с полями ввода */
+    padding-top: 5px;
+    padding-right: 12px;
+    padding-bottom: 5px;
+    padding-left: 12px;
+    background-color: #30AA6E;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-family: Inter, sans-serif;
+    font-size: 13px; /* Соответствует .changeButton */
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 16px; /* Отступ снизу перед сообщением об ошибке */
+}
+
+.saveButton:hover {
+    background-color: #2a9961;
+}
+
+/* Стили для переключателя */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #d9d9d9;
+    transition: 0.4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #30AA6E;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+/* Сообщение об ошибке */
+.errorMessage {
+    display: flex;
+    align-items: center;
+    background: #FFE6E6;
+    color: #FF4D4F;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 12px;
+    font-family: Inter, sans-serif;
+    font-size: 13px; /* Изменено */
+    line-height: 1.5;
+    max-width: 500px;
+}
+
+.errorText {
+    margin: 0;
+}

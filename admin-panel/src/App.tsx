@@ -17,6 +17,7 @@ import OfferPage from './components/OfferPage'
 import StoresPage from "./pages/StoresPage.tsx";
 import OrdersPage from "./pages/OrdersPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
+import DeliveryPage from "./pages/DeliveryPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -130,6 +131,11 @@ const App: React.FC = () => {
                     <Route path="orders" element={
                         <ProtectedRoute>
                             <OrdersPage/>
+                        </ProtectedRoute>
+                    }/>
+                    <Route path="delivery" element={
+                        <ProtectedRoute>
+                            <DeliveryPage />
                         </ProtectedRoute>
                     }/>
 
