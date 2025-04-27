@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
 import styles from './DeliveryPage.module.css';
-import { getDeliveryCost, updateDeliveryCost, DeliveryCostData } from '../api/delivery';
+import { toast } from 'react-toastify';
+import { 
+  getDeliveryCost, 
+  createDeliveryCost, 
+  updateDeliveryCost, 
+  DeliveryCostData,
+  DeliveryCostResponse 
+} from '../api/delivery';
 
 const DeliveryPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
-    const [deliveryType, setDeliveryType] = useState<'radius' | 'fixed' | 'yandex_geo' | null>(null);
+    const [deliveryType, setDeliveryType] = useState<'radius' | 'fixed' | 'yandex_go' | null>(null);
+    const [hasExistingData, setHasExistingData] = useState(false);
     
     // Form values
     const [fixedCost, setFixedCost] = useState<number>(0);
@@ -23,21 +30,35 @@ const DeliveryPage: React.FC = () => {
                 setLoading(true);
                 const data = await getDeliveryCost();
                 
-                // Set form values from API data
-                setFixedCost(data.fixed_cost);
-                setRadiusCosts(data.radius_cost);
+                // Set form values from API data with null checks
+                setFixedCost(data.fixed_cost || 0);
+                
+                // Ensure radius_cost is properly initialized
+                if (data.radius_cost) {
+                    setRadiusCosts({
+                        "1": data.radius_cost["1"] || 0,
+                        "5": data.radius_cost["5"] || 0,
+                        "10": data.radius_cost["10"] || 0,
+                        "20": data.radius_cost["20"] || 0
+                    });
+                }
                 
                 // Set active delivery type
-                if (data.is_yandex_geo) {
-                    setDeliveryType('yandex_geo');
+                if (data.type === 'yandex_go') {
+                    setDeliveryType('yandex_go');
                 } else if (data.type === 'fixed') {
                     setDeliveryType('fixed');
                 } else if (data.type === 'radius') {
                     setDeliveryType('radius');
                 }
                 
+                // Check if we have existing data
+                setHasExistingData(true);
+                
             } catch (error) {
                 console.error('Error fetching delivery cost:', error);
+                // If we get a 404 or other error, assume no existing data
+                setHasExistingData(false);
                 // toast.error('Не удалось загрузить настройки доставки');
             } finally {
                 setLoading(false);
@@ -57,7 +78,7 @@ const DeliveryPage: React.FC = () => {
     };
     
     // Handle delivery type change
-    const handleDeliveryTypeChange = (type: 'radius' | 'fixed' | 'yandex_geo') => {
+    const handleDeliveryTypeChange = (type: 'radius' | 'fixed' | 'yandex_go') => {
         setDeliveryType(type === deliveryType ? null : type);
     };
     
@@ -69,14 +90,36 @@ const DeliveryPage: React.FC = () => {
         }
         
         try {
-            const data: DeliveryCostData = {
-                type: deliveryType === 'yandex_geo' ? 'fixed' : deliveryType,
-                fixed_cost: fixedCost,
-                radius_cost: radiusCosts,
-                is_yandex_geo: deliveryType === 'yandex_geo'
-            };
+            let data: DeliveryCostData;
             
-            await updateDeliveryCost(data);
+            // Prepare data based on the selected delivery type
+            if (deliveryType === 'yandex_go') {
+                data = {
+                    type: 'yandex_go',
+                    is_yandex_geo: true
+                } as DeliveryCostData;
+            } else if (deliveryType === 'fixed') {
+                data = {
+                    type: 'fixed',
+                    fixed_cost: fixedCost
+                } as DeliveryCostData;
+            } else {
+                data = {
+                    type: 'radius',
+                    radius_cost: radiusCosts
+                } as DeliveryCostData;
+            }
+            
+            // Use createDeliveryCost if there's no existing data, otherwise updateDeliveryCost
+            let response: DeliveryCostResponse;
+            if (hasExistingData) {
+                response = await updateDeliveryCost(data);
+            } else {
+                response = await createDeliveryCost(data);
+                // After creating, we now have existing data
+                setHasExistingData(true);
+            }
+            
             toast.success('Настройки доставки успешно сохранены');
         } catch (error) {
             console.error('Error saving delivery cost:', error);
@@ -228,8 +271,8 @@ const DeliveryPage: React.FC = () => {
                     <label className={styles.switch}>
                         <input
                             type="checkbox"
-                            checked={deliveryType === 'yandex_geo'}
-                            onChange={() => handleDeliveryTypeChange('yandex_geo')}
+                            checked={deliveryType === 'yandex_go'}
+                            onChange={() => handleDeliveryTypeChange('yandex_go')}
                         />
                         <span className={styles.slider}></span>
                     </label>
