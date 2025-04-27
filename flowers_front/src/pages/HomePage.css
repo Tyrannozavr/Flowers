@@ -53,12 +53,12 @@
 }
 
 .category-tab.active {
-  color: var(--primary-color);
+  color: var(--accent-color);
   font-weight: 600;
 }
 
 .category-tab:hover .category-image {
-  border-color: var(--primary-color);
+  border-color: var(--accent-color);
 }
 
 .category-image {
@@ -99,7 +99,7 @@
     position: absolute;
     width: 92.51952237298119px;
     height: 20.559894284517732px;
-    background-color: var(--primary-color);
+    background-color: var(--accent-color);
     top: 35%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-15deg);
@@ -113,7 +113,7 @@
   }
 
   .category-tabs .category-tab:hover .category-text {
-    color: var(--primary-color);
+    color: var(--accent-color);
   }
 
   .category-text {
