@@ -402,6 +402,100 @@ def get_shops(
 
     return list_of_shops
 
+@router.get("/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
+def get_shop_delivery_cost(
+        shop: ShopByOwnerDep,
+        db: Session = Depends(get_db),
+):
+    """Get shop delivery cost."""
+    if not shop:
+        raise HTTPException(status_code=404, detail="Магазин не найден")
+    
+    if not shop.delivery_cost:
+        # Return a default response if no delivery cost is set
+        return ShopDeliveryCostResponse(
+            type="FIXED",
+            fixed_cost=None,
+            radius_cost=None
+        )
+
+    # Return the current delivery cost settings
+    return ShopDeliveryCostResponse(
+        type=shop.delivery_cost.type,
+        fixed_cost=shop.delivery_cost.fixed_cost if shop.delivery_cost.type == "FIXED" else None,
+        radius_cost=shop.delivery_cost.radius_cost if shop.delivery_cost.type == "RADIUS" else None
+    )
+
+
+from app.services import Shop as ShopServices
+
+
+@router.post("/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
+def create_shop_delivery_cost(
+        shop: ShopByOwnerDep,
+        delivery_cost: ShopDeliveryCostCreate,
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user),
+):
+    shop_id = shop.id
+    if not shop:
+        raise HTTPException(status_code=404, detail="Магазин не найден")
+    if shop.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
+    if shop.delivery_cost:
+        raise HTTPException(status_code=400, detail="Доставка уже создана")
+    if shop_repository.get_shop_delivery_cost(shop_id=shop_id, db=db):
+        raise HTTPException(status_code=400, detail="Доставка уже создана")
+    new_delivery_cost = shop_repository.create_shop_delivery_cost(db=db, shop_id=shop_id, delivery_cost=delivery_cost)
+    db.add(new_delivery_cost)
+    db.commit()
+    db.refresh(new_delivery_cost)
+
+    return ShopDeliveryCostResponse(
+        type=new_delivery_cost.type,
+        fixed_cost=new_delivery_cost.fixed_cost,
+        radius_cost=new_delivery_cost.radius_cost
+    )
+
+
+@router.put("/delivery/cost", response_model=ShopDeliveryCostResponse,
+            tags=["Shops", "Delivery"])
+def update_shop_delivery_cost(
+        shop: ShopByOwnerDep,
+        delivery_cost: ShopDeliveryCostCreate,
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user),
+):
+    """Create or update shop delivery cost."""
+    shop_id = shop.id
+    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
+    if delivery_cost.type == "FIXED" and delivery_cost.radius_cost:
+        all_zeros = all(value == 0 for value in delivery_cost.radius_cost.values())
+        if all_zeros:
+            delivery_cost.radius_cost = None
+    if not shop:
+        raise HTTPException(status_code=404, detail="Магазин не найден")
+    if shop.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
+    if not shop.delivery_cost:
+        new_delivery_cost = shop_repository.create_shop_delivery_cost(db=db, shop_id=shop_id, delivery_cost=delivery_cost)
+        db.add(new_delivery_cost)
+        db.commit()
+        db.refresh(new_delivery_cost)
+        return ShopDeliveryCostResponse(
+            type=new_delivery_cost.type,
+            fixed_cost=new_delivery_cost.fixed_cost,
+            radius_cost=new_delivery_cost.radius_cost,
+        )
+    new_delivery_cost = shop_repository.update_shop_delivery_cost(db=db, shop_id=shop_id, delivery_cost=delivery_cost)
+    db.add(new_delivery_cost)
+    db.commit()
+    db.refresh(new_delivery_cost)
+    return ShopDeliveryCostResponse(
+        type=new_delivery_cost.type,
+        fixed_cost=new_delivery_cost.fixed_cost,
+        radius_cost=new_delivery_cost.radius_cost
+    )
 
 @router.post("/shop-types", tags=["Shops", "Types"])
 async def create_shop_type(
@@ -958,85 +1052,14 @@ def delete_product(
     return {"detail": "Продукт удален"}
 
 
-@router.get("/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
-def get_shop_delivery_cost(
-        shop: ShopByOwnerDep,
-        db: Session = Depends(get_db),
-):
-    if not shop or not shop.delivery_cost:
-        raise HTTPException(status_code=404, detail="Доставка не найдена")
-
-    return ShopDeliveryCostResponse(
-        type=shop.delivery_cost.type,
-        fixed_cost=shop.delivery_cost.fixed_cost,
-        radius_cost=shop.delivery_cost.radius_cost
-    )
-
-
-from app.services import Shop as ShopServices
-
-
-@router.post("/delivery/cost", response_model=ShopDeliveryCostResponse, tags=["Shops", "Delivery"])
-def create_shop_delivery_cost(
-        shop: ShopByOwnerDep,
-        delivery_cost: ShopDeliveryCostCreate,
-        db: Session = Depends(get_db),
-        user: User = Depends(get_current_user),
-):
-    shop_id = shop.id
-    if not shop:
-        raise HTTPException(status_code=404, detail="Магазин не найден")
-    if shop.owner_id != user.id:
-        raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
-    if shop.delivery_cost:
-        raise HTTPException(status_code=400, detail="Доставка уже создана")
-    if shop_repository.get_shop_delivery_cost(shop_id=shop_id, db=db):
-        raise HTTPException(status_code=400, detail="Доставка уже создана")
-    new_delivery_cost = shop_repository.create_shop_delivery_cost(db=db, shop_id=shop_id, delivery_cost=delivery_cost)
-    db.add(new_delivery_cost)
-    db.commit()
-    db.refresh(new_delivery_cost)
-
-    return ShopDeliveryCostResponse(
-        type=new_delivery_cost.type,
-        fixed_cost=new_delivery_cost.fixed_cost,
-        radius_cost=new_delivery_cost.radius_cost
-    )
-
-
-@router.put("/delivery/cost", response_model=ShopDeliveryCostResponse,
-            tags=["Shops", "Delivery"])
-def update_shop_delivery_cost(
-        shop: ShopByOwnerDep,
-        delivery_cost: ShopDeliveryCostCreate,
-        db: Session = Depends(get_db),
-        user: User = Depends(get_current_user),
-):
-    shop_id = shop.id
-    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
-    if not shop:
-        raise HTTPException(status_code=404, detail="Магазин не найден")
-    if shop.owner_id != user.id:
-        raise HTTPException(status_code=403, detail="У вас нет доступа к этому магазину")
-    if not shop.delivery_cost:
-        raise HTTPException(status_code=404, detail="Доставка не найдена")
-
-    new_delivery_cost = shop_repository.update_shop_delivery_cost(db=db, shop_id=shop_id, delivery_cost=delivery_cost)
-    db.add(new_delivery_cost)
-    db.commit()
-    db.refresh(new_delivery_cost)
-
-    return ShopDeliveryCostResponse(
-        type=new_delivery_cost.type,
-        fixed_cost=new_delivery_cost.fixed_cost,
-        radius_cost=new_delivery_cost.radius_cost
-    )
-
-@router.post("/delivery/cost/calculate", tags=["Shops", "Delivery"])
+@router.post("/{shop_id}/delivery/cost/calculate", tags=["Shops", "Delivery"])
 def calculate_shop_delivery_cost(
-        shop: ShopByOwnerDep,
+        shop_id: int,
         delivery_distance_services: DeliveryDistanceServiceDep,
+        db: Session = Depends(get_db),
 ):
+    shop = shop_repository.get_shop_by_id(shop_id=shop_id, db=db)
+
     if not shop or not shop.delivery_cost:
         raise HTTPException(status_code=404, detail="Доставка не найдена")
     elif shop.delivery_cost.fixed_cost:

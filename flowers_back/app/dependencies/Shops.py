@@ -32,6 +32,8 @@ class ShopDeliveryCostResponse(BaseModel):
     type: str
     fixed_cost: Optional[int] = None
     radius_cost: Optional[Dict[int, int]] = None
+    is_yandex_geo: bool = False
+
 
 def get_shop_by_owner(user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> Shop:
     shop = db.query(Shop).filter(Shop.owner_id == user.id).first()
