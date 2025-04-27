@@ -118,7 +118,7 @@ const DeliveryPage: React.FC = () => {
                 // After creating, we now have existing data
                 setHasExistingData(true);
             }
-            
+            console.log(response)
             toast.success('Настройки доставки успешно сохранены');
         } catch (error) {
             console.error('Error saving delivery cost:', error);
