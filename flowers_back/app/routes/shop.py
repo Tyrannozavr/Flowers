@@ -419,7 +419,6 @@ def get_shop_delivery_cost(
             radius_cost=None
         )
 
-    print("Data is ", shop.delivery_cost.radius_cost, shop.delivery_cost.type)
     return ShopDeliveryCostResponse(
         type=shop.delivery_cost.type,
         fixed_cost=shop.delivery_cost.fixed_cost if shop.delivery_cost.type == DeliveryCostType.FIXED.value else None,
