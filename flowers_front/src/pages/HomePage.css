@@ -1,3 +1,4 @@
+/* src/pages/HomePage.css */
 :root {
   --primary-color: #30aa6e;
   --primary-hover: #268a56;
@@ -16,18 +17,42 @@
   flex: 1;
   max-width: 1200px;
   width: 100%;
-  padding: 16px;
+  margin: 0 auto;
+  padding: 0 16px;
   padding-top: 2px;
+  margin-top: 0px;
   overflow-x: visible !important;
 }
 
 .category-tabs {
   display: flex;
-  gap: 10px;
-  padding: 16px 32px 40px 32px;
+  gap: 10px; /* Updated gap to 10px */
+  padding: 16px 32px 40px 32px; /* Updated padding: top remains 16px, right and left are 32px (2XL radius), bottom is 40px */
   align-items: flex-start;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 780px) {
+  .category-tabs {
+    gap: 10px; /* Keep gap at 10px for tablet */
+    padding: 8px 32px 40px 32px; /* Adjust top padding for tablet, keep right/left at 32px, bottom at 40px */
+  }
+}
+
+@media (max-width: 480px) {
+  .category-tabs {
+    gap: 10px; /* Keep gap at 10px for mobile */
+    padding: 8px 32px 40px 32px; /* Same padding as tablet for mobile */
+  }
+}
+
+@media (min-width: 769px) {
+  .category-tabs {
+    justify-content: center;
+    overflow-x: hidden; /* Disable horizontal scrolling on desktop */
+    flex-wrap: wrap; /* Allow tabs to wrap to the next line */
+  }
 }
 
 .category-tab {
@@ -47,59 +72,40 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   flex: 0 0 auto;
-  width: 96px;
-  min-width: 96px;
-  height: 104px;
+  width: 96px; /* Updated width to 96px */
+  min-width: 96px; /* Updated min-width to 96px */
+  height: 104px; /* Updated height to 104px */
 }
 
 .category-tab.active {
-  color: var(--primary-color);
+  color: #30aa6e;
   font-weight: 600;
 }
 
-.category-tab:hover .category-image {
-  border-color: var(--primary-color);
-}
-
-.category-image {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  object-fit: cover;
-  margin: 0;
-  flex-shrink: 0;
-  border: 2px solid #e0e0e0;
-  transition: border-color 0.3s ease;
-}
-
-.category-text {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  letter-spacing: 0px;
-  text-align: center;
-  color: var(--text-color);
-  transition: color 0.3s ease;
-  margin: 0;
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  white-space: normal;
-}
-
-/* Desktop (min-width: 769px) */
-@media (min-width: 769px) {
-  .category-tabs {
-    justify-content: center;
-    overflow-x: hidden;
-    flex-wrap: wrap;
+@media (max-width: 768px) {
+  .category-tab {
+    padding: 6px 12px;
+    width: 96px; /* Keep width at 96px for tablet */
+    min-width: 96px; /* Keep min-width at 96px for tablet */
+    height: 104px; /* Keep height at 104px for tablet */
   }
+}
 
+@media (max-width: 320px) {
+  .category-tab {
+    width: 96px; /* Keep width at 96px for smaller mobile */
+    min-width: 96px; /* Keep min-width at 96px for smaller mobile */
+    height: 104px; /* Keep height at 104px for smaller mobile */
+  }
+}
+
+@media (min-width: 769px) {
   .category-tab::after {
     content: '';
     position: absolute;
     width: 92.51952237298119px;
     height: 20.559894284517732px;
-    background-color: var(--primary-color);
+    background-color: var(--accent-color);
     top: 35%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-15deg);
@@ -113,124 +119,101 @@
   }
 
   .category-tabs .category-tab:hover .category-text {
-    color: var(--primary-color);
+    color: #30aa6e;
   }
+}
 
+.category-image {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  object-fit: cover;
+  margin: 0;
+  flex-shrink: 0;
+  border: 2px solid #e0e0e0;
+  transition: border-color 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .category-image {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 768px) {
+  .category-image {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+.category-tab:hover .category-image {
+  border-color: #30aa6e;
+}
+
+.category-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0px;
+  text-align: center;
+  color: #333333;
+  transition: color 0.3s ease;
+  margin: 0;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  white-space: normal;
+}
+
+@media (min-width: 769px) {
   .category-text {
     font-size: 13px;
     line-height: 16px;
   }
 }
 
-/* Tablet (max-width: 780px) */
-@media (max-width: 780px) {
-  .main-content {
-    padding: 24px 12px;
-  }
-
-  .category-tabs {
-    gap: 10px;
-    padding: 8px 32px 40px 32px;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Hide scrollbar in Firefox */
-  }
-
-  .category-tabs::-webkit-scrollbar {
-    display: none; /* Hide scrollbar in WebKit browsers */
-  }
-
-  .category-tab {
-    padding: 6px 12px;
-    width: 96px;
-    min-width: 96px;
-    height: 104px;
-  }
-
-  .category-image {
-    width: 66px;
-    height: 66px;
-  }
-
+@media (max-width: 768px) {
   .category-text {
-    font-size: 11px;
-    line-height: 16px;
+    font-size: 11px !important;
+    line-height: 16px !important;
   }
 }
 
-/* Mobile (max-width: 480px) */
-@media (max-width: 480px) {
-  .main-content {
-    padding: 16px 8px;
-  }
-
-  .category-tabs {
-    gap: 0;
-    padding: 0 32px 30px 32px;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .category-tabs::-webkit-scrollbar {
-    display: none;
-  }
-
-  .category-tab {
-    padding: 4px 8px;
-    width: 96px;
-    min-width: 96px;
-    height: 104px;
-  }
-
-  .category-image {
-    width: 66px;
-    height: 66px;
-  }
-
-  .category-text {
-    font-size: 11px;
-    line-height: 14px;
-  }
-}
-
-/* Smaller Mobile (max-width: 320px) */
-@media (max-width: 320px) {
-  .category-tab {
-    width: 96px;
-    min-width: 96px;
-    height: 104px;
-  }
-}
-
-/* Specific range for tablet (max-width: 780px and min-width: 481px) */
 @media (max-width: 780px) and (min-width: 481px) {
   .category-tab {
     padding: 6px 12px;
-    width: 96px;
-    min-width: 96px;
-    height: 104px;
+    width: 96px; /* Keep width at 96px for tablet */
+    min-width: 96px; /* Keep min-width at 96px for tablet */
+    height: 104px; /* Keep height at 104px for tablet */
   }
 
   .category-image {
-    width: 66px;
-    height: 66px;
+    width: 44px;
+    height: 44px;
   }
 
   .category-text {
-    font-size: 11px;
-    line-height: 16px;
+    font-size: 11px !important;
+    line-height: 16px !important;
   }
 }
 
-/* Specific range for larger tablet (max-width: 1024px) */
-@media (max-width: 1024px) {
+@media (max-width: 480px) {
+  .category-tab {
+    padding: 4px 8px;
+    width: 96px; /* Keep width at 96px for mobile */
+    min-width: 96px; /* Keep min-width at 96px for mobile */
+    height: 104px; /* Keep height at 104px for mobile */
+  }
+
   .category-image {
-    width: 66px;
-    height: 66px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .category-text {
+    font-size: 11px !important;
+    line-height: 14px !important;
   }
 }
