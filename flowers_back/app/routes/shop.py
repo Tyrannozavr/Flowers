@@ -13,7 +13,7 @@ import app.repositories.categories
 from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR, CATEGORY_IMAGE_UPLOAD_DIR
 from app.core.database import get_db
 from app.dependencies.Orders import DeliveryDistanceServiceDep
-from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate, ShopByOwnerDep
+from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate, ShopByOwnerDep, DeliveryCostType
 from app.dependencies.subdomain import ShopDep
 from app.models import Category
 from app.models.product import Product, ProductAttribute
@@ -419,11 +419,11 @@ def get_shop_delivery_cost(
             radius_cost=None
         )
 
-    # Return the current delivery cost settings
+    print("Data is ", shop.delivery_cost.radius_cost, shop.delivery_cost.type)
     return ShopDeliveryCostResponse(
         type=shop.delivery_cost.type,
-        fixed_cost=shop.delivery_cost.fixed_cost if shop.delivery_cost.type == "FIXED" else None,
-        radius_cost=shop.delivery_cost.radius_cost if shop.delivery_cost.type == "RADIUS" else None
+        fixed_cost=shop.delivery_cost.fixed_cost if shop.delivery_cost.type == DeliveryCostType.FIXED.value else None,
+        radius_cost=shop.delivery_cost.radius_cost if shop.delivery_cost.type == DeliveryCostType.RADIUS.value else None
     )
 
 
