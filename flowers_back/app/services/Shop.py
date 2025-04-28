@@ -13,34 +13,36 @@ def create_shop_delivery_cost(delivery_cost: ShopDeliveryCostCreate):
         raise ValueError("Only one of fixed_cost, radius_cost, or is_yandex_geo must be provided")
     
     # Create the delivery cost object based on the type
-    if delivery_cost.type == DeliveryCostType.FIXED.value:
+    if delivery_cost.type == DeliveryCostType.FIXED:
         if delivery_cost.fixed_cost is None:
             raise ValueError("Fixed cost is required for fixed delivery cost type")
         return ShopDeliveryCost(
-            type=str(delivery_cost.type),
+            type=str(delivery_cost.type.value),
             fixed_cost=delivery_cost.fixed_cost,
             radius_cost=None,
             is_yandex_geo=False
         )
-    elif delivery_cost.type == DeliveryCostType.RADIUS.value:
+    elif delivery_cost.type == DeliveryCostType.RADIUS:
         if not delivery_cost.radius_cost:
             raise ValueError("Radius cost is required for radius delivery cost type")
         return ShopDeliveryCost(
-            type=str(delivery_cost.type),
-            fixed_cost=None,
+            type=str(delivery_cost.type.value),
+            fixed_cost=0,  # Use 0 instead of None for fixed_cost
             radius_cost=delivery_cost.radius_cost,
             is_yandex_geo=False
         )
-    elif delivery_cost.type == DeliveryCostType.YANDEX_GO.value:
+    elif delivery_cost.type == DeliveryCostType.YANDEX_GO:
         if not delivery_cost.is_yandex_geo:
             raise ValueError("is_yandex_geo must be True for Yandex Go delivery cost type")
         return ShopDeliveryCost(
-            type=delivery_cost.type,
-            fixed_cost=None,
+            type=delivery_cost.type.value,
+            fixed_cost=0,  # Use 0 instead of None for fixed_cost
             radius_cost=None,
             is_yandex_geo=True
         )
     else:
+        print("Invalid type ", delivery_cost.type, type(delivery_cost.type))
+        print(DeliveryCostType.YANDEX_GO, type(DeliveryCostType.YANDEX_GO))
         raise ValueError("Invalid delivery cost type")
 
 
