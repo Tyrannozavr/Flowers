@@ -549,7 +549,6 @@ async def update_shop(
         db: Session = Depends(get_db),
 ):
     find_user = db.query(User).filter(User.id == user.id).first()
-    print(addresses)
     if not find_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 

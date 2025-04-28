@@ -19,20 +19,23 @@
   margin-bottom: 8px;
 }
 
-.emptyStateSubtitle {
-  font-family: Inter;
+.createNowText {
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
   font-size: 13px;
   line-height: 16px;
   letter-spacing: 0px;
   text-align: center;
-  margin-bottom: 24px;
+  color: #000000;
+  margin: 10px;
+  display: block;
 }
 
-.emptyState p {
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 24px;
+.formContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
 }
 
 .form {
@@ -41,14 +44,6 @@
   border-radius: 12px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.04);
   width: 450px;
-  margin: 0 auto;
-}
-
-.form h1 {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 32px;
-  color: #000000;
 }
 
 .form h2 {
@@ -67,8 +62,7 @@
   margin-top: 24px;
 }
 
-.formGroup input,
-.formGroup textarea {
+.formGroup input {
   width: 100%;
   padding: 12px;
   border: 1px solid #D9D9D9;
@@ -77,29 +71,111 @@
   font-family: inherit;
 }
 
-.formGroup textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.formGroup input:focus,
-.formGroup textarea:focus {
+.formGroup input:focus {
   outline: none;
   border-color: #30AA6E;
   box-shadow: 0px 0px 0px 4px rgba(48, 170, 110, 0.1);
 }
 
-.colorInput {
-  width: 100px !important;
-  height: 40px;
-  padding: 4px !important;
+.inputError {
+  border-color: #ff4d4f !important;
+}
+
+.activeInput {
+  border-color: #30AA6E !important;
+  box-shadow: 0px 0px 0px 4px rgba(48, 170, 110, 0.1) !important;
+}
+
+.error {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.addressGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.addressGroup input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #D9D9D9;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.addressGroup input:focus {
+  outline: none;
+  border-color: #30AA6E;
+  box-shadow: 0px 0px 0px 4px rgba(48, 170, 110, 0.1);
+}
+
+.addAddressButton {
+  width: 50px;
+  height: 50px;
+  background: #F5F5F5;
+  border: 1px solid #D9D9D9;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #000;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addAddressButton:hover {
+  background-color: #E8E8E8;
+}
+
+.logoButtonGroup {
+  margin-bottom: 16px;
+}
+
+.logoButton {
+  display: block;
+  width: 100%;
+  height: 50px;
+  background: #F5F5F5;
+  border: 1px solid #D9D9D9;
+  border-radius: 6px;
+  color: #8C8C8C;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 50px;
+  margin-bottom: 8px;
+}
+
+.logoButton:hover {
+  background: #E8E8E8;
+}
+
+.activeButton {
+  background-color: #30AA6E !important;
+  color: white !important;
+  border-color: #30AA6E !important;
+}
+
+.uploadHint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 8px;
+  text-align: center;
 }
 
 .buttonGroup {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 24px;
   width: 100%;
 }
 
@@ -127,7 +203,7 @@
 .secondaryButton {
   padding: 8px 16px;
   background-color: #F5F5F5;
-  color: #000000;
+  color: #8C8C8C;
   border: 1px solid #D9D9D9;
   border-radius: 6px;
   font-size: 14px;
@@ -138,93 +214,6 @@
 
 .secondaryButton:hover {
   background-color: #E8E8E8;
-}
-
-.uploadButton {
-  width: 100%;
-  margin-bottom: 16px;
-}
-
-.uploadButton button {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  background: #F5F5F5;
-  border: 1px solid #D9D9D9;
-  border-radius: 6px;
-  color: #000000;
-  font-family: Inter, sans-serif;
-  font-size: 14px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.uploadButton button:hover {
-  background: #E8E8E8;
-}
-
-.storeView {
-  background: white;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.04);
-  width: 450px;
-  margin: 0 auto;
-}
-
-.storeInfo {
-  margin-bottom: 32px;
-}
-
-.storeInfo h2 {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #000000;
-}
-
-.storeInfo p {
-  margin-bottom: 12px;
-  font-size: 16px;
-  color: #000000;
-}
-
-.colorDisplay {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  margin: 12px 0;
-}
-
-.actions h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #000000;
-}
-
-.deleteButton {
-  background: #FF4D4F;
-  color: white;
-}
-
-.deleteButton:hover {
-  background: #ff3333;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Inter', sans-serif;
-  color: #333;
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 10px;
-  }
 }
 
 .tableContainer {
@@ -274,11 +263,6 @@
   text-align: right;
 }
 
-.colorCell {
-  color: #000;
-  font-size: 14px;
-}
-
 .actionsCell {
   display: flex;
   gap: 12px;
@@ -322,66 +306,15 @@
   color: #000;
 }
 
-.openButton {
-  background: #30AA6E;
-  color: #ffffff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+.textLogo {
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  color: #000;
 }
 
-.openButton:hover {
-  background: #2C9E64;
-}
-
-.editButton {
-  background: #f5f5f5;
-  color: #333;
-  border: 1px solid #d9d9d9;
-  padding: 8px 16px;
+.logoImage {
+  max-width: 50px;
+  max-height: 50px;
+  object-fit: contain;
   border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.editButton:hover {
-  background: #e0e0e0;
-}
-
-.deleteButton {
-  background: #E9033A;
-  color: white;
-  border: none;
-  padding: 8px;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-}
-
-.deleteButton:hover {
-  background: #D6002F;
-}
-
-.createNowText {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 13px;
-  line-height: 16px;
-  letter-spacing: 0px;
-  text-align: center;
-  color: #000000;
-  margin: 0;
-  display: block;
 }

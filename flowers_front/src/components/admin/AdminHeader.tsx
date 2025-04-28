@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './AdminHeader.css';
-import logoIcon from '../../assets/Flattened.svg';
 import cartIcon from '../../assets/icon left (1).svg';
 import chatIcon from '../../assets/chat-1-line.svg';
 import tgIcon from '../../assets/Tg.svg';
@@ -80,7 +79,7 @@ const ContactModal: React.FC<{ isOpen: boolean; onClose: () => void; phone: stri
         { icon: tgIcon, label: 'Telegram', link: 'https://t.me/'+phone },
         { icon: vkIcon, label: 'Вконтакте', link: 'https://vk.com/'+phone },
         { icon: wsIcon, label: 'Whatsapp', link: 'https://wa.me/'+phone },
-        { icon: tlIcon, label: '+7 922 323-29-35', link: 'tel:'+phone },
+        { icon: tlIcon, label: phone, link: 'tel:'+phone },
     ];
 
     return (
@@ -166,7 +165,7 @@ const AdminHeader: React.FC = () => {
                         {!logoUrl ? (
                             <h2>{name}</h2>
                         ) : (
-                            <img src={logoIcon} alt="Логотип Магнолия" className="logo-image" />
+                            <img src={logoUrl} alt="Логотип" className="logo-image" />
                         )}
                     </a>
                     <nav className="header-icons" aria-label="User actions">
