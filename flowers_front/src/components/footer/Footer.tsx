@@ -37,9 +37,11 @@ const ContactModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOp
   }, [isOpen, onClose]);
   
   if (!isOpen) return null;
-  
+
+  const tgName = tg !== null ? tg : '';
+
   const contactOptions: ContactOption[] = [
-    { icon: tgIcon, label: 'Telegram', link: 'https://t.me/'+tg },
+    { icon: tgIcon, label: 'Telegram', link: 'https://t.me/'+tgName },
     { icon: vkIcon, label: 'Вконтакте', link: 'https://vk.com/magnolia_flowers' },
     { icon: wsIcon, label: 'Whatsapp', link: 'https://wa.me/'+whatsapp },
     { icon: tlIcon, label: phone, link: 'tel:'+phone },
