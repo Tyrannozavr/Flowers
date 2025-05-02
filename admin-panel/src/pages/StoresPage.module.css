@@ -222,14 +222,20 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.04);
-  padding: 0 48px;
+  padding: 0 32px;
+  margin-top: 20px;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   border: none;
-  margin: 32px 0;
+  margin: 24px 0;
+  table-layout: fixed;
+}
+
+.table tr {
+  height: 60px;
 }
 
 .table th {
@@ -241,22 +247,50 @@
   line-height: 18px;
   letter-spacing: 0px;
   text-align: left;
-  padding: 16px 0;
-  height: auto;
+  padding: 12px 10px 12px 0;
   border-bottom: 1px solid #E0E0E0;
+  vertical-align: middle;
+}
+
+.table th:first-child {
+  padding-left: 0;
+  width: 120px;
+}
+
+.table th:nth-child(2) {
+  width: 150px;
+}
+
+.table th:nth-child(3) {
+  width: 100px;
+}
+
+.table th:nth-child(4) {
+  width: 70px;
+  text-align: center;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .table th:last-child {
   text-align: right;
+  width: 150px;
 }
 
 .table td {
   font-size: 14px;
   color: #000;
   text-align: left;
-  padding: 16px 0;
-  height: auto;
+  padding: 10px 10px 10px 0;
   border-bottom: 1px solid #E0E0E0;
+  vertical-align: middle;
+  word-break: break-word;
+  height: 60px;
+}
+
+.table td:first-child {
+  padding-left: 0;
+  font-weight: 500;
 }
 
 .table td:last-child {
@@ -306,15 +340,38 @@
   color: #000;
 }
 
+.logoCell {
+  width: 70px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 0;
+  height: 60px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
 .textLogo {
   font-size: 14px;
   font-weight: 500;
   color: #000;
+  display: inline-block;
 }
 
 .logoImage {
-  max-width: 50px;
-  max-height: 50px;
+  max-width: 30px;
+  max-height: 30px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   border-radius: 4px;
+  display: block;
+  margin: 0 auto;
 }

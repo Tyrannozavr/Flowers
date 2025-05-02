@@ -72,6 +72,7 @@ const StoresPage: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isTextLogoActive, setIsTextLogoActive] = useState(false);
   const [isFileLogoActive, setIsFileLogoActive] = useState(false);
+  const [logoError, setLogoError] = useState<string>('');
 
   const validateAddresses = (addresses: string[]) => {
     let isValid = true;
@@ -191,26 +192,72 @@ const StoresPage: React.FC = () => {
     validateInput(name, cleanedValue);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const checkImageTransparency = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          
+          if (!ctx) {
+            resolve(true);
+            return;
+          }
+          
+          ctx.drawImage(img, 0, 0);
+          
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          
+          let hasTransparentPixel = false;
+          for (let i = 3; i < data.length; i += 4) {
+            if (data[i] < 255) {
+              hasTransparentPixel = true;
+              break;
+            }
+          }
+          
+          resolve(hasTransparentPixel);
+        };
+        
+        img.src = event.target?.result as string;
+      };
+      
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLogoError('');
+    
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
       if (file.type !== 'image/png') {
-        alert('Пожалуйста, загрузите файл в формате PNG.');
+        setLogoError('Пожалуйста, загрузите файл в формате PNG.');
+        e.target.value = '';
+        return;
+      }
+      
+      const hasTransparency = await checkImageTransparency(file);
+      
+      if (!hasTransparency) {
+        setLogoError('Логотип должен быть в PNG формате с прозрачным фоном. Выберите другое изображение или используйте название как логотип.');
         e.target.value = '';
         return;
       }
 
-      // Преобразуем Blob в объект File
       const logoFile = new File([file], file.name, { type: file.type });
 
-      // Обновляем состояние для отправки в FormData
       setFormData(prev => ({ ...prev, new_logo: logoFile, textLogo: '' }));
       setIsFileLogoActive(true);
       setIsTextLogoActive(false);
-      // validateInput('logo', logoFile);
     }
   };
-
 
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
@@ -236,6 +283,7 @@ const StoresPage: React.FC = () => {
   const handleTextLogoToggle = () => {
     setIsTextLogoActive(true);
     setIsFileLogoActive(false);
+    setLogoError('');
     setFormData(prev => ({ ...prev, new_logo: undefined, textLogo: prev.subdomain }));
     validateInput('textLogo', formData.subdomain);
   };
@@ -251,9 +299,9 @@ const StoresPage: React.FC = () => {
           queryClient.invalidateQueries("shops");
           navigate("/shops");
         },
-        onError: (error: any) => {
+        onError: (error: Error & { response?: { data: { detail: string } } }) => {
           toast.error(
-              `Не удалось создать магазин: ${error.response.data.detail}`
+              `Не удалось создать магазин: ${error.response?.data.detail || 'Неизвестная ошибка'}`
           );
         },
       }
@@ -280,7 +328,9 @@ const StoresPage: React.FC = () => {
       fd.append("tg", formData.tg);
       fd.append("whatsapp", formData.whatsapp);
 
-      if (formData.new_logo) {
+      if (isTextLogoActive) {
+        fd.append("use_text_logo", "true");
+      } else if (formData.new_logo) {
         fd.append("logo", formData.new_logo);
       }
 
@@ -303,6 +353,16 @@ const StoresPage: React.FC = () => {
       if (store.addresses) {
         setAddressInputs(store.addresses.length > 0 ? store.addresses : ['']);
       }
+      
+      // Установка начальных значений для логотипа
+      if (store.logo_url) {
+        setIsFileLogoActive(true);
+        setIsTextLogoActive(false);
+      } else {
+        setIsFileLogoActive(false);
+        setIsTextLogoActive(true);
+      }
+      
       setCurrentState('editing');
       setCurrentStep('step1');
     }
@@ -320,9 +380,9 @@ const StoresPage: React.FC = () => {
           queryClient.invalidateQueries("shops");
           navigate("/shops");
         },
-        onError: (error: any) => {
+        onError: (error: Error & { response?: { data: { detail: string } } }) => {
           toast.error(
-              `Не удалось обновить магазин: ${error.response.data.detail}`
+              `Не удалось обновить магазин: ${error.response?.data.detail || 'Неизвестная ошибка'}`
           );
         },
       }
@@ -360,7 +420,9 @@ const StoresPage: React.FC = () => {
         fd.append("tg", formData.tg);
         fd.append("whatsapp", formData.whatsapp);
 
-        if (formData.new_logo) {
+        if (isTextLogoActive) {
+          fd.append("use_text_logo", "true");
+        } else if (formData.new_logo) {
           fd.append("logo", formData.new_logo);
         }
 
@@ -538,6 +600,7 @@ const StoresPage: React.FC = () => {
                 style={{ display: 'none' }}
             />
             <p className={styles.uploadHint}>Изображение в формате PNG без фона.</p>
+            {logoError && <p className={styles.error}>{logoError}</p>}
           </div>
 
           <div className={styles.buttonGroup}>
@@ -597,11 +660,13 @@ const StoresPage: React.FC = () => {
               <td>{store.subdomain}</td>
               <td>{storeLink}</td>
               <td>{store.primary_color}</td>
-              <td>
+              <td className={styles.logoCell}>
                 {!store.logo_url ? (
                     <span className={styles.textLogo}>{store.subdomain}</span>
                 ) : store.logo_url ? (
-                    <img src={store.logo_url} alt="Store Logo" className={styles.logoImage} />
+                    <div className={styles.logoContainer}>
+                      <img src={store.logo_url} alt="Store Logo" className={styles.logoImage} />
+                    </div>
                 ) : (
                     'Нет логотипа'
                 )}

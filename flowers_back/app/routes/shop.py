@@ -41,6 +41,7 @@ async def create_shop(
         inn: str = Form(...),
         phone: str = Form(...),
         logo: UploadFile = None,
+        use_text_logo: Optional[bool] = Form(False),
         tg: str = Form(...),
         whatsapp: str = Form(...),
         addresses: str = Form(...),
@@ -59,15 +60,14 @@ async def create_shop(
     if existing_shop:
         raise HTTPException(status_code=400, detail="Поддомен уже существует")
 
-    if logo:
+    logo_url = None
+    if not use_text_logo and logo:
         file_extension = logo.filename.split(".")[-1]
         unique_filename = f"{uuid.uuid4()}.{file_extension}"
-
         save_path = os.path.join(UPLOAD_DIR, unique_filename)
 
         with open(save_path, "wb") as f:
             f.write(await logo.read())
-
         logo_url = unique_filename
     else:
         logo_url = None
@@ -638,6 +638,7 @@ async def update_shop(
         tg: str = Form(...),
         whatsapp: str = Form(...),
         logo: Optional[UploadFile] = None,
+        use_text_logo: Optional[bool] = Form(False),
         addresses: str = Form(...),
         db: Session = Depends(get_db),
 ):
@@ -668,13 +669,38 @@ async def update_shop(
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Невалидный формат для адресов: {str(e)}")
 
-    if logo:
+    # Если указан флаг использования текстового логотипа, удаляем существующий логотип
+    if use_text_logo:
+        # Если был логотип, удаляем файл
+        if shop.logo_url:
+            try:
+                logo_path = os.path.join(UPLOAD_DIR, shop.logo_url)
+                if os.path.exists(logo_path):
+                    os.remove(logo_path)
+            except Exception as e:
+                # Логируем ошибку, но продолжаем выполнение
+                print(f"Ошибка при удалении файла логотипа: {str(e)}")
+        # Обнуляем путь к логотипу
+        shop.logo_url = None
+    elif logo:
+        # Если загружается новый логотип
         file_extension = logo.filename.split(".")[-1]
         unique_filename = f"{uuid.uuid4()}.{file_extension}"
-        save_path = os.path.join("uploads", unique_filename)
+        save_path = os.path.join(UPLOAD_DIR, unique_filename)
 
         with open(save_path, "wb") as f:
             f.write(await logo.read())
+        
+        # Если был предыдущий логотип, удаляем его файл
+        if shop.logo_url:
+            try:
+                logo_path = os.path.join(UPLOAD_DIR, shop.logo_url)
+                if os.path.exists(logo_path):
+                    os.remove(logo_path)
+            except Exception as e:
+                # Логируем ошибку, но продолжаем выполнение
+                print(f"Ошибка при удалении старого файла логотипа: {str(e)}")
+        
         shop.logo_url = unique_filename
 
     db.commit()
