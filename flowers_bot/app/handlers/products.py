@@ -34,7 +34,7 @@ class BouquetCreation(StatesGroup):
     upload_image = State()
     confirm = State()
 
-@router.message(lambda message: message.text == "Создать букет")
+@router.message(lambda message: message.text == "Создать товар")
 async def start_creation(message: types.Message, state: FSMContext):
     user_context[message.from_user.id] = "create_bouquet"
 
@@ -57,7 +57,7 @@ async def start_creation(message: types.Message, state: FSMContext):
         )
 
         # Оставляем клавиатуру с кнопкой "Создать букет" активной
-        await message.answer("Выберите магазин для добавления букета:", reply_markup=keyboard)
+        await message.answer("Выберите магазин для добавления товара:", reply_markup=keyboard)
         await state.set_state(BouquetCreation.select_shop.shop_id)
     except Exception as e:
         # Обрабатываем и отправляем сообщение об ошибке
@@ -67,7 +67,7 @@ async def start_creation(message: types.Message, state: FSMContext):
 @router.callback_query(BouquetCreation.select_shop)
 async def select_store(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == "cancel":
-        await callback.message.answer("Создание букета отменено.", reply_markup=get_main_menu())
+        await callback.message.answer("Создание товара отменено.", reply_markup=get_main_menu())
         await state.clear()
         user_context.pop(callback.from_user.id, None)
         return
@@ -79,7 +79,7 @@ async def select_store(callback: types.CallbackQuery, state: FSMContext):
         shop_name = next(shop["subdomain"] for shop in shops if str(shop["id"]) == shop_id)
 
         await state.update_data(shop_id=shop_id, shop_name=shop_name)
-        await callback.message.edit_text(f"Вы выбрали магазин: {shop_name}\n\nВведите название букета:")
+        await callback.message.edit_text(f"Вы выбрали магазин: {shop_name}\n\nВведите название товара:")
         await state.set_state(BouquetCreation.input_name)
     except (IndexError, StopIteration):
         await callback.answer("Некорректный выбор. Попробуйте снова.", show_alert=True)
@@ -92,14 +92,14 @@ async def select_store(callback: types.CallbackQuery, state: FSMContext):
 async def input_name(message: types.Message, state: FSMContext):
     name = message.text
     await state.update_data(name=name)
-    await message.answer("Введите описание букета:")
+    await message.answer("Введите описание товара:")
     await state.set_state(BouquetCreation.input_description)
 
 @router.message(BouquetCreation.input_description)
 async def input_description(message: types.Message, state: FSMContext):
     description = message.text
     await state.update_data(description=description)
-    await message.answer("Введите цену букета (только цифры):")
+    await message.answer("Введите цену товара (только цифры):")
     await state.set_state(BouquetCreation.input_price)
 
 @router.message(BouquetCreation.input_price)
@@ -109,7 +109,7 @@ async def input_price(message: types.Message, state: FSMContext):
         if price <= 0:
             raise ValueError
         await state.update_data(price=price)
-        await message.answer("Введите состав букета(ставьте ',' после каждого составляющего без пробела(например: пионы 4 штуки,лента,ромашки)):")
+        await message.answer("Введите состав товара(ставьте ',' после каждого составляющего без пробела(например: пионы 4 штуки,лента,ромашки)):")
         await state.set_state(BouquetCreation.input_ingredients)
     except ValueError:
         await message.answer("Цена должна быть числом больше нуля. Попробуйте снова.")
@@ -135,13 +135,13 @@ async def input_ingredients(message: types.Message, state: FSMContext):
         ] + [[InlineKeyboardButton(text="Отмена", callback_data="cancel")]]
     )
 
-    await message.answer("Выберите категорию букета:", reply_markup=keyboard)
+    await message.answer("Выберите категорию товара:", reply_markup=keyboard)
     await state.set_state(BouquetCreation.input_category.category_id)
 
 @router.callback_query(BouquetCreation.input_category)
 async def select_category(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == "cancel":
-        await callback.message.answer("Создание букета отменено.", reply_markup=get_main_menu())
+        await callback.message.answer("Создание товара отменено.", reply_markup=get_main_menu())
         await state.clear()
         user_context.pop(callback.from_user.id, None)
         return
@@ -160,7 +160,7 @@ async def select_category(callback: types.CallbackQuery, state: FSMContext):
         return
 
     await state.update_data(category_id=category_id, category_name=category_name)
-    await callback.message.edit_text(f"Вы выбрали категорию: {category_name}\n\nЗагрузите изображение букета:")
+    await callback.message.edit_text(f"Вы выбрали категорию: {category_name}\n\nЗагрузите изображение товара:")
     await state.set_state(BouquetCreation.upload_image)
 
 @router.message(BouquetCreation.upload_image, lambda message: message.content_type == ContentType.PHOTO)
@@ -193,7 +193,7 @@ async def upload_image(message: types.Message, state: FSMContext):
 async def confirm_creation(callback: types.CallbackQuery, state: FSMContext, bot: Bot):
     if callback.data == "cancel":
         user_context.pop(callback.from_user.id, None)
-        await callback.message.edit_text("Создание букета отменено.")
+        await callback.message.edit_text("Создание товара отменено.")
         await callback.message.answer("Операция отменена.", reply_markup=get_main_menu())
         await state.clear()
         return
@@ -205,10 +205,10 @@ async def confirm_creation(callback: types.CallbackQuery, state: FSMContext, bot
             response = await create_product(data, bot)
             user_context.pop(callback.from_user.id, None)
             await state.clear()
-            await callback.message.answer(f"Букет успешно создан!", reply_markup=get_main_menu())
+            await callback.message.answer(f"Товар успешно создан!", reply_markup=get_main_menu())
         except Exception as e:
             await state.clear()
             user_context.pop(callback.from_user.id, None)
-            await callback.message.answer(f"Ошибка при создании букета: {e}", reply_markup=get_main_menu())
+            await callback.message.answer(f"Ошибка при создании товара: {e}", reply_markup=get_main_menu())
             return
 
