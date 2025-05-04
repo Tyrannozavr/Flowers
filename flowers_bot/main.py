@@ -16,14 +16,18 @@ async def on_startup():
     result = await bot.set_webhook(WEBHOOK_URL, allowed_updates=["message", "callback_query"])
     logging.info(f"Результат установки вебхука: {result}")
 
+    # Запускаем фоновые задачи
     asyncio.create_task(send_new_orders())
     asyncio.create_task(send_new_consultations())
+    
+    # Запускаем polling в отдельной задаче
+    # asyncio.create_task(start_polling())
+    logging.info("Бот запущен в режиме вебхуков")
 
 @app.on_event("shutdown")
 async def on_shutdown():
-    logging.info("Удаление вебхука")
+    logging.info("Остановка бота")
     await bot.delete_webhook()
-
 
 
 @app.post(f"/webhook/{TELEGRAM_BOT_TOKEN}")
@@ -37,3 +41,7 @@ async def webhook(request: Request):
     except Exception as e:
         logging.error(f"Ошибка при обработке вебхука: {e}")
         return {"ok": False}
+
+# async def start_polling():
+#     """Запуск бота в режиме long polling"""
+#     # await dp.start_polling(bot)

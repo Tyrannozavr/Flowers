@@ -61,9 +61,13 @@ async def get_shops_by_user(user_id: str) -> list:
         except httpx.RequestError as e:
             raise Exception(f"Ошибка соединения с сервером: {e}")
 
-async def get_categories() -> list:
+async def get_categories(shop_id: int = None, shop_subdomain: str = None) -> list:
     async with httpx.AsyncClient() as client:
-        response = await client.get(f"{BACKEND_API_URL}/categories/")
+        url = f"{BACKEND_API_URL}/categories/"
+        headers = {}
+        if shop_subdomain:
+            headers["X-Subdomain"] = shop_subdomain
+        response = await client.get(url, headers=headers)
         response.raise_for_status()
         return response.json()
 
@@ -94,7 +98,7 @@ async def create_product(data: dict, bot: Bot):
             async with aiohttp.ClientSession(timeout=timeout) as client:
                 try:
                     response = await client.post(f"{BACKEND_API_URL}/shops/telegram/{data['shop_id']}/products", data=form_data)
-                    logging.info("Запрос отправлен, статус ответа:", response.status)
+                    logging.info(f"Запрос отправлен, статус ответа: {response.status}")
                     if response.status != 200:
                         error_text = await response.text()
                         raise Exception(f"Ошибка при создании букета: {response.status} - {error_text}")

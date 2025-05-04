@@ -72,13 +72,45 @@ async def create_order(request: Request, order: Order, db: Session = Depends(get
 @router.get("/", response_model=List[OrderResponse])
 async def get_orders(db: Session = Depends(get_db)):
     try:
-        orders = db.query(OrderDb).filter(OrderDb.is_sent == False).all()
+        orders = db.query(OrderDb).options(joinedload(OrderDb.items)).filter(OrderDb.is_sent == False).all()
 
         for order in orders:
             order.is_sent = True
         db.commit()
 
-        order_responses = [OrderResponse.from_orm(order) for order in orders]
+        order_responses = []
+        for order in orders:
+            order_items = [OrderItem(
+                id=item.product_id,
+                name=item.name,
+                price=item.price,
+                quantity=item.quantity
+            ) for item in order.items]
+
+            order_response = OrderResponse(
+                id=order.id,
+                fullName=order.full_name,
+                phoneNumber=order.phone_number,
+                recipientName=order.recipient_name,
+                recipientPhone=order.recipient_phone,
+                city=order.city,
+                street=order.street,
+                house=order.house,
+                building=order.building,
+                apartment=order.apartment,
+                deliveryMethod=order.delivery_method,
+                deliveryDate=order.delivery_date,
+                deliveryTime=order.delivery_time,
+                wishes=order.wishes,
+                cardText=order.card_text,
+                isSelfPickup=order.is_self_pickup,
+                status=order.status,
+                isSent=order.is_sent,
+                items=order_items,
+                shop_id=order.shop_id
+            )
+            order_responses.append(order_response)
+
         return order_responses
     except Exception as e:
         print(e)
@@ -145,8 +177,40 @@ async def get_orders_by_status(
         db: Session = Depends(get_db),
 ):
     try:
-        orders = db.query(OrderDb).filter(OrderDb.status == status).all()
-        order_responses = [OrderResponse.from_orm(order) for order in orders]
+        orders = db.query(OrderDb).options(joinedload(OrderDb.items)).filter(OrderDb.status == status).all()
+        
+        order_responses = []
+        for order in orders:
+            order_items = [OrderItem(
+                id=item.product_id,
+                name=item.name,
+                price=item.price,
+                quantity=item.quantity
+            ) for item in order.items]
+
+            order_response = OrderResponse(
+                id=order.id,
+                fullName=order.full_name,
+                phoneNumber=order.phone_number,
+                recipientName=order.recipient_name,
+                recipientPhone=order.recipient_phone,
+                city=order.city,
+                street=order.street,
+                house=order.house,
+                building=order.building,
+                apartment=order.apartment,
+                deliveryMethod=order.delivery_method,
+                deliveryDate=order.delivery_date,
+                deliveryTime=order.delivery_time,
+                wishes=order.wishes,
+                cardText=order.card_text,
+                isSelfPickup=order.is_self_pickup,
+                status=order.status,
+                isSent=order.is_sent,
+                items=order_items,
+                shop_id=order.shop_id
+            )
+            order_responses.append(order_response)
 
         return order_responses
     except Exception as e:

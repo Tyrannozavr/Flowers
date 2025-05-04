@@ -837,7 +837,7 @@ def get_user_id_by_tg_id(user_tg_id: str, db: Session):
         text('''
              SELECT *
              FROM Users u
-             WHERE u.telegram_ids @ > :telegram_id
+             WHERE u.telegram_ids @> :telegram_id
              '''),
         {"telegram_id": f'["{user_tg_id}"]'}
     ).fetchone()

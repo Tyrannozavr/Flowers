@@ -1,7 +1,7 @@
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram import Router, types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import Bot
 from utils.api import get_shops_by_user, get_categories, create_product
@@ -56,6 +56,7 @@ async def start_creation(message: types.Message, state: FSMContext):
             ] + [[InlineKeyboardButton(text="Отмена", callback_data="cancel")]]
         )
 
+        # Оставляем клавиатуру с кнопкой "Создать букет" активной
         await message.answer("Выберите магазин для добавления букета:", reply_markup=keyboard)
         await state.set_state(BouquetCreation.select_shop.shop_id)
     except Exception as e:
@@ -68,6 +69,7 @@ async def select_store(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == "cancel":
         await callback.message.answer("Создание букета отменено.", reply_markup=get_main_menu())
         await state.clear()
+        user_context.pop(callback.from_user.id, None)
         return
 
     try:
@@ -117,7 +119,12 @@ async def input_ingredients(message: types.Message, state: FSMContext):
     ingredients = message.text
     await state.update_data(ingredients=ingredients)
 
-    categories = await get_categories()
+    # Получаем сохраненные данные, включая информацию о магазине
+    data = await state.get_data()
+    shop_subdomain = data.get("shop_name")  # shop_name содержит subdomain магазина
+
+    # Передаем shop_subdomain в функцию get_categories
+    categories = await get_categories(shop_subdomain=shop_subdomain)
     if not categories:
         user_context.pop(message.from_user.id, None)
         return await message.answer("Нет доступных категорий.", reply_markup=get_main_menu())
@@ -136,11 +143,18 @@ async def select_category(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == "cancel":
         await callback.message.answer("Создание букета отменено.", reply_markup=get_main_menu())
         await state.clear()
+        user_context.pop(callback.from_user.id, None)
         return
 
     try:
+        # Получаем данные из состояния
+        data = await state.get_data()
+        shop_subdomain = data.get("shop_name")  # shop_name содержит subdomain магазина
+        
         category_id = callback.data.split("_")[1]
-        category_name = next(category["name"] for category in await get_categories() if str(category["id"]) == category_id)
+        # Передаем shop_subdomain в функцию get_categories
+        categories = await get_categories(shop_subdomain=shop_subdomain)
+        category_name = next(category["name"] for category in categories if str(category["id"]) == category_id)
     except (IndexError, StopIteration):
         await callback.answer("Некорректный выбор. Попробуйте снова.", show_alert=True)
         return
@@ -179,7 +193,8 @@ async def upload_image(message: types.Message, state: FSMContext):
 async def confirm_creation(callback: types.CallbackQuery, state: FSMContext, bot: Bot):
     if callback.data == "cancel":
         user_context.pop(callback.from_user.id, None)
-        await callback.message.edit_text("Создание букета отменено.", reply_markup=get_main_menu())
+        await callback.message.edit_text("Создание букета отменено.")
+        await callback.message.answer("Операция отменена.", reply_markup=get_main_menu())
         await state.clear()
         return
 
@@ -193,5 +208,7 @@ async def confirm_creation(callback: types.CallbackQuery, state: FSMContext, bot
             await callback.message.answer(f"Букет успешно создан!", reply_markup=get_main_menu())
         except Exception as e:
             await state.clear()
-            return f"Ошибка при создании букета: {e}"
+            user_context.pop(callback.from_user.id, None)
+            await callback.message.answer(f"Ошибка при создании букета: {e}", reply_markup=get_main_menu())
+            return
 
