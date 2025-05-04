@@ -4,7 +4,7 @@ def get_main_menu():
     buttons = [
         # [KeyboardButton(text="Список заказов по статусу")],
         # [KeyboardButton(text="Обновить статус заказа")],
-        [KeyboardButton(text="Создать букет")],
+        [KeyboardButton(text="Создать товар")],
     ]
     return ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
 
