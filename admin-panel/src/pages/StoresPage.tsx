@@ -73,7 +73,6 @@ const StoresPage: React.FC = () => {
   const [isTextLogoActive, setIsTextLogoActive] = useState(false);
   const [isFileLogoActive, setIsFileLogoActive] = useState(false);
   const [logoError, setLogoError] = useState<string>('');
-  const [addressValidating, setAddressValidating] = useState<{ [key: string]: boolean }>({});
 
   const validateAddresses = async (addresses: string[], validateWithAPI: boolean = false): Promise<boolean> => {
     let isValid = true;
@@ -93,9 +92,7 @@ const StoresPage: React.FC = () => {
       // Проверка через API, если требуется
       if (validateWithAPI && address) {
         try {
-          setAddressValidating(prev => ({ ...prev, [errorKey]: true }));
           const response = await validateAddress(address);
-          setAddressValidating(prev => ({ ...prev, [errorKey]: false }));
           
           if (!response.isValid) {
             newErrors[errorKey] = response.message;
@@ -104,7 +101,6 @@ const StoresPage: React.FC = () => {
             newErrors[errorKey] = '';
           }
         } catch (error) {
-          setAddressValidating(prev => ({ ...prev, [errorKey]: false }));
           console.error(`Error validating address at index ${index}:`, error);
           newErrors[errorKey] = 'Ошибка при проверке адреса';
           isValid = false;
@@ -125,34 +121,6 @@ const StoresPage: React.FC = () => {
     validateAddresses([value], false).then(() => {});
   };
 
-  const validateSingleAddress = async (index: number) => {
-    const address = addressInputs[index];
-    const errorKey = `address${index}`;
-    
-    if (!address) {
-      setErrors(prev => ({ ...prev, [errorKey]: 'Поле обязательно для заполнения' }));
-      return false;
-    }
-
-    try {
-      setAddressValidating(prev => ({ ...prev, [errorKey]: true }));
-      const response = await validateAddress(address);
-      setAddressValidating(prev => ({ ...prev, [errorKey]: false }));
-      
-      if (!response.isValid) {
-        setErrors(prev => ({ ...prev, [errorKey]: response.message }));
-        return false;
-      } else {
-        setErrors(prev => ({ ...prev, [errorKey]: '' }));
-        return true;
-      }
-    } catch (error) {
-      setAddressValidating(prev => ({ ...prev, [errorKey]: false }));
-      console.error(`Error validating address at index ${index}:`, error);
-      setErrors(prev => ({ ...prev, [errorKey]: 'Ошибка при проверке адреса' }));
-      return false;
-    }
-  };
 
   const handleAddAddress = () => {
     setAddressInputs(prev => [...prev, '']);
