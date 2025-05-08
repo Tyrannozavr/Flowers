@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Depends, Query, Request
+from fastapi import APIRouter, HTTPException, Depends, Query, Request, Body
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
@@ -8,11 +8,13 @@ from app.core.database import get_db
 from app.dependencies.Orders import DeliveryDistanceServiceDep
 from app.dependencies.Shops import ShopByOwnerDep
 from app.dependencies.subdomain import ShopDep
-from app.models.order import Order as OrderDb, OrderItem
+from app.models.order import Order as OrderDb, OrderItem, AddressModel
 from app.models.order import OrderItem as OrderItemDb
 from app.models.shop import Shop
 from app.repositories import shop as shop_repository
 from app.schemas.order import Order, OrderStatus, OrderResponse
+from app.core.config import settings
+from app.services.Geo import YandexGeoService
 
 router = APIRouter()
 
@@ -28,6 +30,7 @@ async def create_order(request: Request, order: Order, db: Session = Depends(get
         if not shop:
             raise HTTPException(status_code=404, detail="Магазин не найден")
 
+        
         db_order = OrderDb(
             full_name=order.fullName,
             phone_number=order.phoneNumber,
@@ -241,14 +244,67 @@ async def update_order_status(
         raise HTTPException(status_code=500, detail=f"Error updating order status: {str(e)}")
 
 
-@router.get("/delivery/cost/{shop_id}")
-def get_delivery_cost(
-        shop_id: int,
-        delivery_distance_service: DeliveryDistanceServiceDep,
-        db: Session = Depends(get_db),
-):
-    shop = shop_repository.get_shop_by_id(db, shop_id)
-    if not shop:
-        raise HTTPException(status_code=404, detail="Магазин не найден")
 
-    return {"delivery_cost": shop.delivery_cost}
+# Проверка на существование адреса
+@router.post("/validate-address")
+async def validate_address(
+    address: AddressModel,
+    db: Session = Depends(get_db)
+):
+    """
+    Проверяет существование адреса через Яндекс.Геокодер
+    """
+    print("validate-address","="*40, address, "="*40)
+    try:
+        address_str = address.to_address_string(without_building=True, without_apartment=True)
+        geo_service = YandexGeoService(api_key=settings.YANDEX_GEOCODER_API_KEY)
+        is_valid = geo_service.validate_address(address_str)
+        
+        if is_valid:
+            message = "Адрес найден и существует. Доставка возможна по указанному адресу."
+        else:
+            message = "Указанный адрес не найден или не соответствует действительности. Пожалуйста, проверьте правильность ввода всех частей адреса (город, улица, дом)."
+        
+        return {
+            "isValid": is_valid,
+            "message": message
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при проверке адреса: {str(e)}")
+
+@router.post("/delivery-cost")
+async def calculate_delivery_cost(
+    shop_id: int = Body(...),
+    address: AddressModel = Body(...),
+    db: Session = Depends(get_db)
+):
+    print("delivery-cost", "="*40, address, "="*40)
+    shop = db.query(Shop).filter(Shop.id == shop_id).first()
+    if not shop or not shop.delivery_cost:
+        raise HTTPException(status_code=404, detail="Магазин или доставка не найдены")
+
+    # Фиксированная стоимость
+    if shop.delivery_cost.fixed_cost is not None:
+        return {"cost": shop.delivery_cost.fixed_cost}
+
+    # Радиусная доставка
+    if shop.delivery_cost.radius_cost:
+        from app.services.Geo import YandexGeoService
+        geo_service = YandexGeoService(api_key=settings.YANDEX_GEOCODER_API_KEY)
+        shop_address = shop.addresses[0]['address'] if shop.addresses else None
+        if not shop_address:
+            raise HTTPException(status_code=400, detail="У магазина не указан адрес")
+        distance = geo_service.calculate_distance(shop_address, address.to_address_string())
+
+        # Дистаниця: 4.5
+        # Радиус: 1, 5, 10, 20
+        for radius, cost in sorted(shop.delivery_cost.radius_cost.items(), key=lambda x: float(x[0])):
+            if distance <= float(radius):
+                return {"cost": cost}
+        return {"cost": max(shop.delivery_cost.radius_cost.values())}
+
+    # Яндекс Go
+    if getattr(shop.delivery_cost, "is_yandex_geo", False):
+        return {"cost": 0}
+
+    raise HTTPException(status_code=400, detail="Не удалось рассчитать стоимость доставки")

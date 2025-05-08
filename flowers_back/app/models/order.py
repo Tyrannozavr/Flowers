@@ -65,11 +65,11 @@ class AddressModel(BaseModel):
     building: Union[str, None] = Field(None, description="Корпус")
     apartment: Union[str, None ]= Field(None, description="Квартира")
 
-    def to_address_string(self) -> str:
+    def to_address_string(self, without_building: bool = False, without_apartment: bool = False) -> str:
         # Формируем строку адреса
         address_parts = [self.city, self.street, self.house]
-        if self.building:
+        if self.building and not without_building:
             address_parts.append(f"корпус {self.building}")
-        if self.apartment:
+        if self.apartment and not without_apartment:
             address_parts.append(f"квартира {self.apartment}")
         return ", ".join(address_parts)

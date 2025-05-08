@@ -4,13 +4,13 @@ import os
 import uuid
 from typing import Optional, List
 
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request, File
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, Form, Request, File, Body
 from pydantic import HttpUrl
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 import app.repositories.categories
-from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR, CATEGORY_IMAGE_UPLOAD_DIR
+from app.core.config import CATEGORY_IMAGE_RETRIEVAL_DIR, CATEGORY_IMAGE_UPLOAD_DIR, settings
 from app.core.database import get_db
 from app.dependencies.Orders import DeliveryDistanceServiceDep
 from app.dependencies.Shops import ShopDeliveryCostResponse, ShopDeliveryCostCreate, ShopByOwnerDep, DeliveryCostType
@@ -23,8 +23,9 @@ from app.repositories import shop as shop_repository
 from app.routes.admin import get_current_user
 from app.schemas.category import CategoryResponse
 from app.schemas.product import ProductResponse, ProductImagesResponse
-from app.schemas.shop import ShopResponse, OwnerShopResponse
+from app.schemas.shop import ShopResponse, OwnerShopResponse, ShopCreate, ShopUpdate
 from app.services.shop_service import apply_attributes_to_shop
+from app.services.Geo import YandexGeoService
 
 router = APIRouter()
 
@@ -368,7 +369,7 @@ def delete_product(
     db.commit()
     return {"detail": "Продукт удален"}
 
-@router.get("/", response_model=list[ShopResponse])
+@router.get("/", response_model=List[ShopResponse])
 def get_shops(
         request: Request,
         current_user: User = Depends(get_current_user),
@@ -1131,3 +1132,27 @@ def apply_shop_attributes(
         raise HTTPException(status_code=404, detail=str(e))
 
     return {"message": "Attributes successfully applied to shop", "shop_id": shop.id}
+
+@router.post("/validate-address")
+async def validate_shop_address(
+    address: str = Body(..., embed=True),
+    db: Session = Depends(get_db)
+):
+    """
+    Проверяет существование адреса через Яндекс.Геокодер
+    """
+    try:
+        geo_service = YandexGeoService(api_key=settings.YANDEX_GEOCODER_API_KEY)
+        is_valid = geo_service.validate_address(address)
+        
+        if is_valid:
+            message = "Адрес найден и существует."
+        else:
+            message = "Указанный адрес не найден или не соответствует действительности. Пожалуйста, проверьте правильность ввода адреса."
+        
+        return {
+            "isValid": is_valid,
+            "message": message
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при проверке адреса: {str(e)}")

@@ -1,7 +1,7 @@
 import React, {useState,} from 'react';
 import styles from './StoresPage.module.css';
 import {useMutation, useQuery, useQueryClient} from "react-query";
-import {createShop, deleteShop, fetchShops, updateShop} from "../api/shops";
+import {createShop, deleteShop, fetchShops, updateShop, validateAddress} from "../api/shops";
 import {TextField} from "@mui/material";
 import {toast} from "react-toastify";
 import {useNavigate} from "react-router-dom";
@@ -73,19 +73,46 @@ const StoresPage: React.FC = () => {
   const [isTextLogoActive, setIsTextLogoActive] = useState(false);
   const [isFileLogoActive, setIsFileLogoActive] = useState(false);
   const [logoError, setLogoError] = useState<string>('');
+  const [addressValidating, setAddressValidating] = useState<{ [key: string]: boolean }>({});
 
-  const validateAddresses = (addresses: string[]) => {
+  const validateAddresses = async (addresses: string[], validateWithAPI: boolean = false): Promise<boolean> => {
     let isValid = true;
     const newErrors: { [key: string]: string } = {};
 
-    addresses.forEach((address, index) => {
+    for (let index = 0; index < addresses.length; index++) {
+      const address = addresses[index];
+      const errorKey = `address${index}`;
+      
+      // Первичная проверка на пустое значение
       if (!address) {
-        newErrors[`address${index}`] = 'Поле обязательно для заполнения';
+        newErrors[errorKey] = 'Поле обязательно для заполнения';
         isValid = false;
-      } else {
-        newErrors[`address${index}`] = '';
+        continue;
       }
-    });
+
+      // Проверка через API, если требуется
+      if (validateWithAPI && address) {
+        try {
+          setAddressValidating(prev => ({ ...prev, [errorKey]: true }));
+          const response = await validateAddress(address);
+          setAddressValidating(prev => ({ ...prev, [errorKey]: false }));
+          
+          if (!response.isValid) {
+            newErrors[errorKey] = response.message;
+            isValid = false;
+          } else {
+            newErrors[errorKey] = '';
+          }
+        } catch (error) {
+          setAddressValidating(prev => ({ ...prev, [errorKey]: false }));
+          console.error(`Error validating address at index ${index}:`, error);
+          newErrors[errorKey] = 'Ошибка при проверке адреса';
+          isValid = false;
+        }
+      } else {
+        newErrors[errorKey] = '';
+      }
+    }
 
     setErrors(prev => ({ ...prev, ...newErrors }));
     return isValid;
@@ -95,7 +122,36 @@ const StoresPage: React.FC = () => {
     const newAddressInputs = [...addressInputs];
     newAddressInputs[index] = value;
     setAddressInputs(newAddressInputs);
-    validateAddresses(newAddressInputs);
+    validateAddresses([value], false).then(() => {});
+  };
+
+  const validateSingleAddress = async (index: number) => {
+    const address = addressInputs[index];
+    const errorKey = `address${index}`;
+    
+    if (!address) {
+      setErrors(prev => ({ ...prev, [errorKey]: 'Поле обязательно для заполнения' }));
+      return false;
+    }
+
+    try {
+      setAddressValidating(prev => ({ ...prev, [errorKey]: true }));
+      const response = await validateAddress(address);
+      setAddressValidating(prev => ({ ...prev, [errorKey]: false }));
+      
+      if (!response.isValid) {
+        setErrors(prev => ({ ...prev, [errorKey]: response.message }));
+        return false;
+      } else {
+        setErrors(prev => ({ ...prev, [errorKey]: '' }));
+        return true;
+      }
+    } catch (error) {
+      setAddressValidating(prev => ({ ...prev, [errorKey]: false }));
+      console.error(`Error validating address at index ${index}:`, error);
+      setErrors(prev => ({ ...prev, [errorKey]: 'Ошибка при проверке адреса' }));
+      return false;
+    }
   };
 
   const handleAddAddress = () => {
@@ -259,7 +315,7 @@ const StoresPage: React.FC = () => {
     }
   };
 
-  const handleNextStep = (e: React.FormEvent) => {
+  const handleNextStep = async (e: React.FormEvent) => {
     e.preventDefault();
     const fieldsToValidate = ['subdomain', 'primary_color', 'inn'] as const;
     let isValid = true;
@@ -271,12 +327,18 @@ const StoresPage: React.FC = () => {
         }
       }
     });
-    if (!validateAddresses(addressInputs)) {
+    
+    // Валидация адресов с API проверкой
+    const addressesValid = await validateAddresses(addressInputs, true);
+    if (!addressesValid) {
       isValid = false;
     }
+    
     if (isValid) {
       setFormData(prev => ({ ...prev, addresses: addressInputs }));
       setCurrentStep('step2');
+    } else {
+      toast.error("Пожалуйста, исправьте ошибки в форме");
     }
   };
 
@@ -388,7 +450,7 @@ const StoresPage: React.FC = () => {
       }
   );
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const fieldsToValidate = ['subdomain', 'primary_color', 'inn', 'phone', 'tg', 'whatsapp'] as const;
     let isValid = true;
@@ -403,7 +465,8 @@ const StoresPage: React.FC = () => {
     });
 
     if (formData.addresses && formData.addresses.length > 0) {
-      if (!validateAddresses(formData.addresses)) {
+      const addressesValid = await validateAddresses(formData.addresses, true);
+      if (!addressesValid) {
         isValid = false;
       }
     }
@@ -438,6 +501,8 @@ const StoresPage: React.FC = () => {
       }
 
       setCurrentState('viewing');
+    } else {
+      toast.error("Пожалуйста, исправьте ошибки в форме");
     }
   };
 
@@ -489,7 +554,7 @@ const StoresPage: React.FC = () => {
             {errors.inn && <p className={styles.error}>{errors.inn}</p>}
           </div>
 
-          {addressInputs.map((address, index) => (
+          {addressInputs.map((address, index) => (<>
               <div key={index} className={styles.addressGroup}>
                 <input
                     type="text"
@@ -500,7 +565,6 @@ const StoresPage: React.FC = () => {
                     className={errors[`address${index}`] ? styles.inputError : ''}
                     required
                 />
-                {errors[`address${index}`] && <p className={styles.error}>{errors[`address${index}`]}</p>}
                 {index === addressInputs.length - 1 && (
                     <button
                         type="button"
@@ -512,7 +576,10 @@ const StoresPage: React.FC = () => {
                       </svg>
                     </button>
                 )}
+
               </div>
+              {errors[`address${index}`] && <p className={styles.error}>{errors[`address${index}`]}</p>}
+              </>
           ))}
 
           <div className={styles.buttonGroup}>

@@ -70,7 +70,7 @@ const orderSlice = createSlice({
             state.formData = { ...state.formData, ...action.payload };
         },
         setErrors(state, action: PayloadAction<{ [key: string]: string }>) {
-            state.errors = action.payload;
+            state.errors = { ...state.errors, ...action.payload };
         },
         toggleSelfPickup(state) {
             state.formData.isSelfPickup = !state.formData.isSelfPickup;

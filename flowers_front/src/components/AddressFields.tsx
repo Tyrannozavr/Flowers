@@ -1,23 +1,50 @@
 // src/components/AddressFields.tsx
 
-import React from "react";
+import React, { useState, forwardRef, useImperativeHandle } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
     IOrder,
     clearOrderError,
-    setErrors,
     setFormData,
 } from "../redux/order/slice";
+import { validateAddress } from "../api/order";
 
-const AddressFields: React.FC = () => {
+interface AddressFieldsProps {
+    onValidation?: (isValid: boolean) => void;
+}
+
+export interface AddressFieldsRef {
+    validateAddress: () => Promise<boolean>;
+}
+
+const AddressFields = forwardRef<AddressFieldsRef, AddressFieldsProps>(({ onValidation }, ref) => {
     const dispatch = useDispatch();
     const formData = useSelector(
         (state: { order: { formData: IOrder } }) => state.order.formData
     );
-    const errors = useSelector(
-        (state: { order: { errors: { [key: string]: string } } }) =>
-            state.order.errors
-    );
+    const [addressValidating, setAddressValidating] = useState(false);
+    const [addressValidated, setAddressValidated] = useState(false);
+    const [addressError, setAddressError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+
+    const validateFields = () => {
+        const newErrors: {[key: string]: string} = {};
+        
+        if (!formData.city || formData.city.trim() === "") {
+            newErrors.city = "Город обязателен для заполнения";
+        }
+        
+        if (!formData.street || formData.street.trim() === "") {
+            newErrors.street = "Улица обязательна для заполнения";
+        }
+        
+        if (!formData.house || formData.house.trim() === "") {
+            newErrors.house = "Номер дома обязателен для заполнения";
+        }
+        
+        setFieldErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -25,19 +52,62 @@ const AddressFields: React.FC = () => {
         const { name, value } = e.target;
         dispatch(setFormData({ [name]: value }));
         dispatch(clearOrderError(name));
+        
+        // Сбрасываем ошибку для текущего поля
+        setFieldErrors(prev => ({
+            ...prev,
+            [name]: ""
+        }));
+        
+        // Сбрасываем статус валидации адреса при изменении любого поля адреса
+        setAddressValidated(false);
+        setAddressError("");
+    };
 
-        if (name === "city" && value.trim() === "") {
-            dispatch(setErrors({ field: "city", error: "Город обязателен" }));
+    // Функция для проверки адреса
+    const checkAddress = async (): Promise<boolean> => {
+        // Сначала проверяем заполнение полей
+        const fieldsValid = validateFields();
+        if (!fieldsValid) {
+            return false;
         }
-        if (name === "street" && value.trim() === "") {
-            dispatch(
-                setErrors({ field: "street", error: "Улица обязательна" })
-            );
-        }
-        if (name === "house" && value.trim() === "") {
-            dispatch(setErrors({ field: "house", error: "Дом обязателен" }));
+
+        try {
+            setAddressValidating(true);
+            setAddressError("");
+
+            const response = await validateAddress({
+                city: formData.city || "",
+                street: formData.street || "",
+                house: formData.house || "",
+                building: formData.building || "",
+                apartment: formData.apartment || ""
+            });
+
+            setAddressValidated(true);
+            
+            if (!response.isValid) {
+                setAddressError(response.message);
+                if (onValidation) onValidation(false);
+                return false;
+            }
+            
+            if (onValidation) onValidation(true);
+            return true;
+        } catch (err) {
+            console.error("Ошибка при проверке адреса:", err);
+            setAddressError("Произошла ошибка при проверке адреса");
+            if (onValidation) onValidation(false);
+            return false;
+        } finally {
+            setAddressValidating(false);
         }
     };
+
+    // Экспортируем функцию проверки адреса
+    useImperativeHandle(ref, () => ({
+        validateAddress: checkAddress
+    }));
 
     return (
         <div className="grid grid-cols-1 gap-4 mb-6">
@@ -51,12 +121,12 @@ const AddressFields: React.FC = () => {
                     value={formData.city || ""}
                     onChange={handleInputChange}
                     className={`w-full p-3 border rounded-lg ${
-                        errors.city ? "border-red-500" : "border-gray-300"
+                        fieldErrors.city || addressError ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Введите город"
                 />
-                {errors.city && (
-                    <p className="text-red-500 text-sm mt-1">{errors.city}</p>
+                {fieldErrors.city && (
+                    <p className="text-red-500 text-sm mt-1">{fieldErrors.city}</p>
                 )}
             </div>
             <div>
@@ -69,12 +139,12 @@ const AddressFields: React.FC = () => {
                     value={formData.street || ""}
                     onChange={handleInputChange}
                     className={`w-full p-3 border rounded-lg ${
-                        errors.street ? "border-red-500" : "border-gray-300"
+                        fieldErrors.street || addressError ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Введите улицу"
                 />
-                {errors.street && (
-                    <p className="text-red-500 text-sm mt-1">{errors.street}</p>
+                {fieldErrors.street && (
+                    <p className="text-red-500 text-sm mt-1">{fieldErrors.street}</p>
                 )}
             </div>
             <div className="grid grid-cols-3 gap-4">
@@ -88,13 +158,13 @@ const AddressFields: React.FC = () => {
                         value={formData.house || ""}
                         onChange={handleInputChange}
                         className={`w-full p-3 border rounded-lg ${
-                            errors.house ? "border-red-500" : "border-gray-300"
+                            fieldErrors.house || addressError ? "border-red-500" : "border-gray-300"
                         }`}
                         placeholder="Дом"
                     />
-                    {errors.house && (
+                    {fieldErrors.house && (
                         <p className="text-red-500 text-sm mt-1">
-                            {errors.house}
+                            {fieldErrors.house}
                         </p>
                     )}
                 </div>
@@ -107,7 +177,9 @@ const AddressFields: React.FC = () => {
                         name="building"
                         value={formData.building || ""}
                         onChange={handleInputChange}
-                        className="w-full p-3 border rounded-lg border-gray-300"
+                        className={`w-full p-3 border rounded-lg ${
+                            addressError ? "border-red-500" : "border-gray-300"
+                        }`}
                         placeholder="Корпус"
                     />
                 </div>
@@ -121,21 +193,32 @@ const AddressFields: React.FC = () => {
                         value={formData.apartment || ""}
                         onChange={handleInputChange}
                         className={`w-full p-3 border rounded-lg ${
-                            errors.apartment
-                                ? "border-red-500"
-                                : "border-gray-300"
+                            addressError ? "border-red-500" : "border-gray-300"
                         }`}
                         placeholder="Квартира"
                     />
-                    {errors.apartment && (
-                        <p className="text-red-500 text-sm mt-1">
-                            {errors.apartment}
-                        </p>
-                    )}
                 </div>
             </div>
+            
+            {addressValidating && (
+                <div className="mt-2 text-blue-600">
+                    Проверка адреса...
+                </div>
+            )}
+            
+            {addressError && (
+                <div className="mt-2 text-red-500">
+                    {addressError}
+                </div>
+            )}
+            
+            {addressValidated && !addressError && (
+                <div className="mt-2 text-green-600">
+                    Адрес проверен и существует
+                </div>
+            )}
         </div>
     );
-};
+});
 
 export default AddressFields;

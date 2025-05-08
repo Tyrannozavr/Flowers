@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminHeader from '../components/admin/AdminHeader';
 import Footer from '../components/footer/Footer';
@@ -23,19 +23,21 @@ import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../redux/store.ts";
 import {useTheme} from "../theme/ThemeProvider.tsx";
 import TimeSlotSelector from "../components/TimeSlotSelector.tsx";
-import {createOrder} from "../api/order";
+import {createOrder, getDeliveryCost} from "../api/order";
+import AddressFields, { AddressFieldsRef } from '../components/AddressFields';
 
 const CheckoutPage: React.FC = () => {
 
     const dispatch = useDispatch();
     interface Address {
         address: string;
+        shop_id?: number;
     }
 
     const formData = useSelector(
         (state: { order: { formData: IOrder } }) => state.order.formData
     );
-    const theme = useTheme() as { addresses: Address[] };
+    const theme = useTheme() as { addresses: Address[], shopId: number };
     const changeAddress = (value: string) => {
         dispatch(setFormData({ street: value }));
     };
@@ -106,25 +108,7 @@ const CheckoutPage: React.FC = () => {
         const { name, value } = e.target;
         dispatch(setFormData({ [name]: value }));
     };
-    const handleInputChangeCity = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-        const { name, value } = e.target;
-        dispatch(setFormData({ [name]: value }));
-        dispatch(clearOrderError(name));
-
-        if (name === "city" && value.trim() === "") {
-            dispatch(setErrors({ field: "city", error: "Город обязателен" }));
-        }
-        if (name === "street" && value.trim() === "") {
-            dispatch(
-                setErrors({ field: "street", error: "Улица обязательна" })
-            );
-        }
-        if (name === "house" && value.trim() === "") {
-            dispatch(setErrors({ field: "house", error: "Дом обязателен" }));
-        }
-    };
+    
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     useEffect(() => {
         if (!formData.deliveryDate) {
@@ -164,12 +148,25 @@ const CheckoutPage: React.FC = () => {
         }
     };
 
+    const addressFieldsRef = useRef<AddressFieldsRef | null>(null);
+    
+
     const handleContinue = async () => {
+        if (step === 2 && formData.deliveryMethod === "DELIVERY") {
+            // Если это шаг с адресом доставки, проверяем его
+            const addressValid = await addressFieldsRef.current?.validateAddress();
+            if (!addressValid) {
+                return; // Останавливаем переход если адрес не валиден
+            }
+            
+            // Вычисляем стоимость доставки после валидации адреса
+            await fetchDeliveryCost();
+        }
+        
         if (step < 3) {
             setStep(step + 1);
         } else {
             await createOrder(formData);
-            // navigate('/confirmation');
         }
     };
 
@@ -189,6 +186,50 @@ const CheckoutPage: React.FC = () => {
         } else {
             alert("Произошла ошибка при создании заказа. Попробуйте снова.");
         }
+    };
+
+    const [deliveryCost, setDeliveryCost] = useState<number | null>(null);
+    const [deliveryCostLoading, setDeliveryCostLoading] = useState(false);
+    const [deliveryCostError, setDeliveryCostError] = useState<string | null>(null);
+
+    // Получаем shopId из темы
+    const shopId = theme.shopId || (theme.addresses && theme.addresses[0] && theme.addresses[0].shop_id);
+
+    const fetchDeliveryCost = async () => {
+        if (
+            formData.deliveryMethod !== "DELIVERY" ||
+            !formData.city ||
+            !formData.street ||
+            !formData.house ||
+            !shopId
+        ) {
+            setDeliveryCost(null);
+            return;
+        }
+        setDeliveryCostLoading(true);
+        setDeliveryCostError(null);
+        try {
+            const cost = await getDeliveryCost(shopId, {
+                city: formData.city,
+                street: formData.street,
+                house: formData.house,
+                building: formData.building,
+                apartment: formData.apartment,
+            });
+            setDeliveryCost(cost);
+        } catch {
+            setDeliveryCostError("Ошибка при расчете стоимости доставки");
+            setDeliveryCost(null);
+        } finally {
+            setDeliveryCostLoading(false);
+        }
+    };
+
+    // Расчет итоговой суммы с учетом доставки
+    const calculateFinalTotal = () => {
+        const productsTotal = calculateTotal();
+        const delivery = deliveryCost || 0;
+        return productsTotal + delivery;
     };
 
     return (
@@ -291,7 +332,7 @@ const CheckoutPage: React.FC = () => {
                             {formData.deliveryMethod === 'PICKUP' ? (
                                 theme.addresses.length > 0 ? (
                                     <div className="pickup-section">
-                                        <h3 className="contact-section-title">Адрес доставки</h3>
+                                        <h3 className="contact-section-title">Адрес магазина</h3>
                                         <div className="address-options">
                                             {theme.addresses.map((slot, i) => (
                                                 <label className="address-option" key={i}>
@@ -324,87 +365,9 @@ const CheckoutPage: React.FC = () => {
                             ) : (
                                 <div className="delivery-section">
                                     <h3 className="contact-section-title">Адрес доставки</h3>
-                                    <div className="form-group">
-                                        <input
-                                            type="text"
-                                            placeholder="Город"
-                                            required
-                                            name="city"
-                                            value={formData.city || ""}
-                                            onChange={handleInputChangeCity}
-                                            className={`checkout-form-input ${
-                                                errors.city ? "border-red-500" : "border-gray-300"
-                                            }`}
-                                        />
-                                        {errors.city && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.city}</p>
-                                        )}
-                                    </div>
-                                    <div className="form-group">
-                                        <input
-                                            type="text"
-                                            placeholder="Улица"
-                                            name="street"
-                                            value={formData.street || ""}
-                                            onChange={handleInputChangeCity}
-                                            className={`checkout-form-input ${
-                                                errors.street ? "border-red-500" : "border-gray-300"
-                                            }`}
-                                            required
-                                        />
-                                        {errors.street && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.street}</p>
-                                        )}
-                                    </div>
-                                    <div className="address-details">
-                                        <div className="form-group">
-                                            <input
-                                                type="text"
-                                                placeholder="Дом"
-                                                name="house"
-                                                value={formData.house || ""}
-                                                onChange={handleInputChangeCity}
-                                                className={`checkout-form-input ${
-                                                    errors.house ? "border-red-500" : "border-gray-300"
-                                                }`}
-                                                required
-                                            />
-                                            {errors.house && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.house}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="form-group">
-                                            <input
-                                                type="text"
-                                                placeholder="Корпус"
-                                                className="checkout-form-input"
-                                                name="building"
-                                                value={formData.building || ""}
-                                                onChange={handleInputChangeCity}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <input
-                                                type="text"
-                                                placeholder="Квартира"
-                                                name="apartment"
-                                                value={formData.apartment || ""}
-                                                onChange={handleInputChangeCity}
-                                                className={`checkout-form-input ${
-                                                    errors.apartment
-                                                        ? "border-red-500"
-                                                        : "border-gray-300"
-                                                }`}
-                                            />
-                                            {errors.apartment && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.apartment}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
+                                    <AddressFields 
+                                        ref={addressFieldsRef}
+                                    />
 
                                     <h3 className="contact-section-title">Желаемое время доставки</h3>
                                     <div className="form-group date-input-wrapper">
@@ -443,7 +406,7 @@ const CheckoutPage: React.FC = () => {
                     {step === 3 && (
                         <div className="confirmation-section">
                             {cart.map(({ product, quantity }) => (
-                                <div className="confirmation-cart-item">
+                                <div className="confirmation-cart-item" key={product.id}>
                                     <div className="confirmation-cart-item-left">
                                         <img src={product.images[0]} alt={product.name} className="confirmation-cart-item-image" />
                                     </div>
@@ -497,13 +460,21 @@ const CheckoutPage: React.FC = () => {
                                     <h4>Товары:</h4>
                                     <p>{formatPrice(calculateTotal())} ₽</p>
                                 </div>
-                                <div className="confirmation-order-total-row">
-                                    <h4>Доставка:</h4>
-                                    <p>—</p>
-                                </div>
+                                {formData.deliveryMethod === "DELIVERY" && (
+                                    <div className="confirmation-order-total-row">
+                                        <h4>Доставка:</h4>
+                                        {deliveryCostLoading ? (
+                                            <p>Рассчитываем...</p>
+                                        ) : deliveryCostError ? (
+                                            <p className="text-red-500">{deliveryCostError}</p>
+                                        ) : (
+                                            <p>{deliveryCost !== null ? `${deliveryCost} ₽` : "—"}</p>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="confirmation-order-total-row">
                                     <h4>Итоговая сумма заказа:</h4>
-                                    <p>{formatPrice(calculateTotal())} ₽</p>
+                                    <p>{formatPrice(calculateFinalTotal())} ₽</p>
                                 </div>
                             </div>
 

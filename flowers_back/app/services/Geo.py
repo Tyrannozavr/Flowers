@@ -55,6 +55,61 @@ class YandexGeoService(GeoService):
         if isinstance(coords2, str):
             coords2 = self.get_coordinates(coords2)
         return geodesic(coords1, coords2).kilometers
+    
+    def validate_address(self, address_str: str) -> bool:
+        params = {
+            "apikey": self.api_key,
+            "geocode": address_str,
+            "format": "json"
+        }
+        try:
+            response = requests.get(self.geocoder_url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            
+            # Получаем результаты геокодирования
+            features = data.get("response", {}).get("GeoObjectCollection", {}).get("featureMember", [])
+            
+            if not features:
+                logger.error(f"Адрес не найден: {address_str}")
+                return False
+                
+            # Берем первый результат (наиболее релевантный)
+            geo_object = features[0]["GeoObject"]
+            
+            # Проверяем точность геокодирования
+            precision = geo_object.get("metaDataProperty", {}).get("GeocoderMetaData", {}).get("precision")
+            
+            # Получаем текст найденного адреса для сравнения с введенным
+            found_address = geo_object.get("metaDataProperty", {}).get("GeocoderMetaData", {}).get("text", "")
+            
+            # Нормализуем введенный и найденный адреса для сравнения
+            # Удаляем запятые, лишние пробелы и приводим к нижнему регистру
+            normalized_input = ' '.join(address_str.lower().replace(',', '').split())
+            normalized_found = ' '.join(found_address.lower().replace(',', '').split())
+            
+            # Проверяем точность и соответствие
+            # Для точного совпадения precision должен быть 'exact'
+            # Для хорошего совпадения - 'near' или 'number'
+            if precision in ['exact', 'number', 'near']:
+                logger.info(f"Адрес найден с точностью {precision}: {found_address}")
+                
+                # Дополнительная проверка на совпадение ключевых частей адреса
+                # Если введенный адрес полностью содержится в найденном
+                if all(part in normalized_found for part in normalized_input.split()):
+                    return True
+                    
+                # Логируем различия для отладки
+                logger.warning(f"Введенный адрес: {address_str}")
+                logger.warning(f"Найденный адрес: {found_address}")
+                logger.warning(f"Введенный и найденный адреса не совпадают полностью")
+            
+            logger.error(f"Адрес найден, но точность низкая: {precision}")
+            return False
+            
+        except Exception as e:
+            logger.error(f"Ошибка при валидации адреса: {e}")
+            return False
 
 class DeliveryDistanceService:
     def __init__(self, address_data: AddressModel, geo_service: GeoService):
@@ -71,6 +126,7 @@ class DeliveryDistanceService:
 
 
     # return DeliveryDistanceService(address_data, YandexGeoService(api_key=Settings.YANDEX_GEOCODER_API_KEY))
+
 
 
 
