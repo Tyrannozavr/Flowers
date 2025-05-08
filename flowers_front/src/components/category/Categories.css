@@ -1,0 +1,218 @@
+/* Основной контейнер */
+.categories-container {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Контейнер Swiper */
+.categories-swiper {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    touch-action: pan-y;
+    padding: 10px;
+    margin: 10px;
+}
+
+/* Обертка слайдов */
+.categories-swiper .swiper-wrapper {
+    display: flex;
+    align-items: center;
+    transition-timing-function: cubic-bezier(0.17, 0.67, 0.21, 0.99);
+}
+
+/* Отдельный слайд */
+.category-slide {
+    width: auto !important;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    margin-right: 20px;
+}
+
+/* Ссылка-вкладка категории */
+.category-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90px;
+    min-height: 104px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    position: relative;
+}
+
+/* Анимация при наведении на десктопе */
+@media (min-width: 1024px) {
+    .category-tab::before {
+        content: '';
+        position: absolute;
+        width: 95px;
+        height: 24px;
+        background-color: var(--accent-color);
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-15deg) scale(0);
+        opacity: 1;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        z-index: -1;
+        border-radius: 0px;
+    }
+
+    .category-tab:hover::before {
+        transform: translate(-50%, -50%) rotate(-15deg) scale(1);
+        opacity: 1;
+    }
+
+    .category-tab:hover {
+        transform: translateY(-3px);
+    }
+
+    .category-tab:hover .category-text {
+        color: var(--accent-color);
+    }
+}
+
+/* Контейнер изображения */
+.category-image-container {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f8f8;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Изображение категории */
+.category-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.category-tab:hover .category-image {
+    border-color: var(--accent-color);
+    transform: scale(1.03);
+}
+
+/* Текст категории */
+.category-text {
+    font-size: 13px;
+    line-height: 1.3;
+    text-align: center;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    padding: 0 4px;
+    font-family: 'Inter', sans-serif;
+    transition: color 0.3s ease;
+}
+
+/* Для категорий из двух слов */
+.category-text.two-words {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+}
+
+/* Активная категория */
+.category-tab.active .category-text {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.category-tab.active .category-image {
+    border-color: var(--accent-color);
+}
+
+/* Кастомный скроллбар */
+.categories-swiper .swiper-scrollbar {
+    position: absolute;
+    left: 0;
+    bottom: 12px;
+    width: 100%;
+    height: 4px;
+    background: rgba(0,0,0,0);
+    border-radius: 2px;
+    z-index: 10;
+}
+
+.categories-swiper .swiper-scrollbar-drag {
+    background: var(--accent-color);
+    border-radius: 2px;
+    min-width: 80px;
+    cursor: grab;
+}
+
+.categories-swiper .swiper-scrollbar-drag:active {
+    cursor: grabbing;
+}
+
+/* Десктопная версия */
+@media (min-width: 1024px) {
+    .categories-container {
+        padding: 10px 0;
+    }
+
+    .categories-swiper {
+        overflow: hidden;
+    }
+
+    .categories-swiper .swiper-wrapper {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        transform: none !important;
+        padding: 10px;
+        margin: 10px;
+    }
+
+    .category-slide {
+        margin-right: 0 !important;
+        width: 90px !important;
+    }
+
+    .categories-swiper .swiper-scrollbar {
+        display: none;
+    }
+}
+
+/* Анимации появления */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.category-slide {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.category-slide:nth-child(odd) {
+    animation-delay: 0.05s;
+}
+.category-slide:nth-child(even) {
+    animation-delay: 0.1s;
+}
+
+/* Мобильная версия */
+@media (max-width: 1023px) {
+    .category-tab:hover .category-image {
+        border-color: var(--accent-color);
+    }
+
+    .category-tab:hover .category-text {
+        color: var(--accent-color);
+    }
+}

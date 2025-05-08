@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { IProduct, fetchProducts } from "../api/product";
-import Categories from "../components/Categories";
+import Categories from "../components/category/Categories.tsx";
 import ContactForm from "../components/ContactForm";
 import FloatingCartButton from "../components/FloatingCart";
 import Pagination from "../components/Pagination";
