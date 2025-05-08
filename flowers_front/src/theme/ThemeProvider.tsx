@@ -30,6 +30,13 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         (async () => {
             const data: any = await fetchShop();
             setTheme(data);
+            document.title = data.name;
+            if (data.logoUrl) {
+                document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]').forEach(function(element) {
+                    element.setAttribute('href', data.logoUrl);
+                });
+            }
+
         })();
     }, []);
 
