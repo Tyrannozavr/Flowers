@@ -37,6 +37,12 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
                 });
             }
 
+            if (theme.accentColor) {
+                const metaThemeColor = document.createElement('meta');
+                metaThemeColor.setAttribute('name', 'theme-color');
+                metaThemeColor.setAttribute('content', data.accentColor);
+                document.head.appendChild(metaThemeColor);
+            }
         })();
     }, []);
 

@@ -8,6 +8,8 @@ import wsIcon from '../../assets/Ws.svg';
 import tlIcon from '../../assets/Tl.svg';
 import homeIcon from '../../assets/home-line 1.svg';
 import { useTheme } from "../../theme/ThemeProvider.tsx";
+import { HeaderMobile } from '../HeaderMobile/index.tsx';
+import { useMediaQuery } from 'react-responsive';
 
 
 const CART_TEXT = 'Корзина';
@@ -157,11 +159,17 @@ const AdminHeader: React.FC = () => {
         setIsContactModalOpen(true);
     };
 
+    const isMobile = useMediaQuery({ maxWidth: 1200 });
+    
+
     return (
         <>
-            <header className="admin-header bg-accent-color">
-                <div className="admin-header-content">
-                    <a href="/" className="admin-logo" aria-label="На главную страницу">
+            {isMobile ? (
+                <HeaderMobile name={name} logoUrl={logoUrl} phoneNumber={phone} />
+            ) : (
+                <header className="admin-header bg-accent-color">
+                    <div className="admin-header-content">
+                        <a href="/" className="admin-logo" aria-label="На главную страницу">
                         {!logoUrl ? (
                             <h2>{name}</h2>
                         ) : (
@@ -181,8 +189,10 @@ const AdminHeader: React.FC = () => {
                         />
                     </nav>
                 </div>
-                <ContactModal isOpen={isContactModalOpen} phone={phone} onClose={() => setIsContactModalOpen(false)} />
             </header>
+            )}
+            <ContactModal isOpen={isContactModalOpen} phone={phone} onClose={() => setIsContactModalOpen(false)} />
+
             <MobileNavigation />
         </>
     );

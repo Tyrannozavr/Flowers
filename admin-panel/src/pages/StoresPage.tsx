@@ -4,7 +4,7 @@ import {useMutation, useQuery, useQueryClient} from "react-query";
 import {createShop, deleteShop, fetchShops, updateShop, validateAddress} from "../api/shops";
 import {TextField} from "@mui/material";
 import {toast} from "react-toastify";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 interface StoreAddressOld {
   address: string;
@@ -676,7 +676,7 @@ const StoresPage: React.FC = () => {
 
   const renderViewingState = () => {
     if (!store) return null;
-    const storeLink = `${store.subdomain.toLowerCase()}.forum.ru`;
+    const storeLink = `${store.subdomain.toLowerCase()}.flourum.ru`;
 
     return (
         <div className={styles.tableContainer}>
@@ -693,7 +693,7 @@ const StoresPage: React.FC = () => {
             <tbody>
             <tr>
               <td>{store.subdomain}</td>
-              <td>{storeLink}</td>
+              <td><Link to={`https://${storeLink}`} target="_blank">{storeLink}</Link></td>
               <td>{store.primary_color}</td>
               <td className={styles.logoCell}>
                 {!store.logo_url ? (
@@ -707,7 +707,7 @@ const StoresPage: React.FC = () => {
                 )}
               </td>
               <td className={styles.actionsCell}>
-                <button className={styles.actionButton}>Открыть</button>
+                <button className={styles.actionButton} onClick={() => window.open(`https://${storeLink}`, '_blank')}>Открыть</button>
                 <button className={styles.actionButton} onClick={handleEdit}>
                   Изменить
                 </button>

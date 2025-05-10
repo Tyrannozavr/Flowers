@@ -1,0 +1,72 @@
+$border-radius: 10px;
+
+.root {
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 10px;
+
+    .content {
+        display: flex;
+        flex-direction: column;
+
+        h1 {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        span {
+            margin-bottom: 10px;
+        }
+
+        .contact {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            &__button {
+                border-radius: $border-radius;
+                padding: 10px 15px;
+                transition: filter 0.3s ease;
+
+                &:hover {
+                    filter: brightness(90%)
+                }
+            }
+
+            .phone_button {
+                color: black;
+                background-color: #F2F2F2;
+            }
+
+            .whatsapp_button {
+                padding: 10px 35px;
+                color: white;
+                background-color: var(--accent-color);
+            }
+
+        }
+
+
+    }
+
+    .logo {
+        background-color: var(--accent-color);
+        text-align: center;
+        border-radius: $border-radius;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+        width: 120px;
+        height: 120px;
+    }
+    
+}
+
+
+
