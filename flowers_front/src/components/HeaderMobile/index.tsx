@@ -22,7 +22,7 @@ export const HeaderMobile: React.FC<HeaderMobileProps> = ({phoneNumber, name, lo
                 </div>
 
                 <div className={s.content}>
-                    <h1>Магнолия</h1>
+                    <h1>{name}</h1>
                     <span>Онлайн витрина</span>
 
                     <div className={s.contact}>
