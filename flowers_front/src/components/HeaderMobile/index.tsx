@@ -1,8 +1,7 @@
 import React from 'react';
 import s from './HeaderMobile.module.scss';
 import cn from 'classnames';
-import { useIntersection } from 'react-use';
-import { HeaderIntersection } from './HeaderIntersection';
+
 interface HeaderMobileProps {
     phoneNumber: string;
     name: string;
@@ -10,22 +9,16 @@ interface HeaderMobileProps {
 }
 
 export const HeaderMobile: React.FC<HeaderMobileProps> = ({phoneNumber, name, logoUrl}) => {
-    const intersectionRef = React.useRef<null | HTMLDivElement>(null);
-    const intersection = useIntersection(intersectionRef, {
-        root: null,
-        rootMargin: `0px`,
-        threshold: 0.1
-      });
+
 
     return (
-        <header className={s.root} ref={intersectionRef}>
+        <header className={s.root}>
             <div className={s.container}>
                 {
                     logoUrl && <div className={s.logo}>
                         <img src={logoUrl} alt="Логотип" />
                     </div>
                 }
-                
 
                 <div className={cn(s.content, {[s.full_width]: !logoUrl})}>
                     <h1>{name}</h1>
@@ -47,7 +40,6 @@ export const HeaderMobile: React.FC<HeaderMobileProps> = ({phoneNumber, name, lo
                 </div>
             </div>
 
-            {!intersection?.isIntersecting && <HeaderIntersection logoUrl={logoUrl} name={name} />}
         </header>
     );
 };
