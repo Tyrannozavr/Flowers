@@ -4,7 +4,7 @@ import {useMutation, useQuery, useQueryClient} from "react-query";
 import {createShop, deleteShop, fetchShops, updateShop, validateAddress} from "../api/shops";
 import {TextField} from "@mui/material";
 import {toast} from "react-toastify";
-import {Link, useNavigate} from "react-router-dom";
+import {Link, useNavigate, useLocation} from "react-router-dom";
 
 interface StoreAddressOld {
   address: string;
@@ -33,6 +33,7 @@ const StoresPage: React.FC = () => {
   const [currentState, setCurrentState] = useState<StoreState>('empty');
   const [currentStep, setCurrentStep] = useState<FormStep>('step1');
   const [store, setStore] = useState<Store | null>(null);
+  const location = useLocation();
   // const queryClient = useQueryClient();
   const [formData, setFormData] = useState<Store>({
     inn: '',

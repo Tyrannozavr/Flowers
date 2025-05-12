@@ -27,6 +27,7 @@
     "react-responsive": "^10.0.0",
     "react-router-dom": "^7.1.0",
     "react-toastify": "^11.0.2",
+    "react-use": "^17.6.0",
     "sass": "^1.87.0",
     "styled-components": "^6.1.13",
     "swiper": "^11.2.5"

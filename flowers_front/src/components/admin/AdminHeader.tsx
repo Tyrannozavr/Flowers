@@ -10,7 +10,7 @@ import homeIcon from '../../assets/home-line 1.svg';
 import { useTheme } from "../../theme/ThemeProvider.tsx";
 import { HeaderMobile } from '../HeaderMobile/index.tsx';
 import { useMediaQuery } from 'react-responsive';
-
+import { useLocation } from 'react-router-dom';
 
 const CART_TEXT = 'Корзина';
 const CONTACT_TEXT = 'Связаться';
@@ -73,6 +73,7 @@ const ContactModal: React.FC<{ isOpen: boolean; onClose: () => void; phone: stri
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen, onClose]);
+
 
     if (!isOpen) return null;
 
@@ -150,6 +151,7 @@ const MobileNavigation: React.FC = () => {
 const AdminHeader: React.FC = () => {
     const { logoUrl, name, phone } = useTheme();
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const location = useLocation();
 
     const handleCartClick = () => {
         window.location.href = '/cart';
@@ -159,12 +161,12 @@ const AdminHeader: React.FC = () => {
         setIsContactModalOpen(true);
     };
 
-    const isMobile = useMediaQuery({ maxWidth: 1200 });
+    const isMobile = useMediaQuery({ maxWidth: 756 });
     
 
     return (
         <>
-            {isMobile ? (
+            {isMobile && location.pathname === '/' ? (
                 <HeaderMobile name={name} logoUrl={logoUrl} phoneNumber={phone} />
             ) : (
                 <header className="admin-header bg-accent-color">

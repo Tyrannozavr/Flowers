@@ -1,37 +1,50 @@
 $border-radius: 10px;
 
+body {
+    @media (max-width: 756px) {
+        padding-top: 24px !important;
+    }
+}
+
 .root {
-    display: flex;
-    justify-content: center;
+    margin-bottom: 20px;
 }
 
 .container {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
     justify-content: space-around;
     gap: 10px;
 
     .content {
         display: flex;
         flex-direction: column;
+        grid-column: 4 / 13;
 
         h1 {
             font-weight: bold;
-            font-size: 1.5rem;
+            font-size: 1.5em;
         }
 
         span {
             margin-bottom: 10px;
+            font-size: 1em;
         }
 
         .contact {
+            flex: 1;
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 5px;
+
+            width: 100%;
+            font-size: 13px;
+            font-weight: 400;
             &__button {
                 border-radius: $border-radius;
-                padding: 10px 15px;
+                padding: 7px 15px;
                 transition: filter 0.3s ease;
+                align-self: flex-end;
+
 
                 &:hover {
                     filter: brightness(90%)
@@ -41,30 +54,40 @@ $border-radius: 10px;
             .phone_button {
                 color: black;
                 background-color: #F2F2F2;
+                width: 45%;
             }
 
             .whatsapp_button {
-                padding: 10px 35px;
+                width: calc(55% - 5px);
                 color: white;
                 background-color: var(--accent-color);
             }
 
         }
+    }
 
-
+    .content.full_width {
+        grid-column: 1 / -1;
     }
 
     .logo {
-        background-color: var(--accent-color);
         text-align: center;
         border-radius: $border-radius;
         display: flex;
         justify-content: center;
         align-items: center;
         user-select: none;
-        width: 120px;
-        height: 120px;
+        margin: auto;
+        grid-column: 1 / 4;
+        background-color: var(--accent-color);
+
+        img {
+            width: 100%;
+            filter: brightness(0) invert(1);
+        }
+
     }
+
     
 }
 
